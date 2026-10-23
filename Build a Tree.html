@@ -1,0 +1,990 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Build a Tree</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* Layout: a lab worksheet. Three stages share one engine: surnames first,
+   then short DNA, then long DNA. Letters on top, distance table and growing
+   tree side by side, arithmetic ledger along the bottom. Stacks to one column
+   on a phone. Light white-and-lilac theme after the Meridian Learning
+   calendar poster: white ground, near-black Inter headings, brand purple
+   #7733FF as the working accent, powder pink / mint / gray as supports. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;   /* page ground, faint lilac */
+  --panel:     #FFFFFF;   /* cards, poster-white */
+  --panel-2:   #F3EFFB;   /* hover tint */
+  --line:      #E7E3F2;
+  --fg:        #161925;   /* Meridian blue-black */
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF; /* Meridian purple */
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9; /* powder pink */
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED; /* pale teal */
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1; /* the faded poster letters */
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 26px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 64ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex]):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+/* the per-stage story line */
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+/* ---------- generic panel ---------- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+/* ---------- how to ---------- */
+
+.howto { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.howto > div { min-width: 0; }
+.howto .n {
+  font: 700 13px/1 var(--mono); color: var(--violet);
+  display: block; margin-bottom: 4px;
+}
+.howto p { margin: 0; font-size: 13.5px; color: var(--fg-dim); }
+.howto b { color: var(--fg); font-weight: 600; }
+
+/* ---------- sequences / people ---------- */
+
+.scroller { overflow-x: auto; }
+table.seqs { border-collapse: collapse; font-size: 13px; }
+table.seqs td { padding: 3px 0; white-space: nowrap; vertical-align: baseline; }
+table.seqs td.code {
+  font: 700 14px/1.4 var(--mono); color: var(--violet);
+  padding-right: 12px; text-align: right;
+}
+table.seqs td.name { color: var(--fg); font-weight: 600; padding-right: 18px; }
+table.seqs td.name i { color: var(--fg); }
+table.seqs td.name .gloss { color: var(--fg-dim); font-weight: 500; }
+table.seqs td.fname { color: var(--fg-dim); font-weight: 500; padding-right: 16px; }
+table.seqs td.letters { font: 500 14px/1.4 var(--mono); letter-spacing: .055em; color: var(--fg); }
+table.seqs tr.faded td { opacity: .3; }
+.letters mark {
+  background: var(--violet-soft); color: var(--violet);
+  border-radius: 3px; padding: 1px 0; font-weight: 700;
+}
+.letters mark.cons { background: transparent; color: var(--gray-letter); font-weight: 500; }
+
+.seqnote { margin: 10px 0 0; font-size: 12.5px; color: var(--fg-dim); max-width: 78ch; }
+.seqnote .cons { color: var(--gray-letter); font: 700 12.5px/1 var(--mono); letter-spacing: .05em; }
+
+/* ---------- main two-column ---------- */
+
+.main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 20px; align-items: start; }
+
+/* ---------- matrix ---------- */
+
+table.mx { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.mx th, table.mx td { border: 1px solid var(--line); padding: 0; }
+table.mx th {
+  font: 700 11.5px/1.25 var(--mono); color: var(--violet);
+  background: var(--violet-soft);
+  padding: 7px 8px; min-width: 52px; white-space: nowrap;
+}
+table.mx th.corner { background: transparent; }
+table.mx td.diag { color: #B9B4CC; text-align: center; font: 500 15px/1 var(--mono); }
+table.mx td button {
+  display: block; width: 100%; min-width: 52px; height: 46px;
+  font: 600 16px/1 var(--mono); color: var(--fg);
+  background: transparent; border: 0; cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+table.mx td button:hover,
+table.mx td button:focus-visible { background: var(--panel-2); }
+table.mx td button.hit { background: var(--mint); color: #0B303B; }
+table.mx td button.miss { background: #FFE6D6; color: var(--orange-deep); }
+table.mx td.fresh { outline: 2px solid var(--violet); outline-offset: -2px; }
+table.mx td button[disabled] { cursor: default; color: var(--fg-dim); }
+
+.legend { margin-top: 12px; font-size: 12.5px; color: var(--fg-dim); }
+.legend code { font: 600 12.5px/1 var(--mono); color: var(--violet); }
+
+/* ---------- inspector ---------- */
+
+.inspect { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 13px; min-height: 92px; }
+.inspect .ttl { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-dim); font-weight: 600; }
+.inspect .pair { font: 700 15px/1.4 var(--mono); color: var(--fg); margin: 5px 0 3px; }
+.inspect .arith { font: 500 13.5px/1.7 var(--mono); color: var(--fg); margin-top: 4px; }
+.inspect .arith b { color: var(--violet); font-weight: 700; }
+.inspect .hintrow { font-size: 13px; color: var(--fg-dim); margin-top: 6px; }
+
+.prows { display: flex; flex-wrap: wrap; gap: 3px 18px; margin: 6px 0 2px; }
+.prow { font: 500 12.5px/1.6 var(--mono); color: var(--fg-dim); }
+.prow b { color: var(--violet); font-weight: 700; margin-left: 7px; }
+
+.pill {
+  display: inline-block; font: 700 12.5px/1 var(--mono);
+  color: var(--violet); background: var(--violet-soft);
+  border-radius: 999px; padding: 3px 8px; margin: 1px 0;
+}
+.arr { color: var(--fg-dim); }
+.dim { color: var(--fg-dim); font-weight: 400; font-size: 12px; }
+
+svg.nl { display: block; width: 100%; max-width: 350px; height: auto; margin: 6px 0 0; }
+
+/* ---------- tree ---------- */
+
+.tree-card { position: relative; }
+svg.tree { display: block; width: 100%; max-width: 100%; height: auto; }
+.tree-empty { font-size: 13.5px; color: var(--fg-dim); }
+
+/* ---------- status ---------- */
+
+.status {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  background: var(--panel);
+  border-radius: 0 12px 12px 0;
+  padding: 14px 18px;
+}
+.status.good { border-left-color: var(--mint-deep); }
+.status.bad  { border-left-color: var(--orange); }
+.status .head { font-weight: 600; color: var(--fg); }
+.status.good .head { color: var(--mint-deep); }
+.status.bad  .head { color: var(--orange-deep); }
+.status .sum { font: 500 14.5px/1.9 var(--mono); color: var(--fg); margin-top: 7px; }
+.status .sum b { color: var(--violet); font-weight: 700; }
+.status .why { font-size: 13.5px; color: var(--fg-dim); margin-top: 5px; }
+
+/* ---------- ledger ---------- */
+
+.ledger ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.ledger li { border-top: 1px solid var(--line); padding-top: 11px; }
+.ledger li:first-child { border-top: 0; padding-top: 0; }
+.ledger .step {
+  font: 700 12px/1 var(--mono); letter-spacing: .06em;
+  text-transform: uppercase; color: var(--violet);
+}
+.ledger .join { font: 700 14.5px/1.5 var(--mono); color: var(--fg); margin-top: 4px; }
+.ledger .join em { color: var(--violet); font-style: normal; }
+.ledger .lines { margin-top: 5px; display: flex; flex-direction: column; gap: 3px; }
+.ledger .lines div { font: 500 13px/1.9 var(--mono); color: var(--fg-dim); }
+.ledger .lines div b { color: var(--violet); font-weight: 700; }
+.ledger .lines .lbl { color: var(--pink-deep); }
+.ledger .nothing { font-size: 13.5px; color: var(--fg-dim); }
+
+.heights { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.heights .ttl { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-dim); font-weight: 600; }
+.heights .row { font: 700 16px/1.5 var(--mono); color: var(--violet); margin-top: 4px; }
+.heights .row span { color: var(--fg-dim); font-weight: 400; }
+.heights .ok { font-size: 13px; color: var(--mint-deep); margin-top: 3px; }
+
+/* ---------- done ---------- */
+
+.done { border: 1px solid #A7E8DA; background: #EEFBF7; }
+.done > h2 { color: var(--mint-deep); }
+.done .bracket {
+  font: 700 clamp(15px, 3vw, 22px)/1.4 var(--mono);
+  color: #0B303B; word-break: break-all;
+}
+.done .score { margin-top: 10px; font-size: 14px; color: var(--fg); }
+.done .score b { color: var(--mint-deep); }
+.done p { margin: 10px 0 0; font-size: 14px; color: var(--fg-dim); max-width: 64ch; }
+.done p b { color: var(--fg); }
+
+/* ---------- checks ---------- */
+
+.checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.checks > div { min-width: 0; }
+.checks .k { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--orange-deep); font-weight: 700; }
+.checks p { margin: 4px 0 0; font-size: 13.5px; color: var(--fg-dim); }
+.checks b { color: var(--fg); font-weight: 600; }
+
+.foot { font-size: 12.5px; color: var(--fg-dim); text-align: center; }
+
+@media (max-width: 860px) {
+  .main { grid-template-columns: minmax(0, 1fr); }
+  .howto, .checks { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  table.mx td button, .status { transition: background-color .14s ease, border-color .14s ease; }
+  svg.tree .grow { animation: draw .34s ease-out both; }
+  @keyframes draw { from { opacity: 0 } to { opacity: 1 } }
+}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Life Sciences &middot; Meridian Learning World</div>
+    <h1>Build a tree <span class="hi">by clicking</span></h1>
+    <p class="lede">Find the smallest number in the table and click it. Those two join, a fork
+      appears on the tree, and every number that changes is recalculated as a simple average
+      &mdash; shown step by step below.</p>
+    <div class="controls">
+      <div class="seg" id="pick" role="group" aria-label="Which stage"></div>
+      <button class="ghost" id="reset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <section class="card">
+    <h2>How it works</h2>
+    <div class="howto">
+      <div>
+        <span class="n">01</span>
+        <p>Every number in the table is a <b>count</b>: how many letters differ between those two.
+          Hover a number, or tab onto it, to see exactly which letters.</p>
+      </div>
+      <div>
+        <span class="n">02</span>
+        <p>Click the <b>smallest</b> number. The closest pair joins first, and the fork on the tree
+          sits at that distance.</p>
+      </div>
+      <div>
+        <span class="n">03</span>
+        <p>After a join, the table gets a fresh row of numbers: the <b>distances from the newly
+          joined pair to each of the others</b>. Every new distance is just an average of numbers
+          that were already in the table &mdash; hover it to see which old numbers went into it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span id="seqTitle">The sequences</span> <span class="count" id="seqCount"></span></h2>
+    <div class="scroller">
+      <table class="seqs" id="seqs"></table>
+    </div>
+    <p class="seqnote" id="seqNote" hidden></p>
+  </section>
+
+  <div class="main">
+    <section class="card">
+      <h2>Distance table <span class="count" id="mxCount"></span></h2>
+      <div class="scroller">
+        <table class="mx" id="mx"></table>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="inspect" id="inspect"></div>
+    </section>
+
+    <section class="card tree-card">
+      <h2>The tree so far</h2>
+      <div id="treeBox"></div>
+    </section>
+  </div>
+
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+
+  <section class="card ledger">
+    <h2>Working <span class="count">every average, written out</span></h2>
+    <ol id="ledger"></ol>
+    <div class="heights" id="heights"></div>
+  </section>
+
+  <section class="card done" id="done" hidden></section>
+
+  <section class="card">
+    <h2>Two checks on your own answer</h2>
+    <div class="checks">
+      <div>
+        <div class="k">Rule one</div>
+        <p>Your join distances must <b>always increase</b>. If a join comes out lower than the one
+          before it, the join order is wrong &mdash; go back.</p>
+      </div>
+      <div>
+        <div class="k">Rule two</div>
+        <p>No distance can be larger than the <b>number of letters compared</b>. If it is, the
+          counting went wrong somewhere.</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Average linkage (UPGMA). Stage&nbsp;1 compares surnames letter by letter;
+    stages&nbsp;2&ndash;3 compare short aligned fragments of one shared gene (small-subunit
+    rRNA) &mdash; not whole genomes &mdash; in exactly the same way.</p>
+
+</div>
+
+<script>
+'use strict';
+
+/* ------------------------------------------------------------------ data */
+
+const DATASETS = {
+  names: {
+    key: 'names',
+    label: '1 · Surnames',
+    mode: 'names',
+    note: 'Surnames are inherited &mdash; and over the generations clerks make spelling slips, ' +
+      'so one branch&rsquo;s <b>Hansen</b> drifts into another branch&rsquo;s <b>Hanson</b>. ' +
+      'The fewer letters differ between two surnames, the closer the relatives. ' +
+      'First names aren&rsquo;t inherited, so we don&rsquo;t compare them.',
+    taxa: [
+      { code: 'HANSEN', first: 'Emma', seq: 'HANSEN' },
+      { code: 'HANSON', first: 'Noah', seq: 'HANSON' },
+      { code: 'JENSEN', first: 'Liam', seq: 'JENSEN' },
+      { code: 'DUPONT', first: 'Mila', seq: 'DUPONT' }
+    ]
+  },
+  dna4: {
+    key: 'dna4',
+    label: '2 · DNA, short',
+    mode: 'dna',
+    note: 'Same game, new alphabet. DNA is an inherited text of four letters &mdash; ' +
+      '<b>A&nbsp;T&nbsp;G&nbsp;C</b> &mdash; and a <b>gene</b> is one stretch of it: the ' +
+      'instructions for one molecule. Below is a short fragment of a single gene that all ' +
+      'living things share (the small-subunit ribosomal RNA gene), <b>not whole genomes</b> ' +
+      '&mdash; a real bacterial genome runs to millions of letters. Mutations are the ' +
+      'spelling slips: count the differing letters, join the closest pair.',
+    taxa: [
+      { code: 'VC', name: 'Vibrio cholerae',         italic: true, gloss: 'cholera',           seq: 'ATCGGATCCTGA' },
+      { code: 'VP', name: 'Vibrio parahaemolyticus', italic: true, gloss: 'seafood poisoning', seq: 'ATTGGACCCTGA' },
+      { code: 'EC', name: 'Escherichia coli',        italic: true, gloss: 'gut bacterium',     seq: 'ATAGGAGCCAGT' },
+      { code: 'PF', name: 'Plasmodium falciparum',   italic: true, gloss: 'malaria parasite',  seq: 'GCGTCAACCCGG' }
+    ]
+  },
+  dna6: {
+    key: 'dna6',
+    label: '3 · DNA, long',
+    mode: 'dna',
+    note: 'Real bacteria, longer sequences &mdash; again a fragment of the same shared gene, ' +
+      'not whole genomes. The method hasn&rsquo;t changed: there are just more letters to ' +
+      'count, and the averages stop being round numbers, exactly as in real research.',
+    taxa: [
+      { code: 'P',  name: 'Yersinia pestis',       italic: true, gloss: 'plague',             seq: 'ATGCGTACAGACGAGTCCCTTCACGTACGATTCAGGTACC' },
+      { code: 'PT', name: 'Y. pseudotuberculosis', italic: true,                              seq: 'ATGCGTACAGACGAGTCCCTTCTGGTACGATTCAGGTACC' },
+      { code: 'EN', name: 'Y. enterocolitica',     italic: true,                              seq: 'ATGCGTACAGACGAGTCCCTGATCCATAGATTCAGGTACC' },
+      { code: 'EC', name: 'Escherichia coli',      italic: true,                              seq: 'ATGCGTACAGACGAAAGAGCGATCGTACCTTTCAGGTACC' },
+      { code: 'SA', name: 'Salmonella enterica',   italic: true,                              seq: 'ATGCGTACAGACGAAAGAGCGATCGTACGAAGCAGGTACC' },
+      { code: 'BA', name: 'Bacillus subtilis',     italic: true,                              seq: 'TCAACGGTCTGTCTAAGCCTGATCGTACGATTCAGGTACC' }
+    ]
+  }
+};
+
+/* ------------------------------------------------------------------ maths */
+
+const EPS = 1e-9;
+
+function mismatchPositions(a, b) {
+  const out = [];
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) out.push(i);
+  return out;
+}
+
+function conservedTail(taxa) {
+  const L = taxa[0].seq.length;
+  let n = 0;
+  while (n < L) {
+    const i = L - 1 - n;
+    const c = taxa[0].seq[i];
+    if (!taxa.every(t => t.seq[i] === c)) break;
+    n++;
+  }
+  return n;
+}
+
+/** Original leaf-to-leaf distance matrix. */
+function leafMatrix(taxa) {
+  const n = taxa.length;
+  const M = Array.from({ length: n }, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++)
+      M[i][j] = M[j][i] = mismatchPositions(taxa[i].seq, taxa[j].seq).length;
+  return M;
+}
+
+/** Average linkage: the mean over EVERY original pair across the two clusters. */
+function clusterPairs(D, a, b) {
+  const vals = [];
+  for (const x of a.leaves) for (const y of b.leaves) vals.push(D[x][y]);
+  return vals;
+}
+function clusterDist(D, a, b) {
+  const v = clusterPairs(D, a, b);
+  return v.reduce((s, x) => s + x, 0) / v.length;
+}
+
+function fmt(x) {
+  const r = Math.round(x * 100) / 100;
+  return String(parseFloat(r.toFixed(2)));
+}
+
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+
+/* ---- the one idea kids must get: a new number is an average of old ones ---- */
+
+function pillRow(vals) {
+  return vals.map(v => '<span class="pill">' + v + '</span>').join(' ');
+}
+
+/** "[2] [3] → average → 2.5  (2 + 3) ÷ 2" — a left-to-right pipeline, no algebra. */
+function avgPipeline(vals, d) {
+  if (vals.length === 1)
+    return '<b>' + vals[0] + '</b> ' + (vals[0] === 1 ? 'letter differs' : 'letters differ') +
+      ' &rarr; distance <b>' + fmt(d) + '</b>';
+  return pillRow(vals) + ' <span class="arr">&rarr;</span> average <span class="arr">&rarr;</span> ' +
+    '<b>' + fmt(d) + '</b> &nbsp;<span class="dim">(' + vals.join(' + ') + ') &divide; ' +
+    vals.length + '</span>';
+}
+
+/** Mini number line: a dot for every old number, a diamond where the average lands. */
+function numberLine(vals, mean) {
+  const AXIS = '#D9D5E8', TICK = '#767191', DOT = '#D499B9', DOTLBL = '#B05684', MEAN = '#7733FF';
+  const top = Math.max(1, Math.ceil(Math.max(...vals)));
+  const W = 350, x0 = 14, x1 = W - 14, yAx = 40;
+  const sc = v => x0 + (v / top) * (x1 - x0);
+  let s = '<line x1="' + x0 + '" y1="' + yAx + '" x2="' + x1 + '" y2="' + yAx +
+    '" stroke="' + AXIS + '" stroke-width="2" stroke-linecap="round"/>';
+
+  const step = top <= 14 ? 1 : top <= 30 ? 2 : 5;
+  for (let t = 0; t <= top; t += step) {
+    s += '<line x1="' + sc(t) + '" y1="' + (yAx - 3) + '" x2="' + sc(t) + '" y2="' + (yAx + 3) +
+      '" stroke="' + AXIS + '" stroke-width="1.5"/>' +
+      '<text x="' + sc(t) + '" y="' + (yAx + 15) + '" text-anchor="middle" font-size="9.5" ' +
+      'fill="' + TICK + '" font-family="JetBrains Mono, monospace">' + t + '</text>';
+  }
+
+  const cnt = {};
+  vals.forEach(v => { cnt[v] = (cnt[v] || 0) + 1; });
+  for (const k in cnt) {
+    const v = +k, cx = sc(v);
+    s += '<circle cx="' + cx + '" cy="' + yAx + '" r="4.5" fill="' + DOT + '"/>';
+    if (cnt[k] > 1) {
+      const right = cx > x1 - 30;
+      s += '<text x="' + (cx + (right ? -10 : 10)) + '" y="' + (yAx - 7) +
+        '" text-anchor="' + (right ? 'end' : 'start') + '" font-size="10" font-weight="700" ' +
+        'fill="' + DOTLBL + '" font-family="JetBrains Mono, monospace">&times;' + cnt[k] + '</text>';
+    }
+  }
+
+  const mx = sc(mean), tx = Math.min(Math.max(mx, 26), W - 26);
+  s += '<line x1="' + mx + '" y1="20" x2="' + mx + '" y2="' + (yAx - 9) +
+    '" stroke="' + MEAN + '" stroke-width="1" stroke-dasharray="2 3"/>' +
+    '<polygon points="' + mx + ',' + (yAx - 7) + ' ' + (mx + 5) + ',' + yAx + ' ' + mx + ',' +
+    (yAx + 7) + ' ' + (mx - 5) + ',' + yAx + '" fill="' + MEAN + '"/>' +
+    '<text x="' + tx + '" y="15" text-anchor="middle" font-size="12" font-weight="700" ' +
+    'fill="' + MEAN + '" font-family="JetBrains Mono, monospace">' + fmt(mean) + '</text>';
+
+  return '<svg class="nl" viewBox="0 0 ' + W + ' 58" aria-hidden="true">' + s + '</svg>';
+}
+
+/* ------------------------------------------------------------------ state */
+
+let ds, D, clusters, steps, wrongThisStep, firstTry, totalWrong, lastMerged, inspected;
+
+function leafNode(i) {
+  return { leaves: [i], label: ds.taxa[i].code, code: ds.taxa[i].code, children: null, height: 0 };
+}
+
+function start(key) {
+  ds = DATASETS[key];
+  D = leafMatrix(ds.taxa);
+  clusters = ds.taxa.map((_, i) => leafNode(i));
+  steps = [];
+  wrongThisStep = 0;
+  firstTry = 0;
+  totalWrong = 0;
+  lastMerged = null;
+  inspected = null;
+  render();
+  setStatus(null, 'Find the smallest number in the table and click it.',
+    'There are ' + (ds.taxa.length * (ds.taxa.length - 1) / 2) + ' pairs to choose from.');
+}
+
+const minLeaf = c => Math.min(...c.leaves);
+const sortedClusters = () => [...clusters].sort((a, b) => minLeaf(a) - minLeaf(b));
+
+/** Smallest cluster-to-cluster distance currently in the table. */
+function currentMin() {
+  let best = Infinity;
+  for (let i = 0; i < clusters.length; i++)
+    for (let j = i + 1; j < clusters.length; j++)
+      best = Math.min(best, clusterDist(D, clusters[i], clusters[j]));
+  return best;
+}
+
+/* ------------------------------------------------------------------ click */
+
+function attempt(ci, cj) {
+  const a = clusters[ci], b = clusters[cj];
+  const d = clusterDist(D, a, b);
+  const best = currentMin();
+
+  if (d > best + EPS) {
+    wrongThisStep++;
+    totalWrong++;
+    flash(ci, cj, 'miss');
+    setStatus(false, fmt(d) + ' is not the smallest number in the table.',
+      'Scan every cell before you choose. The smallest distance is the closest pair, ' +
+      'and the closest pair always joins first.');
+    return;
+  }
+
+  // Correct. Record the arithmetic of the join itself…
+  const joinPairs = clusterPairs(D, a, b);
+  const first = minLeaf(a) <= minLeaf(b) ? a : b;
+  const second = first === a ? b : a;
+  const merged = {
+    leaves: [...first.leaves, ...second.leaves],
+    label: '(' + first.label + ',' + second.label + ')',
+    code: [...first.leaves, ...second.leaves]
+      .sort((x, y) => x - y).map(i => ds.taxa[i].code).join('·'),
+    children: [first, second],
+    height: d
+  };
+
+  // …and the recalculation of every distance that changes.
+  const rest = clusters.filter(c => c !== a && c !== b);
+  const recalc = rest
+    .sort((x, y) => minLeaf(x) - minLeaf(y))
+    .map(c => {
+      const v = clusterPairs(D, merged, c);
+      return { to: c.code, vals: v, val: v.reduce((s, x) => s + x, 0) / v.length };
+    });
+
+  steps.push({
+    n: steps.length + 1,
+    a: first.code, b: second.code,
+    height: d,
+    joinPairs,
+    recalc,
+    tries: wrongThisStep + 1
+  });
+
+  if (wrongThisStep === 0) firstTry++;
+  wrongThisStep = 0;
+
+  clusters = [merged, ...rest];
+  lastMerged = merged;
+  inspected = null;
+  render();
+
+  if (clusters.length === 1) {
+    setStatus(true, 'Joined ' + first.code + ' and ' + second.code + ' at ' + fmt(d) +
+      '. The tree is complete.', '');
+  } else {
+    setStatus(true, 'Joined ' + first.code + ' and ' + second.code + ' at ' + fmt(d) + '.',
+      plural(recalc.length, 'distance was', 'distances were') +
+      ' recalculated: from the newly joined group to each of the others. Every one of them is ' +
+      'just an average of numbers that were already in the table (see Working below). ' +
+      'Now find the smallest number again.');
+  }
+  document.getElementById('status').querySelector('.sum').innerHTML = avgPipeline(joinPairs, d);
+}
+
+function flash(ci, cj, cls) {
+  const sel = '[data-i="' + ci + '"][data-j="' + cj + '"], [data-i="' + cj + '"][data-j="' + ci + '"]';
+  document.querySelectorAll('#mx ' + sel).forEach(el => {
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), 620);
+  });
+}
+
+function setStatus(ok, head, why) {
+  const el = document.getElementById('status');
+  el.className = 'status' + (ok === true ? ' good' : ok === false ? ' bad' : '');
+  el.innerHTML =
+    '<div class="head">' + head + '</div>' +
+    '<div class="sum"></div>' +
+    (why ? '<div class="why">' + why + '</div>' : '');
+}
+
+/* ------------------------------------------------------------------ render */
+
+function render() {
+  renderPicker();
+  renderSeqs();
+  renderMatrix();
+  renderInspector();
+  renderTree();
+  renderLedger();
+  renderDone();
+  document.getElementById('stageNote').innerHTML = ds.note;
+}
+
+function renderPicker() {
+  const host = document.getElementById('pick');
+  if (host.childElementCount) {
+    [...host.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.key === ds.key)));
+    return;
+  }
+  host.innerHTML = Object.values(DATASETS).map(d =>
+    '<button type="button" data-key="' + d.key + '" aria-pressed="' + (d.key === ds.key) + '">' +
+    d.label + '</button>').join('');
+  host.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b) start(b.dataset.key);
+  });
+}
+
+function renderSeqs() {
+  const tail = conservedTail(ds.taxa);
+  const L = ds.taxa[0].seq.length;
+  const namesMode = ds.mode === 'names';
+
+  document.getElementById('seqTitle').textContent = namesMode ? 'The people' : 'The sequences';
+  document.getElementById('seqCount').textContent = namesMode
+    ? ds.taxa.length + ' people · surnames of ' + L + ' letters'
+    : ds.taxa.length + ' organisms · one gene fragment, ' + L + ' letters each';
+
+  const note = document.getElementById('seqNote');
+  if (tail > 0) {
+    note.hidden = false;
+    note.innerHTML = 'The pale gray tail &mdash; <span class="cons">' +
+      ds.taxa[0].seq.slice(L - tail) + '</span> &mdash; is the conserved part of the gene: ' +
+      'identical in every organism here. Identical letters never add to any count, so they say ' +
+      'nothing about who is closer &mdash; all the tree-building signal is in the letters that differ.';
+  } else {
+    note.hidden = true;
+  }
+
+  const pair = inspected && inspected.a.leaves.length === 1 && inspected.b.leaves.length === 1
+    ? [inspected.a.leaves[0], inspected.b.leaves[0]] : null;
+  const diff = pair ? new Set(mismatchPositions(ds.taxa[pair[0]].seq, ds.taxa[pair[1]].seq)) : null;
+
+  document.getElementById('seqs').innerHTML = ds.taxa.map((t, i) => {
+    const on = !pair || pair.includes(i);
+    const letters = [...t.seq].map((c, k) => {
+      if (diff && on && diff.has(k)) return '<mark>' + c + '</mark>';
+      if (!diff && k >= L - tail) return '<mark class="cons">' + c + '</mark>';
+      return c;
+    }).join('');
+    if (namesMode) {
+      return '<tr class="' + (on ? '' : 'faded') + '">' +
+        '<td class="fname">' + t.first + '</td>' +
+        '<td class="letters">' + letters + '</td></tr>';
+    }
+    let nm = t.italic ? '<i>' + t.name + '</i>' : t.name;
+    if (t.gloss) nm += ' <span class="gloss">&middot; ' + t.gloss + '</span>';
+    return '<tr class="' + (on ? '' : 'faded') + '">' +
+      '<td class="code">' + t.code + '</td>' +
+      '<td class="name">' + nm + '</td>' +
+      '<td class="letters">' + letters + '</td></tr>';
+  }).join('');
+}
+
+function renderMatrix() {
+  const cs = sortedClusters();
+  const idx = cs.map(c => clusters.indexOf(c));
+  document.getElementById('mxCount').textContent =
+    cs.length === 1 ? '1 cluster left'
+      : cs.length + ' clusters · ' + (cs.length * (cs.length - 1) / 2) + ' pairs';
+
+  let html = '<tr><th class="corner"></th>' +
+    cs.map(c => '<th>' + c.code + '</th>').join('') + '</tr>';
+
+  for (let r = 0; r < cs.length; r++) {
+    html += '<tr><th>' + cs[r].code + '</th>';
+    for (let c = 0; c < cs.length; c++) {
+      if (r === c) { html += '<td class="diag">&mdash;</td>'; continue; }
+      const d = clusterDist(D, cs[r], cs[c]);
+      const fresh = lastMerged && (cs[r] === lastMerged || cs[c] === lastMerged) ? ' fresh' : '';
+      html += '<td class="' + fresh.trim() + '"><button type="button" data-i="' + idx[r] +
+        '" data-j="' + idx[c] + '">' + fmt(d) + '</button></td>';
+    }
+    html += '</tr>';
+  }
+  const mx = document.getElementById('mx');
+  mx.innerHTML = cs.length > 1 ? html : '<tr><td class="diag" style="padding:14px 18px">' +
+    'one cluster left &mdash; nothing more to join</td></tr>';
+
+  const merged = cs.filter(c => c.children);
+  const unit = ds.mode === 'names' ? 'surnames' : 'sequences';
+  document.getElementById('legend').innerHTML = merged.length
+    ? 'Clusters so far: ' + merged.map(c => '<code>' + c.code + '</code>').join(', ') +
+      ' &mdash; a cluster&rsquo;s row holds its distances to each of the others; hover one ' +
+      'to see which old numbers it averages.'
+    : 'Each number counts the letters that differ between those two ' + unit + '.';
+
+  mx.querySelectorAll('button').forEach(b => {
+    const i = +b.dataset.i, j = +b.dataset.j;
+    b.addEventListener('click', () => attempt(i, j));
+    const show = () => { inspected = { a: clusters[i], b: clusters[j] }; renderSeqs(); renderInspector(); };
+    b.addEventListener('mouseenter', show);
+    b.addEventListener('focus', show);
+  });
+}
+
+function renderInspector() {
+  const host = document.getElementById('inspect');
+  if (!inspected || clusters.length < 2) {
+    host.innerHTML = '<div class="ttl">Where a number comes from</div>' +
+      '<div class="hintrow">Hover a cell, or tab onto it, and this shows the numbers behind it.</div>';
+    return;
+  }
+  const { a, b } = inspected;
+  const v = clusterPairs(D, a, b);
+  const d = v.reduce((s, x) => s + x, 0) / v.length;
+
+  if (v.length === 1) {
+    host.innerHTML =
+      '<div class="ttl">Where this number comes from</div>' +
+      '<div class="pair">' + a.code + ' &harr; ' + b.code + '</div>' +
+      '<div class="arith"><b>' + v[0] + '</b> ' +
+      (v[0] === 1 ? 'letter differs' : 'letters differ') + ' out of ' + ds.taxa[0].seq.length +
+      ' &mdash; highlighted above.</div>';
+    return;
+  }
+
+  const al = [...a.leaves].sort((x, y) => x - y);
+  const bl = [...b.leaves].sort((x, y) => x - y);
+  const rows = [];
+  for (const x of al) for (const y of bl)
+    rows.push('<div class="prow">' + ds.taxa[x].code + ' &harr; ' + ds.taxa[y].code +
+      '<b>' + D[x][y] + '</b></div>');
+
+  const allEq = v.every(x => x === v[0]);
+  host.innerHTML =
+    '<div class="ttl">Where this number comes from</div>' +
+    '<div class="pair">' + a.code + ' &harr; ' + b.code + '</div>' +
+    '<div class="prows">' + rows.join('') + '</div>' +
+    numberLine(v, d) +
+    '<div class="arith">' + (allEq
+      ? 'Every pair is ' + v[0] + ', so the average is <b>' + fmt(d) + '</b>.'
+      : avgPipeline(v, d)) + '</div>' +
+    '<div class="hintrow">' + v.length + ' pairs &mdash; everyone in one group against everyone ' +
+    'in the other. The average sits in the middle of those numbers.</div>';
+}
+
+/* ------------------------------------------------------------------ tree */
+
+function renderTree() {
+  const box = document.getElementById('treeBox');
+  if (!steps.length) {
+    box.innerHTML = '<p class="tree-empty">No forks yet. The first correct click draws one.</p>';
+    return;
+  }
+
+  // Leaf order: in-order walk of the forest, children sorted by first leaf.
+  const order = [];
+  (function walk(nodes) {
+    for (const nd of nodes) {
+      if (!nd.children) { order.push(nd); continue; }
+      walk([...nd.children].sort((x, y) => minLeaf(x) - minLeaf(y)));
+    }
+  })(sortedClusters());
+
+  const maxCode = Math.max(...ds.taxa.map(t => t.code.length));
+  const ROW = 44, TOP = 30, X0 = Math.max(58, 26 + maxCode * 8.8), X1 = 420, W = 584;
+  const H = TOP * 2 + (order.length - 1) * ROW;
+  const maxH = Math.max(...finalHeights(), 1);
+  const xs = h => X0 + (h / maxH) * (X1 - X0);
+
+  const y = new Map();
+  order.forEach((nd, k) => y.set(nd, TOP + k * ROW));
+
+  const parts = [];
+  const line = (x1, y1, x2, y2, col, w) =>
+    '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 +
+    '" stroke="' + col + '" stroke-width="' + (w || 2) + '" stroke-linecap="round"/>';
+
+  // Poster palette: black branches, purple for the newest join, orange root.
+  const C_LINE = '#161925', C_ACC = '#7733FF', C_OUT = '#E06A1F', C_INK = '#161925',
+        C_DIM = '#9A94B8', C_STUB = '#C6C9D4';
+
+  const newest = steps.length ? steps[steps.length - 1].height : null;
+
+  function place(nd) {
+    if (!nd.children) return { x: xs(0), y: y.get(nd) };
+    const kids = [...nd.children].sort((a, b) => minLeaf(a) - minLeaf(b)).map(place);
+    const x = xs(nd.height);
+    const my = (kids[0].y + kids[1].y) / 2;
+    const isNew = Math.abs(nd.height - newest) < EPS;
+    const col = isNew ? C_ACC : C_LINE;
+    parts.push(line(x, kids[0].y, x, kids[1].y, col, isNew ? 2.6 : 2));
+    for (const k of kids) parts.push(line(k.x, k.y, x, k.y, col, isNew ? 2.6 : 2));
+    parts.push('<text class="' + (isNew ? 'grow' : '') + '" x="' + x + '" y="' +
+      (Math.min(kids[0].y, kids[1].y) - 9) + '" text-anchor="middle" font-size="14" ' +
+      'font-weight="700" font-family="JetBrains Mono, monospace" fill="' +
+      (isNew ? C_ACC : C_DIM) + '">' + fmt(nd.height) + '</text>');
+    return { x, y: my };
+  }
+
+  for (const c of sortedClusters()) {
+    const p = place(c);
+    if (!c.children) parts.push(line(xs(0), p.y, X0 + 16, p.y, C_STUB, 2));
+  }
+
+  // Root stub once everything is one cluster.
+  if (clusters.length === 1) {
+    const p = place(clusters[0]);
+    parts.push(line(p.x, p.y, p.x + 54, p.y, C_OUT, 2.6));
+    parts.push('<text x="' + (p.x + 62) + '" y="' + (p.y + 5) +
+      '" font-size="13" font-weight="700" font-family="Inter, sans-serif" fill="' +
+      C_OUT + '">root</text>');
+  }
+
+  for (const nd of order) {
+    parts.push('<text x="' + (X0 - 12) + '" y="' + (y.get(nd) + 5) +
+      '" text-anchor="end" font-size="14" font-weight="700" ' +
+      'font-family="JetBrains Mono, monospace" fill="' + C_INK + '">' + nd.code + '</text>');
+  }
+
+  box.innerHTML = '<svg class="tree" viewBox="0 0 ' + W + ' ' + H +
+    '" role="img" aria-label="The tree built so far">' + parts.join('') + '</svg>' +
+    '<p class="tree-empty" style="margin:10px 0 0">Tips on the left, root on the right. ' +
+    'The further right a fork sits, the longer ago that split happened.</p>';
+}
+
+/** Heights of every join in the full solution — used only to fix the x-scale. */
+let HEIGHT_CACHE = new Map();
+function finalHeights() {
+  if (HEIGHT_CACHE.has(ds.key)) return HEIGHT_CACHE.get(ds.key);
+  let cs = ds.taxa.map((_, i) => ({ leaves: [i] }));
+  const hs = [];
+  while (cs.length > 1) {
+    let best = null;
+    for (let i = 0; i < cs.length; i++)
+      for (let j = i + 1; j < cs.length; j++) {
+        const d = clusterDist(D, cs[i], cs[j]);
+        if (!best || d < best.d - EPS) best = { d, i, j };
+      }
+    hs.push(best.d);
+    const m = { leaves: [...cs[best.i].leaves, ...cs[best.j].leaves] };
+    cs = cs.filter((_, k) => k !== best.i && k !== best.j);
+    cs.push(m);
+  }
+  HEIGHT_CACHE.set(ds.key, hs);
+  return hs;
+}
+
+/* ------------------------------------------------------------------ ledger */
+
+function renderLedger() {
+  const host = document.getElementById('ledger');
+  if (!steps.length) {
+    host.innerHTML = '<li class="nothing">Nothing joined yet. Each correct click writes its ' +
+      'arithmetic here: the old numbers, and the average they turn into.</li>';
+  } else {
+    host.innerHTML = steps.map(s => {
+      const joinLine = '<div><span class="lbl">distance</span> &nbsp;' +
+        avgPipeline(s.joinPairs, s.height) + '</div>';
+      const recalc = s.recalc.map(r =>
+        '<div><span class="lbl">to ' + r.to + '</span> &nbsp;' +
+        avgPipeline(r.vals, r.val) + '</div>').join('');
+      return '<li><div class="step">Step ' + s.n +
+        (s.tries > 1 ? ' · ' + s.tries + ' tries' : '') + '</div>' +
+        '<div class="join">' + s.a + ' + ' + s.b + ' → <em>' + fmt(s.height) + '</em></div>' +
+        '<div class="lines">' + joinLine + recalc + '</div></li>';
+    }).join('');
+  }
+
+  const hs = steps.map(s => s.height);
+  const box = document.getElementById('heights');
+  if (!hs.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const rising = hs.every((h, i) => i === 0 || h > hs[i - 1] - EPS);
+  box.innerHTML = '<div class="ttl">Join distances, in order</div>' +
+    '<div class="row">' + hs.map(fmt).join(' <span>&rarr;</span> ') + '</div>' +
+    '<div class="ok">' + (rising
+      ? 'Rising, as they must. Every join is further back in time than the one before it.'
+      : 'These are not rising — that would mean the join order is wrong.') + '</div>';
+}
+
+function renderDone() {
+  const host = document.getElementById('done');
+  if (clusters.length !== 1) { host.hidden = true; return; }
+  host.hidden = false;
+  const root = clusters[0];
+  const total = steps.length;
+  const deepest = steps[steps.length - 1];
+  const nextStage = ds.key === 'names'
+    ? ' Now switch to <b>Stage 2</b> above — the same game, played on DNA.'
+    : ds.key === 'dna4'
+      ? ' Ready for messier numbers? <b>Stage 3</b> uses real bacterial sequences.'
+      : '';
+  host.innerHTML =
+    '<h2>Done &middot; the tree</h2>' +
+    '<div class="bracket">' + root.label + '</div>' +
+    '<div class="score">Joins found on the first try: <b>' + firstTry + ' of ' + total + '</b>' +
+    (totalWrong ? ' &nbsp;&middot;&nbsp; wrong clicks: ' + totalWrong : ' &nbsp;&middot;&nbsp; no wrong clicks') +
+    '</div>' +
+    '<p>The last pair to join &mdash; ' + deepest.a + ' with ' + deepest.b + ', at ' +
+    fmt(deepest.height) + ' &mdash; met at the deepest fork, so the root sits between them. ' +
+    'Whichever of those two you already knew to be the odd one out is the <b>outgroup</b>: ' +
+    'it tells you which end of the tree is the bottom.' + nextStage + '</p>';
+}
+
+/* ------------------------------------------------------------------ go */
+
+document.getElementById('reset').addEventListener('click', () => start(ds.key));
+start('names');
+</script>
+
+</body></html>
