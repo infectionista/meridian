@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Make and Break</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: the warm-up bench before Copy the Code. Four stations and a quiz:
+   MAKE (condensation), BREAK (hydrolysis), STICK (hydrogen bonds),
+   PAY (the ATP cycle — what ATP is and where it is recharged).
+   Scene left, chemistry card right, a toolkit that fills along the bottom.
+   Light white-and-lilac theme after the Meridian Learning calendar poster —
+   same family as Build a Tree and Copy the Code. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 66ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+.seg.mini button { padding: 8px 12px; font-size: 12.5px; }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 820px) { .stagegrid { grid-template-columns: 1fr; } }
+
+.scene svg { width: 100%; height: auto; display: block; }
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+
+.meter {
+  font: 500 13px/1.3 var(--ui); color: var(--fg-dim);
+  background: var(--panel-2); border-radius: 8px; padding: 9px 12px;
+}
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+.rx h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.rx .eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; white-space: nowrap; }
+.logtable .eqc { font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim); }
+.logtable tr.off { opacity: .38; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--mint-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+@media (max-width: 820px) {
+  .logtable .eqc { display: none; }
+  .logtable .nm { white-space: normal; }
+  .logtable .chip { font-size: 10px; padding: 3px 7px; }
+}
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--violet-soft); color: var(--violet); font-weight: 700;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+
+.slider-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--violet); }
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.big { font-size: 13px; fill: var(--fg); font-weight: 700; }
+.lab.mono { font-family: var(--mono); }
+.hb { stroke: var(--pink-deep); stroke-width: 2; stroke-dasharray: 2.5 3.5; opacity: .75; }
+.seam { cursor: pointer; }
+.seam:hover circle { stroke: var(--violet); }
+
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-26px); }
+}
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+.floater { transform-box: fill-box; }
+@keyframes pop {
+  0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences · Warm-up for the replication machine</div>
+    <h1>Make <span class="hi">and</span> Break</h1>
+    <p class="lede">Biochemistry has three basic moves: <b>make</b> a bond, <b>break</b> a bond,
+      and <b>stick</b> without a real bond. Learn all three, meet ATP — the battery that pays
+      for everything — and you’re cleared to run
+      <a href="https://claude.ai/artifact/Tuec3MMRE47Tt42pzp76vu" style="color:var(--violet);font-weight:600">Copy the Code</a>.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stations"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Your toolkit <span class="count" id="logCount">0 / 4</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Four tools. Every process in Copy the Code — unzipping, pairing, bonding, proofreading — is these four, over and over.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip con">U1.K1 · water &amp; H-bonds</span>
+      <span class="chip con">U1.K2 · condensation &amp; hydrolysis</span>
+      <span class="chip con">U5.K1 · ATP &amp; respiration</span>
+      <span class="chip con">U8.K3 · hydrogen bonds in DNA</span>
+    </div>
+    Real values follow standard references (Alberts et&nbsp;al., <i>Molecular Biology of the Cell</i>).
+    Next in the series: <a href="https://claude.ai/artifact/Tuec3MMRE47Tt42pzp76vu" style="color:var(--violet);font-weight:600">Copy the Code</a> —
+    then <a href="https://meridian-one-jet.vercel.app/" style="color:var(--violet);font-weight:600">Build a Tree</a>.
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+function hexPoints(cx, cy, r) {
+  const p = [];
+  for (let a = 0; a < 6; a++) {
+    const ang = Math.PI / 3 * a - Math.PI / 6;
+    p.push([cx + r * Math.cos(ang), cy + r * Math.sin(ang)].map(v => v.toFixed(1)).join(','));
+  }
+  return p.join(' ');
+}
+
+/* ---------------- state ---------------- */
+
+const STAGE_META = [
+  { n: 1, label: 'Make' },
+  { n: 2, label: 'Break' },
+  { n: 3, label: 'Stick' },
+  { n: 4, label: 'Battery' },
+  { n: 5, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: '<b>Station 1 · Make.</b> One single reaction builds every big molecule of life — protein, starch, DNA, fat. Two pieces join, and a water molecule is squeezed out. Chemists call it <b>condensation</b>. Try it on all four families.',
+  2: '<b>Station 2 · Break.</b> The reverse reaction takes molecules apart: water goes back in and the bond splits. That is <b>hydrolysis</b> — you run it every time you digest lunch. Cut the chains.',
+  3: '<b>Station 3 · Stick.</b> Not every connection is a real bond. <b>Hydrogen bonds</b> hold molecules gently, and let go without a fight. Warm them up and watch.',
+  4: '<b>Station 4 · The battery.</b> “Make” costs energy. Nearly all of it is paid in one currency: <b>ATP</b>. Meet the molecule, spend it, and recharge it where your cells do — the mitochondrion.',
+  5: '<b>Quiz.</b> Six situations, three moves and a battery. Sort them correctly and you are cleared for the replication machine.',
+};
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    logged: new Set(),
+    s1: { kit: 'amino', made: {} },
+    s2: { kit: 'starch', cuts: { starch: [], protein: [] } },
+    s3: { heat: 20, melted: false, refrozen: false },
+    s4: { mol: 'atp', spends: 0, recharges: 0 },
+    quiz: { picked: {}, submitted: false },
+  };
+}
+S = freshState();
+
+function logRx(id) { S.logged.add(id); }
+
+const LOG = [
+  { id: 'make',  name: 'MAKE · condensation',   eq: 'A–OH + H–B → A▬B + H₂O',  chips: [['covalent', 'con'], ['water out', 'plain'], ['costs energy', 'en']], note: 'builds proteins, starch, DNA, fats' },
+  { id: 'break', name: 'BREAK · hydrolysis',    eq: 'A▬B + H₂O → A–OH + H–B',  chips: [['bond cut', 'hyd'], ['water in', 'plain'], ['releases energy', 'plain']], note: 'digestion, recycling, proofreading' },
+  { id: 'stick', name: 'STICK · hydrogen bonds', eq: 'δ+ ···· δ−',              chips: [['non-covalent', 'non'], ['reversible', 'plain'], ['no ATP needed', 'plain']], note: 'water, DNA pairing, protein folds' },
+  { id: 'pay',   name: 'PAY · the ATP cycle',   eq: 'ATP  ⇌  ADP + Pᵢ',        chips: [['spend = hydrolysis', 'hyd'], ['recharge = condensation', 'con']], note: 'recharged in mitochondria, spent everywhere' },
+];
+
+/* ================= station 1 · MAKE ================= */
+
+const KITS1 = {
+  amino: { tab: 'amino acids', left: 'amino acid', right: 'amino acid', bond: 'peptide bond', product: 'a dipeptide', family: 'proteins', tint: 'var(--violet-soft)', stroke: 'var(--violet)',
+    note: 'Chain thousands of these and you have a protein — muscle, enzymes, hemoglobin.' },
+  sugar: { tab: 'sugars', left: 'glucose', right: 'glucose', bond: 'glycosidic bond', product: 'maltose', family: 'carbohydrates', tint: 'var(--mint)', stroke: 'var(--mint-deep)',
+    note: 'Keep going and you get starch (plants) or glycogen (you). Flip the geometry: cellulose.' },
+  nucl: { tab: 'nucleotides', left: 'nucleotide', right: 'nucleotide', bond: 'phosphodiester bond', product: 'a DNA backbone link', family: 'nucleic acids', tint: 'var(--orange-soft)', stroke: 'var(--orange-deep)',
+    note: 'In real replication the incoming nucleotide arrives pre-charged (a dNTP) — remember this in Copy the Code.' },
+  lipid: { tab: 'glycerol + fatty acid', left: 'glycerol', right: 'fatty acid', bond: 'ester bond', product: 'the start of a fat', family: 'lipids', tint: 'var(--pink-soft)', stroke: 'var(--pink-deep)',
+    note: 'Do this three times on one glycerol and you have a triglyceride — fats are tripods, not chains.' },
+};
+
+function condense() {
+  const k = S.s1.kit;
+  if (S.s1.made[k]) return;
+  S.s1.made[k] = true;
+  logRx('make');
+  if (Object.keys(S.s1.made).length >= 4) S.done[1] = true;
+  render();
+  fx(330, 96, '− H₂O');
+}
+
+function renderScene1() {
+  const kit = KITS1[S.s1.kit];
+  const made = !!S.s1.made[S.s1.kit];
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 230', role: 'img', 'aria-label': 'Two building blocks joining by condensation' });
+  const y = 110, w = 170, hh = 74;
+  const lx = made ? 155 : 90, rx = made ? 335 : 400;
+  /* left block */
+  svg.append(h('rect', { x: lx, y: y - hh / 2, width: w, height: hh, rx: 16, fill: kit.tint, stroke: kit.stroke, 'stroke-width': 1.5, class: made ? 'pop' : null }));
+  svg.append(h('text', { x: lx + w / 2, y: y + 5, class: 'lab big', 'text-anchor': 'middle' }, kit.left));
+  /* right block */
+  svg.append(h('rect', { x: rx, y: y - hh / 2, width: w, height: hh, rx: 16, fill: kit.tint, stroke: kit.stroke, 'stroke-width': 1.5, class: made ? 'pop' : null }));
+  svg.append(h('text', { x: rx + w / 2, y: y + 5, class: 'lab big', 'text-anchor': 'middle' }, kit.right));
+  if (!made) {
+    /* the ends that will react */
+    svg.append(h('text', { x: lx + w + 20, y: y + 5, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--pink-deep)', 'font-size': '14' }, '–OH'));
+    svg.append(h('text', { x: rx - 20, y: y + 5, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--pink-deep)', 'font-size': '14' }, 'H–'));
+    svg.append(h('text', { x: 330, y: 36, class: 'lab', 'text-anchor': 'middle' }, 'an –OH meets an H– … a water molecule is waiting to leave'));
+  } else {
+    /* bond */
+    svg.append(h('rect', { x: lx + w - 2, y: y - 7, width: rx - lx - w + 4, height: 14, rx: 4, fill: kit.stroke, class: 'pop' }));
+    svg.append(h('text', { x: 330, y: y - 22, class: 'lab big', 'text-anchor': 'middle', fill: kit.stroke }, kit.bond));
+    svg.append(h('text', { x: 330, y: 36, class: 'lab', 'text-anchor': 'middle' }, `done — this is ${kit.product}`));
+    /* water drop */
+    svg.append(h('g', { class: 'pop' },
+      h('circle', { cx: 330, cy: 196, r: 13, fill: 'var(--mint)', stroke: 'var(--mint-deep)' }),
+      h('text', { x: 330, y: 200, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--mint-deep)' }, 'H₂O')));
+  }
+  svg.append(h('text', { x: 16, y: 222, class: 'lab' }, 'family: ' + kit.family));
+  return svg;
+}
+
+function renderStage1() {
+  const kit = KITS1[S.s1.kit];
+  const made = !!S.s1.made[S.s1.kit];
+  const madeCount = Object.keys(S.s1.made).length;
+  const doneBar = S.done[1] ? h('div', { class: 'donebar' },
+    h('span', {}, 'All four families — one and the same reaction. Four different bond names, one pattern: join, squeeze out water.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: break it →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      h('div', { class: 'seg mini', style: 'margin-bottom:12px' },
+        ...Object.entries(KITS1).map(([id, k]) =>
+          h('button', { type: 'button', 'aria-pressed': String(S.s1.kit === id), onclick: () => { S.s1.kit = id; render(); } },
+            k.tab + (S.s1.made[id] ? ' ' : ''), S.s1.made[id] ? h('span', { class: 'tick' }, '✓') : null))),
+      renderScene1(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', disabled: made, onclick: condense }, 'Condense — squeeze out H₂O'),
+        h('span', { class: 'meter' }, 'families built: ', h('b', {}, `${madeCount} / 4`))),
+      h('p', { class: 'toast' }, made ? kit.note : ''),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The MAKE reaction · condensation'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip con' }, 'condensation'),
+        h('span', { class: 'chip plain' }, 'covalent bond formed'),
+        h('span', { class: 'chip en' }, 'costs energy')),
+      h('div', { class: 'eq' }, 'A–OH + H–B → A▬B + H₂O'),
+      h('p', {}, 'Two building blocks meet. One gives up an –OH, the other an H. Those two leave together as water, and a strong covalent bond forms where they left.'),
+      h('p', { class: 'sub' }, 'Strong is the point: a covalent bond shares electrons and holds at body temperature for years. Muscles, starch grains, DNA strands and fat stores are all condensation products.'),
+      h('p', { class: 'sub' }, 'Going uphill isn’t free — building bonds costs energy. Who pays? Station 4.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Four families, four bond names — peptide, glycosidic, phosphodiester, ester — but it is one reaction type. Learn the pattern once, read all of biochemistry.'),
+        h('p', {}, 'Monomer → polymer: amino acids → protein; glucose → starch, glycogen or cellulose; nucleotides → DNA/RNA. Fats are the odd ones: three fatty acids on a glycerol, a tripod rather than a chain.'))
+    )
+  );
+}
+
+/* ================= station 2 · BREAK ================= */
+
+const KITS2 = {
+  starch: { tab: 'starch → sugars', units: 5, shape: 'hex', enzyme: 'amylase — the scissors in your saliva', unit: 'glucose', tint: 'var(--mint)', stroke: 'var(--mint-deep)' },
+  protein: { tab: 'protein → amino acids', units: 5, shape: 'circle', enzyme: 'protease — the scissors in your stomach', unit: 'amino acid', tint: 'var(--violet-soft)', stroke: 'var(--violet)' },
+};
+
+function cutSeam(j) {
+  const k = S.s2.kit;
+  if (S.s2.cuts[k].includes(j)) return;
+  S.s2.cuts[k].push(j);
+  logRx('break');
+  if (S.s2.cuts.starch.length >= 2 && S.s2.cuts.protein.length >= 2) S.done[2] = true;
+  render();
+  fx(120 + j * 110 + 55, 80, '+ H₂O');
+}
+
+function renderScene2() {
+  const kit = KITS2[S.s2.kit];
+  const cuts = S.s2.cuts[S.s2.kit];
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 230', role: 'img', 'aria-label': 'A chain being cut by hydrolysis' });
+  const y = 120;
+  /* units drift apart at cut seams */
+  let offset = 0;
+  const xs = [];
+  for (let i = 0; i < kit.units; i++) {
+    if (i > 0 && cuts.includes(i - 1)) offset += 26;
+    xs.push(96 + i * 100 + offset - (cuts.length * 26) / 2);
+  }
+  for (let i = 0; i < kit.units; i++) {
+    const x = xs[i];
+    if (kit.shape === 'hex') {
+      svg.append(h('polygon', { points: hexPoints(x, y, 34), fill: kit.tint, stroke: kit.stroke, 'stroke-width': 1.5 }));
+    } else {
+      svg.append(h('circle', { cx: x, cy: y, r: 32, fill: kit.tint, stroke: kit.stroke, 'stroke-width': 1.5 }));
+    }
+    svg.append(h('text', { x, y: y + 4, class: 'lab', 'text-anchor': 'middle' }, kit.unit));
+    if (i < kit.units - 1) {
+      const cut = cuts.includes(i);
+      const mx = (x + xs[i + 1]) / 2;
+      if (!cut) {
+        svg.append(h('line', { x1: x + 34, y1: y, x2: xs[i + 1] - 34, y2: y, stroke: kit.stroke, 'stroke-width': 6 }));
+        svg.append(h('g', { class: 'seam', tabindex: '0', role: 'button', 'aria-label': 'cut bond ' + (i + 1),
+          onclick: () => cutSeam(i),
+          onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cutSeam(i); } } },
+          h('circle', { cx: mx, cy: y, r: 13, fill: '#fff', stroke: kit.stroke, 'stroke-width': 1.5 }),
+          h('text', { x: mx, y: y + 4, class: 'lab', 'text-anchor': 'middle', fill: kit.stroke }, '✂')));
+      } else {
+        svg.append(h('text', { x: mx, y: y + 4, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--mint-deep)' }, 'OH  H'));
+      }
+    }
+  }
+  svg.append(h('text', { x: 16, y: 30, class: 'lab' }, kit.enzyme));
+  svg.append(h('text', { x: 16, y: 212, class: 'lab' }, 'click a ✂ seam — a water molecule splits and plugs both ends'));
+  return svg;
+}
+
+function renderStage2() {
+  const total = S.s2.cuts.starch.length + S.s2.cuts.protein.length;
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Lunch, digested. Every cut used up one water molecule and set energy free — the exact reverse of station 1.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: stick →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      h('div', { class: 'seg mini', style: 'margin-bottom:12px' },
+        ...Object.entries(KITS2).map(([id, k]) =>
+          h('button', { type: 'button', 'aria-pressed': String(S.s2.kit === id), onclick: () => { S.s2.kit = id; render(); } },
+            k.tab + (S.s2.cuts[id].length >= 2 ? ' ' : ''), S.s2.cuts[id].length >= 2 ? h('span', { class: 'tick' }, '✓') : null))),
+      renderScene2(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'bonds cut: ', h('b', {}, String(total)), ' (2 per chain to finish)')),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The BREAK reaction · hydrolysis'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip hyd' }, 'hydrolysis'),
+        h('span', { class: 'chip plain' }, 'covalent bond cut'),
+        h('span', { class: 'chip plain' }, 'releases energy')),
+      h('div', { class: 'eq' }, 'A▬B + H₂O → A–OH + H–B'),
+      h('p', {}, '“Hydro-lysis” = splitting with water. The water molecule that left during condensation comes back: its –OH caps one piece, its H– caps the other.'),
+      h('p', { class: 'sub' }, 'This is digestion: amylase snips starch into sugars (why bread turns faintly sweet if you chew long enough), proteases snip proteins into amino acids. The freed monomers are fuel and spare parts.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Make and break are the same reaction running in opposite directions. Which direction wins is a matter of energy — and cells cheat: they spend ATP to push “make”, and destroy by-products so the reaction can’t slide back. You’ll catch them doing exactly this with pyrophosphate in Copy the Code.'),
+        h('p', {}, 'Enzymes don’t supply the push; they only make the allowed direction fast. No enzyme, and the same hydrolysis of starch takes years instead of minutes.'))
+    )
+  );
+}
+
+/* ================= station 3 · STICK ================= */
+
+function setHeat(v) {
+  S.s3.heat = v;
+  if (v >= 80) S.s3.melted = true;
+  if (S.s3.melted && v <= 30) S.s3.refrozen = true;
+  logRx('stick');
+  if (S.s3.melted && S.s3.refrozen) S.done[3] = true;
+  render();
+}
+
+function renderScene3() {
+  const hot = S.s3.heat >= 55;
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 250', role: 'img', 'aria-label': 'Water molecules held by hydrogen bonds, and a DNA base pair preview' });
+  /* water cluster, left */
+  const base = [[120, 70], [210, 110], [110, 160], [205, 195]];
+  const jig = hot ? [[-26, -18], [30, -24], [-30, 22], [26, 26]] : [[0, 0], [0, 0], [0, 0], [0, 0]];
+  const pos = base.map((p, i) => [p[0] + jig[i][0], p[1] + jig[i][1]]);
+  if (!hot) {
+    svg.append(h('line', { x1: pos[0][0], y1: pos[0][1], x2: pos[1][0], y2: pos[1][1], class: 'hb' }));
+    svg.append(h('line', { x1: pos[0][0], y1: pos[0][1], x2: pos[2][0], y2: pos[2][1], class: 'hb' }));
+    svg.append(h('line', { x1: pos[1][0], y1: pos[1][1], x2: pos[3][0], y2: pos[3][1], class: 'hb' }));
+    svg.append(h('line', { x1: pos[2][0], y1: pos[2][1], x2: pos[3][0], y2: pos[3][1], class: 'hb' }));
+  }
+  pos.forEach(p => {
+    svg.append(h('circle', { cx: p[0], cy: p[1], r: 17, fill: 'var(--mint)', stroke: 'var(--mint-deep)', 'stroke-width': 1.5 }));
+    svg.append(h('circle', { cx: p[0] - 13, cy: p[1] - 13, r: 7, fill: '#fff', stroke: 'var(--mint-deep)' }));
+    svg.append(h('circle', { cx: p[0] + 13, cy: p[1] - 13, r: 7, fill: '#fff', stroke: 'var(--mint-deep)' }));
+    svg.append(h('text', { x: p[0], y: p[1] + 4, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--mint-deep)' }, 'δ−'));
+    svg.append(h('text', { x: p[0] - 13, y: p[1] - 10, class: 'lab mono', 'text-anchor': 'middle', 'font-size': '8' }, 'δ+'));
+  });
+  svg.append(h('text', { x: 60, y: 236, class: 'lab' }, hot ? 'hot: hydrogen bonds gone — molecules fly apart (steam)' : 'cool: hydrogen bonds hold the cluster (liquid water)'));
+  /* DNA preview, right */
+  svg.append(h('text', { x: 420, y: 42, class: 'lab big' }, 'the same trick in DNA:'));
+  const drawPair = (x, y, b1, b2, n) => {
+    svg.append(h('text', { x, y, class: 'lab mono', 'font-size': '18', 'font-weight': '700' }, b1));
+    svg.append(h('text', { x: x + 86, y, class: 'lab mono', 'font-size': '18', 'font-weight': '700' }, b2));
+    if (!hot) for (let k = 0; k < n; k++)
+      svg.append(h('line', { x1: x + 26 + k * 18, y1: y - 5, x2: x + 36 + k * 18, y2: y - 5, class: 'hb' }));
+  };
+  drawPair(420, 92, 'A', 'T', 2);
+  drawPair(420, 134, 'G', 'C', 3);
+  svg.append(h('line', { x1: 410, y1: 60, x2: 410, y2: 150, stroke: 'var(--gray-letter)', 'stroke-width': 4, 'stroke-linecap': 'round' }));
+  svg.append(h('line', { x1: 522, y1: 60, x2: 522, y2: 150, stroke: 'var(--gray-letter)', 'stroke-width': 4, 'stroke-linecap': 'round' }));
+  svg.append(h('text', { x: 404, y: 186, class: 'lab' }, hot ? 'strands apart — but every letter still on its backbone:' : 'two strands, held gently —'));
+  svg.append(h('text', { x: 404, y: 204, class: 'lab' }, hot ? 'covalent bonds shrug at hot water' : 'strong enough to store, weak enough to open'));
+  return svg;
+}
+
+function renderStage3() {
+  const doneBar = S.done[3] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Broken and re-formed, no enzymes, no ATP — weak bonds are free and reversible. That is why DNA uses them between strands.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: the battery →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene3(),
+      h('div', { class: 'slider-row' },
+        h('label', { for: 'heatSlider', class: 'meter' }, 'heat'),
+        h('input', { type: 'range', id: 'heatSlider', min: 0, max: 100, step: 1, value: S.s3.heat,
+          oninput: (e) => setHeat(+e.target.value) }),
+        h('span', { class: 'meter' }, h('b', {}, S.s3.heat < 35 ? 'body temp' : S.s3.heat < 65 ? 'warming…' : '~95 °C'))),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'to finish: heat past boiling ', h('b', {}, S.s3.melted ? '✓' : '…'), ' then cool back down ', h('b', {}, S.s3.refrozen ? '✓' : '…'))),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The STICK connection · hydrogen bonds'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip non' }, 'non-covalent'),
+        h('span', { class: 'chip plain' }, 'weak · reversible'),
+        h('span', { class: 'chip plain' }, 'no enzyme, no ATP')),
+      h('div', { class: 'eq' }, 'δ+ ···· δ−   (no electrons shared)'),
+      h('p', {}, 'Oxygen hogs the shared electrons, so it sits slightly negative (δ−) and its hydrogens slightly positive (δ+). Plus leans toward minus: a hydrogen bond. No electrons change hands — it is a lean, not a weld.'),
+      h('p', { class: 'sub' }, 'One is ~20× weaker than a covalent bond and pops at a touch of heat. But they come in crowds: enough to make water liquid, to fold proteins, and to hold DNA’s two strands — firmly, yet openable on demand.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Boil an egg: the heat breaks the weak bonds holding each protein’s fold — the chain scrambles (denatures) — but the covalent peptide chain survives. Cooked egg is still protein food; your proteases still get their lunch.'),
+        h('p', {}, 'A PCR machine copies DNA by melting the strands apart at ~95 °C. The letters stay chained — only the hydrogen bonds let go. In your cells, helicase does the same job with ATP instead of heat. You’ll be that helicase in Copy the Code.'))
+    )
+  );
+}
+
+/* ================= station 4 · BATTERY ================= */
+
+function spendAtp() {
+  if (S.s4.mol !== 'atp') return;
+  S.s4.mol = 'adp'; S.s4.spends++;
+  logRx('pay');
+  if (S.s4.spends >= 3 && S.s4.recharges >= 3) S.done[4] = true;
+  render();
+  fx(246, 112, 'H₂O in');
+  fx(330, 70, '+ energy → work!');
+}
+function rechargeAtp() {
+  if (S.s4.mol !== 'adp') return;
+  S.s4.mol = 'atp'; S.s4.recharges++;
+  logRx('pay');
+  if (S.s4.spends >= 3 && S.s4.recharges >= 3) S.done[4] = true;
+  render();
+  fx(520, 86, 'from food: C₆H₁₂O₆ + O₂');
+}
+
+function renderScene4() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 250', role: 'img', 'aria-label': 'The ATP molecule and the mitochondrion that recharges it' });
+  /* adenine: two fused rings */
+  svg.append(h('rect', { x: 40, y: 60, width: 56, height: 48, rx: 10, fill: 'var(--violet-soft)', stroke: 'var(--violet)' }));
+  svg.append(h('rect', { x: 84, y: 70, width: 36, height: 28, rx: 8, fill: 'var(--violet-soft)', stroke: 'var(--violet)' }));
+  svg.append(h('text', { x: 78, y: 48, class: 'lab', 'text-anchor': 'middle' }, 'adenine'));
+  /* ribose */
+  svg.append(h('polygon', { points: hexPoints(78, 150, 26).split(' ').slice(0, 5).join(' '), fill: 'var(--mint)', stroke: 'var(--mint-deep)' }));
+  svg.append(h('text', { x: 78, y: 196, class: 'lab', 'text-anchor': 'middle' }, 'ribose (a sugar)'));
+  svg.append(h('line', { x1: 78, y1: 108, x2: 78, y2: 128, stroke: 'var(--gray-letter)', 'stroke-width': 3 }));
+  /* phosphates: two stay on the molecule; the third visibly detaches when spent */
+  const isAtp = S.s4.mol === 'atp';
+  const drawP = (x, y, cls) => {
+    svg.append(h('circle', { cx: x, cy: y, r: 22, fill: 'var(--orange-soft)', stroke: 'var(--orange-deep)', 'stroke-width': 1.5, class: cls || null }));
+    svg.append(h('text', { x, y: y + 5, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, 'P'));
+    svg.append(h('text', { x, y: y - 16, class: 'lab mono', 'text-anchor': 'middle', fill: 'var(--orange-deep)', 'font-size': '9' }, '−'));
+  };
+  const squiggle = (xRight) => h('path', { d: `M ${xRight - 40} 150 q 10 -10 20 0 q 10 10 18 0`, fill: 'none', stroke: 'var(--orange-deep)', 'stroke-width': 2 });
+  svg.append(h('line', { x1: 104, y1: 150, x2: 128, y2: 150, stroke: 'var(--gray-letter)', 'stroke-width': 3 }));
+  drawP(150, 150);
+  svg.append(squiggle(212));
+  drawP(212, 150);
+  if (isAtp) {
+    svg.append(squiggle(274));
+    drawP(274, 150, 'pop');
+  } else {
+    /* dashed empty slot where the third phosphate sat */
+    svg.append(h('circle', { cx: 274, cy: 150, r: 22, fill: 'none', stroke: 'var(--gray-letter)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }));
+    /* little break-spark at the snapped seam */
+    [[-38, -16], [-42, 0], [-38, 16]].forEach(d =>
+      svg.append(h('line', { x1: 274 + d[0], y1: 150 + d[1], x2: 274 + d[0] - 9, y2: 150 + d[1] * 1.7, stroke: 'var(--orange)', 'stroke-width': 2 })));
+    /* the freed Pᵢ drifts off toward the recharging station */
+    drawP(360, 178, 'pop');
+    svg.append(h('text', { x: 360, y: 221, class: 'lab', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, 'Pᵢ — set free'));
+  }
+  svg.append(h('text', { x: 190, y: 215, class: 'lab', 'text-anchor': 'middle' },
+    (isAtp ? 'ATP — three phosphates, all negative, crammed together: a loaded spring' : 'ADP — two phosphates: the spring is spent')));
+  /* mitochondrion */
+  svg.append(h('ellipse', { cx: 530, cy: 120, rx: 95, ry: 58, fill: 'var(--pink-soft)', stroke: 'var(--pink-deep)', 'stroke-width': 2 }));
+  for (let i = 0; i < 3; i++)
+    svg.append(h('path', { d: `M ${462 + i * 45} 82 q 14 38 0 76`, fill: 'none', stroke: 'var(--pink-deep)', 'stroke-width': 2, opacity: .5 }));
+  svg.append(h('text', { x: 530, y: 120, class: 'lab big', 'text-anchor': 'middle' }, 'mitochondrion'));
+  svg.append(h('text', { x: 530, y: 198, class: 'lab', 'text-anchor': 'middle' }, 'glucose + O₂ → CO₂ + H₂O  (≈30 ATP per glucose)'));
+  svg.append(h('text', { x: 530, y: 216, class: 'lab', 'text-anchor': 'middle' }, 'the recharging station'));
+  /* arrow */
+  svg.append(h('path', { d: 'M 436 120 q -60 40 -150 32', fill: 'none', stroke: 'var(--pink-deep)', 'stroke-width': 2, 'stroke-dasharray': '5 4' }));
+  svg.append(h('text', { x: 330, y: 100, class: 'lab', 'text-anchor': 'middle', fill: 'var(--pink-deep)' }, 'energy from food reattaches Pᵢ'));
+  return svg;
+}
+
+function renderStage4() {
+  const doneBar = S.done[4] ? h('div', { class: 'donebar' },
+    h('span', {}, 'The full cycle: spend by hydrolysis, recharge by condensation. Your cells run this loop millions of times a second.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Take the quiz →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene4(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', disabled: S.s4.mol !== 'atp', onclick: spendAtp }, 'Spend: hydrolyse ATP'),
+        h('button', { class: 'act alt', type: 'button', disabled: S.s4.mol !== 'adp', onclick: rechargeAtp }, 'Recharge in the mitochondrion'),
+        h('span', { class: 'meter' }, 'molecule now: ', h('b', {}, S.s4.mol.toUpperCase()), ' · full cycles: ', h('b', {}, String(Math.min(S.s4.spends, S.s4.recharges))), ' / 3')),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'ATP · adenosine triphosphate'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip en' }, 'the energy currency'),
+        h('span', { class: 'chip plain' }, 'adenine + ribose + 3 phosphates')),
+      h('div', { class: 'eq' }, 'spend:    ATP + H₂O → ADP + Pᵢ + energy (≈30 kJ/mol)'),
+      h('div', { class: 'eq' }, 'recharge: ADP + Pᵢ + energy → ATP + H₂O'),
+      h('p', {}, 'Three phosphate groups, all negatively charged, forced to sit next to each other — they repel like compressed springs. Pop the last one off (hydrolysis — station 2’s move!) and the released energy drives whatever is coupled to it: helicase motors, muscle, pumps, and every “make” from station 1.'),
+      h('p', { class: 'sub' }, 'Where it’s recharged: mostly in your mitochondria, by burning food — glucose + oxygen → CO₂ + H₂O, capturing ≈30 ATP per glucose. The first steps (glycolysis) run in the cytoplasm. Plant cells have a second charger: chloroplasts, which also build the glucose in the first place, from light.'),
+      h('p', { class: 'sub' }, 'Scale: you recycle roughly your own body weight of ATP every day, and a spent ATP is recharged within about a minute.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, '“High-energy bond” is chemists’ slang, not physics: the energy is not stored inside one bond, it is the stability difference between (ATP + water) and (ADP + Pᵢ). Downhill overall — that’s all that matters.'),
+        h('p', {}, 'The textbook −30.5 kJ/mol is for standard conditions; in a living cell, where ATP is kept far above equilibrium, the real payout is nearer −50. Your textbook may also say 36–38 ATP per glucose — chemists have since revised the exchange rate to ~30.'),
+        h('p', {}, 'Deep discharge: some reactions cut two phosphates at once — ATP → AMP + PPᵢ. DNA ligase does exactly this in Copy the Code. Free Pᵢ only ever recharges ADP, never AMP: a stranded AMP is rescued by adenylate kinase, which borrows a phosphate from another ATP (AMP + ATP → 2 ADP), and both ADP then return to the mitochondrion. A rise in AMP is therefore the cell’s sharpest “battery low” alarm.'))
+    )
+  );
+}
+
+/* ================= station 5 · QUIZ ================= */
+
+const QUIZ = [
+  { q: 'Saliva turns starch into sweet sugars while you chew. Which move is that?',
+    opts: ['MAKE — condensation (water out)', 'BREAK — hydrolysis (water in)', 'STICK — hydrogen bonds'],
+    a: 1, why: 'Amylase cuts glycosidic bonds with water — hydrolysis. That faint sweetness is freed glucose and maltose.' },
+  { q: 'A ribosome joins amino acids into a protein chain. Which move?',
+    opts: ['MAKE — condensation (water out)', 'BREAK — hydrolysis (water in)', 'STICK — hydrogen bonds'],
+    a: 0, why: 'Peptide bonds form by condensation — one water out per link. Building is uphill, so the cell pays energy for every bond.' },
+  { q: 'DNA’s two strands hold together firmly, yet unzip easily when the cell copies them. What holds them?',
+    opts: ['Covalent phosphodiester bonds', 'Hydrogen bonds — many weak, reversible ones', 'Ester bonds'],
+    a: 1, why: 'STICK: 2 H-bonds per A·T, 3 per G·C. Individually weak, collectively firm — and openable without cutting anything.' },
+  { q: 'ATP + H₂O → ADP + Pᵢ. Classify the reaction — and what is it for?',
+    opts: ['Condensation; it stores energy', 'Hydrolysis; it releases energy to pay for work', 'A hydrogen bond breaking; no energy involved'],
+    a: 1, why: 'Spending ATP is hydrolysis — water in, last phosphate off, energy out. That payout drives motors, pumps and every MAKE.' },
+  { q: 'Where is most of your ATP recharged?',
+    opts: ['In the nucleus', 'Nowhere — ATP is used once and thrown away', 'In mitochondria, using energy from food and oxygen'],
+    a: 2, why: 'Respiration in mitochondria recharges ADP + Pᵢ back to ATP (~30 per glucose). Each ATP is reused about once a minute.' },
+  { q: 'Boiling an egg makes it solid — but it is still protein food. What did the heat break?',
+    opts: ['The covalent peptide chains, into amino acids', 'Only the weak bonds holding each protein’s fold', 'Nothing — boiling changes no bonds'],
+    a: 1, why: 'Heat pops hydrogen bonds and the folds scramble (denaturation). The covalent chain survives — your proteases cut it later, by hydrolysis.' },
+];
+
+function renderStage5() {
+  const q = S.quiz;
+  const items = QUIZ.map((it, qi) => {
+    const picked = q.picked[qi];
+    const cls = q.submitted ? (picked === it.a ? 'q right' : 'q wrong') : 'q';
+    return h('div', { class: cls },
+      h('p', { class: 'qt' }, `${qi + 1}. ${it.q}`),
+      ...it.opts.map((op, oi) => h('label', {},
+        h('input', { type: 'radio', name: 'q' + qi, checked: picked === oi ? 'checked' : null,
+          disabled: q.submitted ? 'disabled' : null,
+          onchange: () => { S.quiz.picked[qi] = oi; render(); } }),
+        h('span', {}, op))),
+      q.submitted ? h('p', { class: 'why' }, (picked === it.a ? '✓ ' : `✗ Correct: “${it.opts[it.a]}”. `) + it.why) : null);
+  });
+  const allPicked = Object.keys(q.picked).length === QUIZ.length;
+  let band = null;
+  if (q.submitted) {
+    const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
+    if (score === QUIZ.length) S.done[5] = true;
+    band = h('div', { class: 'scoreband' },
+      h('span', {}, score === QUIZ.length
+        ? `${score} / ${QUIZ.length} — cleared for replication duty.`
+        : `${score} / ${QUIZ.length}. Revisit the stations above and run it again.`),
+      score === QUIZ.length
+        ? h('a', { class: 'act', style: 'text-decoration:none', href: 'https://claude.ai/artifact/Tuec3MMRE47Tt42pzp76vu' }, 'Open Copy the Code →')
+        : null);
+  }
+  return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Quiz · three moves and a battery'),
+      ...items,
+      h('div', { class: 'scenebtns' },
+        q.submitted
+          ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
+          : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => { S.quiz.submitted = true; render(); } }, 'Check my answers'),
+        h('span', { class: 'meter' }, 'Covers mastery goals ', h('b', {}, 'U1.K1 · U1.K2 · U5.K1 · U8.K3'))),
+      band));
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  const seg = $('#segStages');
+  seg.replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 5 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+
+function renderLog() {
+  const tbl = $('#logTable');
+  tbl.replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { class: 'eqc' }, r.eq),
+    h('td', {}, h('span', { class: 'chips' }, ...r.chips.map(c => h('span', { class: 'chip ' + c[1] }, c[0])))),
+    h('td', { class: 'eqc' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+window.__S = () => S; /* for automated smoke tests */
+render();
+</script>
+</body>
+</html>
