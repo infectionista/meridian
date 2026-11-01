@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Copy the Code</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a lab bench. Six stations share one engine: unzip, pair, bond,
+   proofread, clock, quiz. Scene on the left, the chemistry card on the
+   right, a reaction log that fills up along the bottom. Stacks to one
+   column on a phone. Light white-and-lilac theme after the Meridian
+   Learning calendar poster — same family as Build a Tree. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 66ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+/* ---------- panels ---------- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .stagegrid { grid-template-columns: 1fr; }
+}
+
+.scene svg { width: 100%; height: auto; display: block; }
+
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+
+.meter {
+  font: 500 13px/1.3 var(--ui); color: var(--fg-dim);
+  background: var(--panel-2); border-radius: 8px; padding: 9px 12px;
+}
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+/* ---------- reaction card ---------- */
+
+.rx h3 {
+  margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.rx .eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+/* ---------- reaction log ---------- */
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; white-space: nowrap; }
+.logtable .eqc { font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim); }
+.logtable tr.off { opacity: .38; }
+.logtable tr.fresh .nm { color: var(--violet); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--mint-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+@media (max-width: 820px) {
+  .logtable .eqc { display: none; }
+  .logtable .nm { white-space: normal; }
+  .logtable .chip { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ---------- quiz ---------- */
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--violet-soft); color: var(--violet); font-weight: 700;
+}
+
+/* ---------- error ladder ---------- */
+
+.ladder { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ladder .rung { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.ladder .bar { height: 14px; border-radius: 7px; background: var(--violet); opacity: .85; }
+.ladder .lb b { display: block; font-variant-numeric: tabular-nums; }
+.ladder .lb { color: var(--fg-dim); }
+
+/* ---------- stage 5 ---------- */
+
+.seqrows { font-family: var(--mono); font-size: 13px; line-height: 2; overflow-x: auto; white-space: nowrap; }
+.seqrows .tag { display: inline-block; width: 86px; font-family: var(--ui); font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.seqrows .mut { color: var(--violet); background: var(--violet-soft); border-radius: 3px; }
+.slider-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--violet); }
+.bignum { font-size: 26px; font-weight: 800; color: var(--violet); font-variant-numeric: tabular-nums; }
+
+.punch {
+  margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+  background: var(--violet-soft); border: 1px solid var(--violet);
+  font-size: 14px;
+}
+.punch b { color: var(--violet); }
+.punch a { color: var(--violet); font-weight: 700; }
+
+/* ---------- footer ---------- */
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+/* ---------- svg bits ---------- */
+
+.bl { font-family: var(--mono); font-size: 19px; font-weight: 700; fill: var(--fg); }
+.bl.dim { fill: var(--gray-letter); }
+.bl.new { fill: var(--violet); }
+.bl.bad { fill: var(--pink-deep); }
+.rail { stroke: var(--gray-letter); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.rail.new { stroke: var(--violet); }
+.hb { stroke: var(--pink-deep); stroke-width: 2; stroke-dasharray: 2.5 3.5; opacity: .75; }
+.hb.bad { stroke: var(--pink-deep); opacity: .9; }
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.mono { font-family: var(--mono); }
+.heli { fill: var(--violet); opacity: .92; }
+.helieye { fill: #fff; }
+.pickable { cursor: pointer; }
+.pickable:hover .bl { fill: var(--violet); }
+
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-26px); }
+}
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+.floater { transform-box: fill-box; }
+@keyframes pop {
+  0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences · One process, many reactions</div>
+    <h1>Copy the <span class="hi">Code</span></h1>
+    <p class="lede">You are the replication machinery. Copy a stretch of DNA one reaction
+      at a time — spend the ATP, pick the bases, build the backbone, catch the mistakes —
+      then see why the mistakes that slip through matter more than the copies.</p>
+    <p class="lede" style="font-size:13.5px;margin-top:6px">New to ATP, condensation or hydrolysis? Warm up first: <a href="https://meridian-one-jet.vercel.app/makebreak.html" style="color:var(--violet);font-weight:600">Make and Break</a>.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" role="tablist" aria-label="Stages"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Reaction log <span class="count" id="logCount">0 / 6</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>One biological process — six chemical reactions. That is what “biochemistry” means.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip con">U1.K2 · condensation &amp; hydrolysis</span>
+      <span class="chip con">U3.K2 · replication, repair &amp; mutation</span>
+      <span class="chip con">U8.K3 · hydrogen bonds in DNA</span>
+    </div>
+    Toy numbers are marked as toy numbers; real values follow standard references
+    (Alberts et&nbsp;al., <i>Molecular Biology of the Cell</i>).
+    Warm-up: <a href="https://meridian-one-jet.vercel.app/makebreak.html" style="color:var(--violet);font-weight:600">Make and Break</a>. Pairs with <a href="https://meridian-one-jet.vercel.app/" style="color:var(--violet);font-weight:600">Build a Tree</a> —
+    where the mutations you make here become distances on the tree of life.
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- tiny helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','tspan','ellipse']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* floating label effect inside the current scene svg */
+function fx(x, y, txt, cls) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater ' + (cls || '') }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+/* ---------------- data ---------------- */
+
+const COMP = { A: 'T', T: 'A', G: 'C', C: 'G' };
+const NBONDS = b => (b === 'G' || b === 'C') ? 3 : 2;
+
+/* stage 1: eight base pairs to unzip, 1 click = 1 H-bond = 1 ATP (toy) */
+const PAIRS1 = [['A','T'],['T','A'],['G','C'],['C','G'],['A','T'],['G','C'],['T','A'],['A','T']];
+const TOTAL_HB1 = PAIRS1.reduce((s, p) => s + NBONDS(p[0]), 0); /* 19 */
+
+/* stage 2: template read 3'->5', new strand written 5'->3' */
+const TPL2 = ['T','A','C','G','G','T'];
+const ANS2 = TPL2.map(b => COMP[b]); /* A T G C C A */
+
+/* stage 4: twelve pairs, two planted mismatches */
+const TPL4 = ['T','A','C','G','A','T','T','G','A','C','G','T'];
+const NEW4 = TPL4.map(b => COMP[b]);
+const MIS4 = { 3: 'T', 8: 'C' };           /* pos3: G·T wobble, pos8: A·C */
+Object.entries(MIS4).forEach(([i, b]) => NEW4[+i] = b);
+
+/* stage 5: one ancestor, two lineages, deterministic mutation schedules */
+const ANC = 'ATGCCATTAGGCTAACGGTCATGC'.split('');
+const GMAX = 160, PMUT = 0.12;
+function buildEvents(seed) {
+  const r = mulberry32(seed), ev = [], seq = ANC.slice();
+  for (let g = 1; g <= GMAX; g++) {
+    if (r() < PMUT) {
+      const pos = Math.floor(r() * ANC.length);
+      const alts = ['A','T','G','C'].filter(b => b !== seq[pos]);
+      const nb = alts[Math.floor(r() * 3)];
+      seq[pos] = nb; ev.push({ g, pos, b: nb });
+    }
+  }
+  return ev;
+}
+const EV_A = buildEvents(42), EV_B = buildEvents(1337);
+function seqAt(evs, g) { const s = ANC.slice(); for (const e of evs) if (e.g <= g) s[e.pos] = e.b; return s; }
+function diffsAt(g) { const a = seqAt(EV_A, g), b = seqAt(EV_B, g); let n = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; }
+const DIFF_SERIES = []; for (let g = 0; g <= GMAX; g++) DIFF_SERIES.push(diffsAt(g));
+
+/* reaction log */
+const LOG = [
+  { id:'atp', name:'ATP hydrolysis',        eq:'ATP + H₂O → ADP + Pᵢ',          chips:[['hydrolysis','hyd'],['energy out','en']],        note:'powers the helicase motor' },
+  { id:'hb',  name:'Base pairing',          eq:'A···T (2 H-bonds) · G···C (3)',  chips:[['non-covalent','non'],['spontaneous','plain']],  note:'broken in stage 1, formed in stage 2' },
+  { id:'pde', name:'Phosphodiester bond',   eq:'DNAₙ + dNTP → DNAₙ₊₁ + PPᵢ',     chips:[['condensation-type','con'],['covalent','plain']],note:'the backbone grows 5′→3′' },
+  { id:'ppi', name:'PPᵢ hydrolysis',        eq:'PPᵢ + H₂O → 2 Pᵢ',               chips:[['hydrolysis','hyd'],['the ratchet','plain']],    note:'makes copying irreversible' },
+  { id:'lig', name:'Nick sealing (ligase)', eq:'nick + ATP → joined + AMP + PPᵢ',chips:[['covalent','plain'],['energy in','en']],         note:'joins Okazaki fragments' },
+  { id:'exo', name:'Proofreading excision', eq:'DNAₙ₊₁ + H₂O → DNAₙ + dNMP',     chips:[['hydrolysis','hyd'],['3′→5′ exonuclease','plain']], note:'the wrong letter is cut out' },
+];
+
+const STAGE_META = [
+  { n: 1, label: 'Unzip' },
+  { n: 2, label: 'Pair' },
+  { n: 3, label: 'Bond' },
+  { n: 4, label: 'Proofread' },
+  { n: 5, label: 'Clock' },
+  { n: 6, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: '<b>Stage 1 · Unzip.</b> Before anything can be copied, the double helix has to open. Opening costs energy — click to spend it, one ATP per hydrogen bond (toy accounting), and watch which pairs resist.',
+  2: '<b>Stage 2 · Pair.</b> The template is exposed. New letters choose themselves — not by magic, but by the geometry of weak bonds. Pick the incoming nucleotide for each template base.',
+  3: '<b>Stage 3 · Bond.</b> So far the new letters are held only by weak bonds. Now make it permanent: build the covalent backbone — and see the trick that makes copying irreversible.',
+  4: '<b>Stage 4 · Proofread.</b> The polymerase mis-pairs about one letter in 100,000. Two slipped into this stretch. Find the crooked rungs and click them.',
+  5: '<b>Stage 5 · Clock.</b> The errors that survive every check become mutations. Run two copies of the same ancestral sequence through generations of copying — and watch a clock start ticking.',
+  6: '<b>Quiz.</b> Six reactions passed through your hands. Classify them. Score 6/6 and you may call yourself a polymerase.',
+};
+
+/* ---------------- state ---------------- */
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1:false, 2:false, 3:false, 4:false, 5:false, 6:false },
+    logged: new Set(),
+    s1: { broken: 0, atp: 0, auto: false },
+    s2: { idx: 0, hbonds: 0, tries: 0, msg: '' },
+    s3: { bonded: 0, ppi: 0, ppiSplit: 0, sealed: false, msg: '' },
+    s4: { fixed: [], misclicks: 0, msg: '' },
+    s5: { gen: 0, seen: false },
+    quiz: { picked: {}, submitted: false },
+  };
+}
+S = freshState();
+let autoTimer = null;
+
+function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } S.s1.auto = false; }
+
+function logRx(id) {
+  if (!S.logged.has(id)) { S.logged.add(id); S.lastLogged = id; }
+}
+
+/* ---------------- stage 1: unzip ---------------- */
+
+/* geometry: pair i at x = 64 + i*74; fork advances with broken bonds */
+function s1PairState(i) {
+  /* returns number of bonds already broken in pair i */
+  let left = S.s1.broken;
+  for (let k = 0; k < i; k++) left -= NBONDS(PAIRS1[k][0]);
+  return Math.max(0, Math.min(NBONDS(PAIRS1[i][0]), left));
+}
+
+function stepUnzip() {
+  if (S.s1.broken >= TOTAL_HB1) return;
+  S.s1.broken++; S.s1.atp++;
+  logRx('atp'); logRx('hb');
+  if (S.s1.broken >= TOTAL_HB1) { S.done[1] = true; stopAuto(); }
+  render();
+  /* place the floater near the fork */
+  let i = 0, left = S.s1.broken;
+  while (i < PAIRS1.length && left > NBONDS(PAIRS1[i][0])) { left -= NBONDS(PAIRS1[i][0]); i++; }
+  fx(64 + Math.min(i, 7) * 74, 128, 'ADP + Pᵢ');
+}
+
+function renderScene1() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 260', role: 'img',
+    'aria-label': 'A DNA double helix being unzipped by helicase' });
+  const topPts = [], botPts = [];
+  PAIRS1.forEach((pair, i) => {
+    const x = 64 + i * 74;
+    const nb = NBONDS(pair[0]);
+    const brokenHere = s1PairState(i);
+    const open = brokenHere >= nb;
+    const ty = open ? 42 : 96, by = open ? 218 : 164;
+    topPts.push([x, ty - 24]); botPts.push([x, by + 12]);
+    /* remaining H-bond dashes */
+    for (let b = 0; b < nb - brokenHere; b++) {
+      const yy = 112 + b * 14 - (nb === 3 ? 7 : 0);
+      svg.append(h('line', { x1: x, y1: yy, x2: x, y2: yy + 8, class: 'hb' }));
+    }
+    svg.append(h('text', { x, y: ty, class: 'bl' + (open ? ' pop' : ''), 'text-anchor': 'middle' }, pair[0]));
+    svg.append(h('text', { x, y: by, class: 'bl' + (open ? ' pop' : ''), 'text-anchor': 'middle' }, pair[1]));
+    svg.append(h('text', { x, y: 250, class: 'lab', 'text-anchor': 'middle' }, nb + ' H-bonds'));
+  });
+  svg.append(h('polyline', { class: 'rail', points: topPts.map(p => p.join(',')).join(' ') }));
+  svg.append(h('polyline', { class: 'rail', points: botPts.map(p => p.join(',')).join(' ') }));
+  /* helicase blob sits at the fork */
+  let i = 0, left = S.s1.broken;
+  while (i < PAIRS1.length && left >= NBONDS(PAIRS1[i][0])) { left -= NBONDS(PAIRS1[i][0]); i++; }
+  const hx = 64 + Math.min(i, 7.6) * 74 - 36;
+  svg.append(h('g', {},
+    h('ellipse', { cx: hx, cy: 130, rx: 26, ry: 34, class: 'heli' }),
+    h('circle', { cx: hx + 8, cy: 122, r: 4, class: 'helieye' }),
+    h('text', { x: hx, y: 186, class: 'lab', 'text-anchor': 'middle' }, 'helicase')
+  ));
+  svg.append(h('text', { x: 10, y: 46, class: 'lab mono' }, "5′"));
+  svg.append(h('text', { x: 10, y: 168, class: 'lab mono' }, "3′"));
+  return svg;
+}
+
+function renderStage1() {
+  const doneBar = S.done[1] ? h('div', { class: 'donebar' },
+    h('span', {}, `Open. ${TOTAL_HB1} hydrogen bonds, ${S.s1.atp} ATP (toy accounting — a real helicase spends ≈1 ATP per base pair). The G≡C lesson stands: three bonds hold tighter than two.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: pair the bases →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene1(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', disabled: S.done[1] ? 'disabled' : null, onclick: () => { stopAuto(); stepUnzip(); } }, 'Hydrolyse 1 ATP'),
+        (S.s1.atp >= 3 && !S.done[1]) ? h('button', { class: 'act alt', type: 'button', onclick: () => {
+          if (autoTimer) { stopAuto(); render(); return; }
+          S.s1.auto = true;
+          autoTimer = setInterval(() => { stepUnzip(); }, 170);
+          render();
+        } }, autoTimer ? 'Pause helicase' : 'Let helicase run') : null,
+        h('span', { class: 'meter' }, 'ATP spent: ', h('b', {}, String(S.s1.atp)), ' · H-bonds broken: ', h('b', {}, `${S.s1.broken} / ${TOTAL_HB1}`))
+      ),
+      doneBar
+    ),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Reaction · ATP hydrolysis'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip hyd' }, 'hydrolysis'),
+        h('span', { class: 'chip en' }, 'energy out'),
+        h('span', { class: 'chip plain' }, 'covalent P–O bond broken')),
+      h('div', { class: 'eq' }, 'ATP + H₂O → ADP + Pᵢ      ΔG°′ ≈ −30.5 kJ/mol'),
+      h('p', {}, 'Helicase is a motor protein. Each ATP it splits pays for prying the two strands apart — against the pull of the hydrogen bonds between bases.'),
+      h('hr'),
+      h('h3', {}, 'What it breaks · H-bonds'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip non' }, 'non-covalent'),
+        h('span', { class: 'chip plain' }, 'A=T ×2 · G≡C ×3')),
+      h('p', { class: 'sub' }, 'One hydrogen bond is feeble — a few kJ/mol in water, tens of times weaker than a covalent bond. Three billion base pairs of them is why your genome doesn’t fall apart, and why opening it needs a motor.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'The helicase doesn’t cut hydrogen bonds with scissors — it walks along one strand and wedges the duplex open, roughly one base pair per ATP. Our “1 ATP per H-bond” is a toy price list so you can feel the G≡C difference.'),
+        h('p', {}, 'Same chemistry, different tool: PCR machines break these bonds with heat instead — ~95 °C, and GC-rich DNA needs the high end. In the cell, ΔG for ATP hydrolysis is closer to −50 kJ/mol than the textbook −30.5.'))
+    )
+  );
+}
+
+/* ---------------- stage 2: pair ---------------- */
+
+function pickNtp(base) {
+  if (S.done[2]) return;
+  const i = S.s2.idx;
+  const want = ANS2[i];
+  S.s2.tries++;
+  if (base === want) {
+    S.s2.idx++; S.s2.hbonds += NBONDS(base); S.s2.msg = '';
+    logRx('hb');
+    if (S.s2.idx >= TPL2.length) S.done[2] = true;
+    render();
+    fx(94 + i * 86, 120, '+' + NBONDS(base) + ' H-bonds', '');
+  } else {
+    S.s2.msg = `d${base}TP against ${TPL2[i]}: the hydrogen-bond donors and acceptors don’t line up — the active site rejects the fit.`;
+    render();
+  }
+}
+
+function renderScene2() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 240', role: 'img',
+    'aria-label': 'A template strand being paired with incoming nucleotides' });
+  svg.append(h('text', { x: 10, y: 64, class: 'lab mono' }, "3′"));
+  svg.append(h('text', { x: 630, y: 64, class: 'lab mono' }, "5′"));
+  svg.append(h('text', { x: 10, y: 186, class: 'lab mono' }, "5′"));
+  svg.append(h('text', { x: 86, y: 30, class: 'lab' }, 'template strand'));
+  svg.append(h('text', { x: 86, y: 222, class: 'lab' }, 'new strand — held by H-bonds only'));
+  const topPts = [], botPts = [];
+  TPL2.forEach((b, i) => {
+    const x = 94 + i * 86;
+    topPts.push([x, 40]);
+    svg.append(h('text', { x, y: 68, class: 'bl', 'text-anchor': 'middle' }, b));
+    if (i < S.s2.idx) {
+      const nb = NBONDS(b);
+      for (let k = 0; k < nb; k++) {
+        const yy = 86 + k * 14 - (nb === 3 ? 7 : 0);
+        svg.append(h('line', { x1: x, y1: yy, x2: x, y2: yy + 8, class: 'hb' }));
+      }
+      svg.append(h('text', { x, y: 158, class: 'bl new' + (i === S.s2.idx - 1 ? ' pop' : ''), 'text-anchor': 'middle' }, ANS2[i]));
+      botPts.push([x, 170]);
+    } else if (i === S.s2.idx) {
+      svg.append(h('rect', { x: x - 20, y: 128, width: 40, height: 44, rx: 8, fill: 'var(--violet-soft)', stroke: 'var(--violet)', 'stroke-dasharray': '4 3' }));
+      svg.append(h('text', { x, y: 158, class: 'bl dim', 'text-anchor': 'middle' }, '?'));
+    }
+  });
+  svg.append(h('polyline', { class: 'rail', points: topPts.map(p => p.join(',')).join(' ') }));
+  if (botPts.length > 1) svg.append(h('polyline', { class: 'rail', points: botPts.map(p => p.join(',')).join(' '), 'stroke-dasharray': '3 6' }));
+  return svg;
+}
+
+const NTP_ICON = {
+  A: 'M2 12 L7 3 L12 12 Z M12 12 l6 0',  /* decorative shapes only */
+};
+function ntpButton(b) {
+  const purine = (b === 'A' || b === 'G');
+  return h('button', { class: 'act alt', type: 'button', onclick: () => pickNtp(b) },
+    h('svg', { viewBox: '0 0 26 14', width: '26', height: '14', 'aria-hidden': 'true', style: 'vertical-align:-2px;margin-right:6px' },
+      purine
+        ? [h('rect', { x: 1, y: 2, width: 11, height: 10, rx: 2, fill: 'var(--violet)' }), h('rect', { x: 13, y: 4, width: 8, height: 8, rx: 2, fill: 'var(--violet)', opacity: .55 })]
+        : h('rect', { x: 6, y: 2, width: 11, height: 10, rx: 2, fill: 'var(--pink-deep)' })
+    ),
+    `d${b}TP`);
+}
+
+function renderStage2() {
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, `Six letters placed, ${S.s2.hbonds} hydrogen bonds formed, ${S.s2.tries - 6} wrong tries — and still zero covalent bonds. The new strand is only pinned on, not sewn.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: build the backbone →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene2(),
+      h('div', { class: 'scenebtns' },
+        ...['A','T','G','C'].map(ntpButton),
+        h('span', { class: 'meter' }, 'H-bonds formed: ', h('b', {}, String(S.s2.hbonds)))),
+      h('p', { class: 'toast' }, S.s2.msg),
+      doneBar
+    ),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Reaction · base pairing'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip non' }, 'non-covalent'),
+        h('span', { class: 'chip plain' }, 'spontaneous'),
+        h('span', { class: 'chip plain' }, 'no ATP needed')),
+      h('div', { class: 'eq' }, 'A ···· T   (2 H-bonds)  ·  G ···· C   (3 H-bonds)'),
+      h('p', {}, 'Nobody chooses the right letter. The right letter chooses itself: only the correct partner has its hydrogen-bond donors and acceptors in the right places, so only it clicks into the polymerase’s active site without strain.'),
+      h('p', { class: 'sub' }, 'Purines (two rings — A, G) always pair with pyrimidines (one ring — T, C), which keeps the ladder’s width constant.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Geometry is good but not perfect: about once in 10⁵ letters a wrong base sneaks in — for instance when a base briefly flips into a rare tautomeric form and fakes the right bonding pattern. Hold that number; it is why Stage 4 exists.'))
+    )
+  );
+}
+
+/* ---------------- stage 3: bond ---------------- */
+
+function bondOne() {
+  if (S.s3.bonded >= ANS2.length) return;
+  S.s3.bonded++; S.s3.ppi++;
+  logRx('pde');
+  render();
+  fx(94 + (S.s3.bonded - 1) * 86, 130, '− PPᵢ');
+}
+function splitPpi() {
+  if (S.s3.ppi <= 0) return;
+  S.s3.ppiSplit += S.s3.ppi;
+  S.s3.ppi = 0;
+  logRx('ppi');
+  render();
+  fx(560, 110, '→ 2 Pᵢ');
+}
+function sealNick() {
+  S.s3.sealed = true;
+  logRx('lig');
+  if (S.s3.bonded >= ANS2.length && S.s3.ppi === 0) S.done[3] = true;
+  render();
+  fx(330, 150, 'AMP + PPᵢ');
+}
+
+function renderScene3() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 240', role: 'img',
+    'aria-label': 'Backbone bonds forming along the new strand' });
+  svg.append(h('text', { x: 86, y: 30, class: 'lab' }, 'template strand'));
+  const topPts = [];
+  TPL2.forEach((b, i) => {
+    const x = 94 + i * 86;
+    topPts.push([x, 40]);
+    svg.append(h('text', { x, y: 68, class: 'bl dim', 'text-anchor': 'middle' }, b));
+    const nb = NBONDS(b);
+    for (let k = 0; k < nb; k++) {
+      const yy = 86 + k * 12 - (nb === 3 ? 6 : 0);
+      svg.append(h('line', { x1: x, y1: yy, x2: x, y2: yy + 7, class: 'hb', opacity: .35 }));
+    }
+    svg.append(h('text', { x, y: 152, class: 'bl new', 'text-anchor': 'middle' }, ANS2[i]));
+  });
+  svg.append(h('polyline', { class: 'rail', points: topPts.map(p => p.join(',')).join(' ') }));
+  /* primer block */
+  svg.append(h('rect', { x: 18, y: 138, width: 48, height: 22, rx: 6, fill: 'var(--orange-soft)', stroke: 'var(--orange-deep)' }));
+  svg.append(h('text', { x: 42, y: 153, class: 'lab', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, 'primer'));
+  /* backbone segments: j=0 primer->0, j>=1 between letters */
+  for (let j = 0; j < S.s3.bonded; j++) {
+    const x1 = j === 0 ? 66 : 94 + (j - 1) * 86 + 12;
+    const x2 = 94 + j * 86 - 12;
+    svg.append(h('line', { x1, y1: 160, x2, y2: 160, class: 'rail new' }));
+  }
+  /* next junction marker */
+  if (S.s3.bonded < ANS2.length) {
+    const j = S.s3.bonded;
+    const xm = j === 0 ? 80 : 94 + (j - 1) * 86 + 43;
+    svg.append(h('circle', { cx: xm, cy: 160, r: 6, fill: 'none', stroke: 'var(--violet)', 'stroke-dasharray': '2 2' }));
+  }
+  svg.append(h('text', { x: 94, y: 196, class: 'lab mono' }, "5′ → 3′ — the only direction a polymerase can write"));
+  /* ppi pool */
+  svg.append(h('text', { x: 560, y: 86, class: 'lab', 'text-anchor': 'middle' }, 'PPᵢ pool'));
+  svg.append(h('text', { x: 560, y: 112, class: 'bl', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, String(S.s3.ppi)));
+  /* nick, once all bonds are made */
+  if (S.s3.bonded >= ANS2.length) {
+    svg.append(h('text', { x: 94, y: 228, class: 'lab' },
+      S.s3.sealed ? 'Nick sealed — the lagging strand is whole.' : 'On the other template, copying ran in short Okazaki fragments. A nick remains:'));
+    if (!S.s3.sealed) {
+      svg.append(h('line', { x1: 380, y1: 223, x2: 420, y2: 223, class: 'rail' }));
+      svg.append(h('line', { x1: 432, y1: 223, x2: 472, y2: 223, class: 'rail' }));
+      svg.append(h('text', { x: 426, y: 228, class: 'bl bad', 'text-anchor': 'middle' }, '×'));
+    } else {
+      svg.append(h('line', { x1: 380, y1: 223, x2: 472, y2: 223, class: 'rail new pop' }));
+    }
+  }
+  return svg;
+}
+
+function renderStage3() {
+  const allBonded = S.s3.bonded >= ANS2.length;
+  if (allBonded && S.s3.ppi === 0 && S.s3.sealed && !S.done[3]) S.done[3] = true;
+  const doneBar = S.done[3] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Backbone complete. Six condensation-type bonds in, every pyrophosphate destroyed behind you — this copy is not coming apart.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: proofread →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene3(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', disabled: allBonded ? 'disabled' : null, onclick: bondOne }, 'Form phosphodiester bond'),
+        h('button', { class: 'act alt', type: 'button', disabled: S.s3.ppi === 0 ? 'disabled' : null, onclick: splitPpi }, `Hydrolyse PPᵢ → 2 Pᵢ (×${S.s3.ppi})`),
+        (allBonded && S.s3.ppi === 0 && !S.s3.sealed) ? h('button', { class: 'act', type: 'button', onclick: sealNick }, 'DNA ligase: seal the nick (1 ATP)') : null,
+        h('span', { class: 'meter' }, 'bonds: ', h('b', {}, `${S.s3.bonded} / ${ANS2.length}`))),
+      doneBar
+    ),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Reaction 1 · making the bond'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip con' }, 'condensation-type'),
+        h('span', { class: 'chip plain' }, 'covalent: phosphodiester'),
+        h('span', { class: 'chip plain' }, '5′→3′ only')),
+      h('div', { class: 'eq' }, 'DNAₙ + dNTP → DNAₙ₊₁ + PPᵢ'),
+      h('p', {}, 'The strand’s free 3′–OH attacks the incoming nucleotide and a phosphodiester bond forms. The nucleotide arrives pre-charged — a triphosphate — and pays for its own insertion.'),
+      h('h3', {}, 'Reaction 2 · the ratchet'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip hyd' }, 'hydrolysis'),
+        h('span', { class: 'chip en' }, 'energy out')),
+      h('div', { class: 'eq' }, 'PPᵢ + H₂O → 2 Pᵢ'),
+      h('p', {}, 'On its own, reaction 1 is nearly reversible. The cell immediately destroys the pyrophosphate — remove a product and the equilibrium can only slide forward. Copying becomes a one-way ratchet.'),
+      h('h3', {}, 'Reaction 3 · the seam'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip plain' }, 'covalent'),
+        h('span', { class: 'chip en' }, 'energy in · ATP')),
+      h('div', { class: 'eq' }, 'nick —ligase→ joined  (+ AMP + PPᵢ)'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Your textbook says nucleotides join “by condensation, releasing water”. In the cell the leaving group is pyrophosphate, not water — water enters one step later, when PPᵢ is split. Same logic, better bookkeeping.'),
+        h('p', {}, 'Pulling an equilibrium by destroying a product is Le Chatelier’s principle wearing a lab coat — the same one from your chemistry unit.'),
+        h('p', {}, 'Why ligase at all? A polymerase writes only 5′→3′, so one strand is copied backwards in ~200-letter Okazaki fragments that must be sewn together. In the cell, pairing (stage 2) and bonding (stage 3) happen in one smooth move; we slowed the film down.'))
+    )
+  );
+}
+
+/* ---------------- stage 4: proofread ---------------- */
+
+function clickBase4(i) {
+  if (S.done[4]) return;
+  if (MIS4[i] !== undefined && !S.s4.fixed.includes(i)) {
+    S.s4.fixed.push(i);
+    S.s4.msg = `Position ${i + 1}: ${MIS4[i]} excised by hydrolysis, ${COMP[TPL4[i]]} written in its place.`;
+    logRx('exo');
+    if (S.s4.fixed.length >= Object.keys(MIS4).length) S.done[4] = true;
+    render();
+    fx(50 + i * 48, 120, '− dNMP');
+  } else {
+    S.s4.misclicks++;
+    S.s4.msg = 'That rung is straight — 2 or 3 tidy H-bonds. Look for the crooked, half-bonded ones.';
+    render();
+  }
+}
+
+function renderScene4() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 230', role: 'img',
+    'aria-label': 'A copied stretch of DNA with two mismatches to find' });
+  svg.append(h('text', { x: 50, y: 28, class: 'lab' }, 'template (old) strand'));
+  svg.append(h('text', { x: 50, y: 212, class: 'lab' }, 'new strand — click a wrong letter'));
+  const topPts = [], botPts = [];
+  TPL4.forEach((b, i) => {
+    const x = 50 + i * 48;
+    topPts.push([x, 42]); botPts.push([x, 182]);
+    svg.append(h('text', { x, y: 66, class: 'bl', 'text-anchor': 'middle' }, b));
+    const fixed = S.s4.fixed.includes(i);
+    const isMis = MIS4[i] !== undefined && !fixed;
+    const shown = fixed ? COMP[b] : (MIS4[i] !== undefined ? MIS4[i] : COMP[b]);
+    const nb = isMis ? (shown === 'T' || TPL4[i] === 'G' ? 2 : 1) : NBONDS(b);
+    for (let k = 0; k < nb; k++) {
+      const yy = 86 + k * 13 - (nb === 3 ? 6 : 0);
+      if (isMis) {
+        svg.append(h('line', { x1: x - 4, y1: yy + 2, x2: x + 5, y2: yy + 8, class: 'hb bad' }));
+      } else {
+        svg.append(h('line', { x1: x, y1: yy, x2: x, y2: yy + 7, class: 'hb' }));
+      }
+    }
+    const g = h('g', { class: 'pickable', tabindex: '0', role: 'button',
+      'aria-label': `new strand position ${i + 1}: ${shown}`,
+      onclick: () => clickBase4(i),
+      onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); clickBase4(i); } } },
+      h('rect', { x: x - 16, y: 134, width: 32, height: 36, rx: 6, fill: 'transparent' }),
+      h('text', { x: x + (isMis ? 3 : 0), y: 160, class: 'bl ' + (fixed ? 'new pop' : (isMis ? '' : '')), 'text-anchor': 'middle' }, shown)
+    );
+    svg.append(g);
+  });
+  svg.append(h('polyline', { class: 'rail', points: topPts.map(p => p.join(',')).join(' ') }));
+  svg.append(h('polyline', { class: 'rail new', points: botPts.map(p => p.join(',')).join(' ') }));
+  return svg;
+}
+
+function renderStage4() {
+  const found = S.s4.fixed.length, total = Object.keys(MIS4).length;
+  const doneBar = S.done[4] ? h('div', { class: 'donebar' },
+    h('span', {}, `Both mismatches excised (wrong clicks: ${S.s4.misclicks}). Error rate after proofreading: ~1 in 10⁷ — and mismatch repair will sweep behind you.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Next: the clock →')) : null;
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene4(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'mismatches found: ', h('b', {}, `${found} / ${total}`)),
+        h('span', { class: 'meter' }, 'hint: count the dashes — and their angle')),
+      h('p', { class: 'toast' }, S.s4.msg),
+      doneBar
+    ),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Reaction · proofreading excision'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip hyd' }, 'hydrolysis'),
+        h('span', { class: 'chip plain' }, '3′→5′ exonuclease')),
+      h('div', { class: 'eq' }, 'DNAₙ₊₁ + H₂O → DNAₙ + dNMP'),
+      h('p', {}, 'The polymerase feels a mis-paired end wobble, backs up one step, and cuts the last letter out — undoing stage 3’s bond with water. Then it tries again.'),
+      h('div', { class: 'ladder' },
+        h('div', { class: 'rung' }, h('span', { class: 'lb' }, h('b', {}, '1 in 100,000'), 'pairing alone'), h('div', { class: 'bar', style: 'width:33%' })),
+        h('div', { class: 'rung' }, h('span', { class: 'lb' }, h('b', {}, '1 in 10,000,000'), '+ proofreading'), h('div', { class: 'bar', style: 'width:60%' })),
+        h('div', { class: 'rung' }, h('span', { class: 'lb' }, h('b', {}, '1 in ~10¹⁰'), '+ mismatch repair'), h('div', { class: 'bar', style: 'width:92%' }))),
+      h('p', { class: 'sub' }, 'Your genome is 3.1 × 10⁹ letters, copied at ~50 letters per second per fork — finished in hours only because tens of thousands of forks run at once. At 10⁻¹⁰, a division leaves just a handful of new errors.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'The sneakiest mismatch is G·T — it still manages two (crooked) hydrogen bonds, which is exactly why it gets past pairing more often. You just fixed one.'),
+        h('p', {}, 'Mismatch repair faces a deeper puzzle: both letters look “real”, so which one is the typo? In bacteria the old strand carries methyl tags — repair trusts the tagged strand. How human cells know is still being worked out.'))
+    )
+  );
+}
+
+/* ---------------- stage 5: clock ---------------- */
+
+const DMAX = Math.max(16, Math.max(...DIFF_SERIES));
+function renderChart5() {
+  const W = 320, H = 150, px = 38, py = 14;
+  const xs = g => px + (W - px - 8) * g / GMAX;
+  const ys = d => (H - 26) - (H - 26 - py) * d / DMAX;
+  const svg = h('svg', { viewBox: `0 0 ${W} ${H}`, style: 'max-width:340px', role: 'img', 'aria-label': 'Differences between the two lineages versus generations' });
+  /* axes */
+  svg.append(h('line', { x1: px, y1: py, x2: px, y2: H - 26, stroke: 'var(--line)', 'stroke-width': 1.5 }));
+  svg.append(h('line', { x1: px, y1: H - 26, x2: W - 8, y2: H - 26, stroke: 'var(--line)', 'stroke-width': 1.5 }));
+  [0, Math.round(DMAX / 2), DMAX].forEach(d => {
+    svg.append(h('text', { x: px - 6, y: ys(d) + 4, class: 'lab', 'text-anchor': 'end' }, String(d)));
+    svg.append(h('line', { x1: px, y1: ys(d), x2: W - 8, y2: ys(d), stroke: 'var(--line)', 'stroke-width': .6 }));
+  });
+  [0, 80, 160].forEach(g => svg.append(h('text', { x: xs(g), y: H - 12, class: 'lab', 'text-anchor': 'middle' }, String(g))));
+  svg.append(h('text', { x: W - 8, y: H - 2, class: 'lab', 'text-anchor': 'end' }, 'generations (toy rate)'));
+  svg.append(h('text', { x: px + 4, y: 12, class: 'lab' }, 'letters different'));
+  /* full series, faint; progress solid */
+  const pts = DIFF_SERIES.map((d, g) => `${xs(g)},${ys(d)}`);
+  svg.append(h('polyline', { points: pts.join(' '), fill: 'none', stroke: 'var(--gray-letter)', 'stroke-width': 1.5 }));
+  const cur = S.s5.gen;
+  svg.append(h('polyline', { points: pts.slice(0, cur + 1).join(' '), fill: 'none', stroke: 'var(--violet)', 'stroke-width': 2.5 }));
+  svg.append(h('circle', { cx: xs(cur), cy: ys(DIFF_SERIES[cur]), r: 4.5, fill: 'var(--violet)' }));
+  return svg;
+}
+
+function renderStage5() {
+  const g = S.s5.gen;
+  const A = seqAt(EV_A, g), B = seqAt(EV_B, g);
+  const d = DIFF_SERIES[g];
+  if (g >= 100) { S.s5.seen = true; S.done[5] = true; }
+
+  const row = (tag, seq, other) => h('div', {},
+    h('span', { class: 'tag' }, tag),
+    ...seq.map((ch, i) => h('span', { class: ch !== other[i] ? 'mut' : null }, ch)));
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      h('div', { class: 'seqrows' },
+        h('div', {}, h('span', { class: 'tag' }, 'ancestor'), ANC.join('')),
+        row('lineage A', A, B),
+        row('lineage B', B, A)),
+      h('div', { class: 'slider-row' },
+        h('label', { for: 'genSlider', class: 'meter' }, 'generations'),
+        h('input', { type: 'range', id: 'genSlider', min: 0, max: GMAX, step: 1, value: g,
+          oninput: (e) => { S.s5.gen = +e.target.value; render(); } }),
+        h('span', { class: 'bignum' }, String(g))),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'letters different between A and B: ', h('b', {}, String(d)), ' / 24'),
+        h('span', { class: 'meter' }, 'toy mutation rate ≈ 10⁷ × real, so you can watch it')),
+      S.s5.seen ? h('div', { class: 'punch' },
+        h('b', {}, 'This is where trees come from. '),
+        'Differences pile up roughly in proportion to time — a ', h('b', {}, 'molecular clock'), '. Count the differences between two species, and you can estimate how long ago their lineages split. Last lesson you did exactly that: ',
+        h('a', { href: 'https://meridian-one-jet.vercel.app/' }, 'Build a Tree'), ' turns these counts into the tree of life.') : null,
+      S.done[5] ? h('div', { class: 'donebar' },
+        h('span', {}, 'Clock observed. One last thing: prove you know your reactions.'),
+        h('button', { class: 'act', type: 'button', onclick: () => go(6) }, 'Take the quiz →')) : null
+    ),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Not a reaction — a consequence'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip plain' }, 'mutation'),
+        h('span', { class: 'chip con' }, 'molecular clock')),
+      h('p', {}, 'Every difference you see survived pairing, proofreading and mismatch repair. Rare per letter — but genomes are long and generations add up.'),
+      renderChart5(),
+      h('p', { class: 'sub' }, 'Real numbers: each human baby carries ~70 brand-new mutations. Human and chimpanzee genomes differ by ~1.2% of single letters — run the clock backwards and you land at a split roughly 6–7 million years ago.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Your curve bends at high counts: with only 24 letters, new mutations start landing on already-changed spots and even flipping letters back. Real analyses correct for this saturation — and real genomes have billions of letters.'),
+        h('p', {}, 'The clock is sloppy, not metronomic: different genes tick at different speeds (histones barely move; fibrinopeptides race), and lineages differ too. Biologists calibrate it against fossils before trusting a date.'))
+    )
+  );
+}
+
+/* ---------------- stage 6: quiz ---------------- */
+
+const QUIZ = [
+  { q: 'Helicase needs energy to open the double helix. Which reaction supplies it?',
+    opts: ['ATP + H₂O → ADP + Pᵢ (hydrolysis)', 'PPᵢ + H₂O → 2 Pᵢ', 'Condensation of two nucleotides', 'Breaking hydrogen bonds releases the energy'],
+    a: 0, why: 'ATP hydrolysis powers the motor. Breaking H-bonds costs energy — it never supplies it.' },
+  { q: 'The bonds holding A opposite T are…',
+    opts: ['covalent phosphodiester bonds', 'hydrogen bonds — non-covalent', 'ionic bonds', 'peptide bonds'],
+    a: 1, why: 'Base pairing is non-covalent: 2 H-bonds for A·T, 3 for G·C. That weakness is a feature — the ladder must open every time it is read or copied.' },
+  { q: 'A nucleotide joins the growing strand. What forms, and what leaves?',
+    opts: ['A peptide bond forms; water leaves', 'A phosphodiester bond forms; pyrophosphate (PPᵢ) leaves', 'A hydrogen bond forms; ADP leaves', 'A glycosidic bond forms; Pᵢ leaves'],
+    a: 1, why: 'Condensation-type bond formation, 5′→3′, with PPᵢ as the leaving group (the textbook drawing says “water” — the cell uses a pre-charged dNTP).' },
+  { q: 'Why does the cell immediately split PPᵢ into 2 Pᵢ?',
+    opts: ['To recycle phosphate for ATP', 'PPᵢ is toxic', 'Destroying a product pulls the reaction forward — copying becomes irreversible', 'To signal that a nucleotide was added'],
+    a: 2, why: 'Removing a product shifts the equilibrium (Le Chatelier). The bond-forming step alone is nearly reversible; the ratchet makes it one-way.' },
+  { q: 'Proofreading removes a mis-paired letter by…',
+    opts: ['condensation', 'hydrolysis of the newest phosphodiester bond', 'breaking its hydrogen bonds only', 'adding a methyl tag'],
+    a: 1, why: 'The 3′→5′ exonuclease undoes the last bond with water — hydrolysis — then the polymerase retries. Errors drop from ~10⁻⁵ to ~10⁻⁷.' },
+  { q: 'Which of these happens with no energy input at all?',
+    opts: ['Unwinding the helix', 'Correct base pairing snapping into place', 'Sealing a nick with ligase', 'Adding a nucleotide to the strand'],
+    a: 1, why: 'H-bonds form spontaneously when geometry fits. Unwinding and ligation burn ATP; nucleotide addition spends the dNTP’s own stored energy.' },
+];
+
+function renderStage6() {
+  const q = S.quiz;
+  const items = QUIZ.map((it, qi) => {
+    const picked = q.picked[qi];
+    const cls = q.submitted ? (picked === it.a ? 'q right' : 'q wrong') : 'q';
+    return h('div', { class: cls },
+      h('p', { class: 'qt' }, `${qi + 1}. ${it.q}`),
+      ...it.opts.map((op, oi) => h('label', {},
+        h('input', { type: 'radio', name: 'q' + qi, checked: picked === oi ? 'checked' : null,
+          disabled: q.submitted ? 'disabled' : null,
+          onchange: () => { S.quiz.picked[qi] = oi; render(); } }),
+        h('span', {}, op))),
+      q.submitted ? h('p', { class: 'why' }, (picked === it.a ? '✓ ' : `✗ Correct: “${it.opts[it.a]}”. `) + it.why) : null
+    );
+  });
+  const allPicked = Object.keys(q.picked).length === QUIZ.length;
+  let band = null;
+  if (q.submitted) {
+    const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
+    if (score === QUIZ.length && !S.done[6]) S.done[6] = true;
+    band = h('div', { class: 'scoreband' },
+      score === QUIZ.length ? `Clean copy — ${score} / ${QUIZ.length}. You may call yourself a polymerase.`
+        : `${score} / ${QUIZ.length}. Proofread your answers and run it again — that is literally the theme of this lesson.`);
+  }
+  return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Quiz · classify the chemistry'),
+      ...items,
+      h('div', { class: 'scenebtns' },
+        q.submitted
+          ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
+          : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => { S.quiz.submitted = true; render(); } }, 'Check my answers'),
+        h('span', { class: 'meter' }, 'Covers mastery goals ', h('b', {}, 'U1.K2 · U3.K2 · U8.K3')),
+      ),
+      band)
+  );
+}
+
+/* ---------------- shell ---------------- */
+
+function go(n) { stopAuto(); S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  const seg = $('#segStages');
+  seg.replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 6 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+
+function renderLog() {
+  const tbl = $('#logTable');
+  tbl.replaceChildren(...LOG.map(r => h('tr', { class: (S.logged.has(r.id) ? 'on' : 'off') + (S.lastLogged === r.id ? ' fresh' : '') },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { class: 'eqc' }, r.eq),
+    h('td', {}, h('span', { class: 'chips' }, ...r.chips.map(c => h('span', { class: 'chip ' + c[1] }, c[0])))),
+    h('td', { class: 'eqc' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5, 6: renderStage6 };
+
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+  S.lastLogged = null;
+}
+
+$('#btnReset').addEventListener('click', () => { stopAuto(); S = freshState(); render(); });
+
+window.__S = () => S; /* for automated smoke tests */
+render();
+</script>
+</body>
+</html>
