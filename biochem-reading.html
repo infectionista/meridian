@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Same Four Moves</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a background-reading handout. One readable column (~70ch) with
+   equation strips, two data tables, dashed fine-print asides, and a short
+   boxed detour on redox. Light white-and-lilac Meridian Learning theme —
+   same family as Make and Break, Copy the Code and Build a Tree. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+  padding-top: max(30px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(56px, env(safe-area-inset-bottom, 0px));
+}
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(30px, 6vw, 46px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.08; margin: 10px 0 0;
+  text-wrap: balance;
+}
+h1 .hi { color: var(--violet); }
+.lede { color: var(--fg-dim); max-width: 68ch; margin: 12px 0 0; }
+.lede a, article a { color: var(--violet); font-weight: 600; text-decoration-thickness: 1px; }
+
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
+.toc a {
+  font: 600 13px/1 var(--ui); color: var(--violet); text-decoration: none;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 9px 14px;
+}
+.toc a:hover { background: var(--violet-soft); }
+:is(a, summary):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+article { margin-top: 10px; }
+article h2 {
+  font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--violet); margin: 44px 0 6px; text-wrap: balance;
+}
+article h2 .n { color: var(--fg-dim); font-weight: 500; letter-spacing: .04em; }
+article h3 { font-size: 19px; font-weight: 700; letter-spacing: -.01em; margin: 26px 0 6px; text-wrap: balance; }
+article p { max-width: 70ch; margin: 10px 0; }
+article .dim { color: var(--fg-dim); font-size: 14.5px; }
+
+.eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.7;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 9px;
+  padding: 10px 14px; margin: 12px 0; overflow-x: auto; white-space: nowrap; max-width: 70ch;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+
+details.fine {
+  margin: 14px 0; font-size: 14px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 9px; padding: 10px 14px; max-width: 70ch;
+  background: var(--panel);
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+.box {
+  background: var(--panel); border: 1px solid var(--violet); border-radius: 12px;
+  padding: 16px 20px; margin: 26px 0; max-width: 74ch;
+}
+.box h3 { margin-top: 0; }
+
+table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+th, td { text-align: left; padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; background: var(--panel-2); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--violet); }
+td b { font-weight: 700; }
+.tscroll { overflow-x: auto; margin: 14px 0; }
+.tscroll table { margin: 0; min-width: 560px; }
+
+.foot {
+  margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 13px; line-height: 1.7;
+}
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Life Sciences · Meridian Learning World · Background reading</div>
+  <h1>The Same <span class="hi">Four Moves</span></h1>
+  <p class="lede">A deeper look behind <a href="https://meridian-one-jet.vercel.app/makebreak.html">Make and Break</a> and
+    <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a>: what the reactions really are,
+    which pathways and cycles they run in — and why a goldfish, a shark, a pigeon and you,
+    all built from the same chemistry, don’t run it quite the same way. About a 15-minute read.</p>
+  <nav class="toc" aria-label="Contents">
+    <a href="#moves">1 · The moves, closer up</a>
+    <a href="#cycles">2 · Where the moves live</a>
+    <a href="#animals">3 · Same moves, different animals</a>
+    <a href="#tree">4 · Back to the tree</a>
+  </nav>
+</header>
+
+<article>
+
+<h2 id="moves"><span class="n">Part 1 ·</span> The moves, closer up</h2>
+
+<h3>Make — condensation</h3>
+<div class="chips"><span class="chip con">condensation</span><span class="chip en">costs energy</span></div>
+<div class="eq">A–OH + H–B → A▬B + H₂O</div>
+<p>Every big molecule of life — protein, starch, glycogen, DNA, fat — is built by this one reaction,
+run with different building blocks. The detail the trainer hid: cells almost never condense <i>bare</i>
+monomers. They pre-charge them first, clipping each building block to an energy-rich carrier, and the
+“make” step then pays for itself when the carrier leaves:</p>
+<ul>
+  <li><b>Proteins:</b> each amino acid rides in on a tRNA, loaded at the cost of ATP → AMP + PPᵢ.</li>
+  <li><b>Glycogen:</b> glucose is first attached to a carrier called UDP; UDP-glucose is the real brick.</li>
+  <li><b>DNA:</b> the nucleotide arrives as a triphosphate (dNTP) — its own two spare phosphates are the ticket.</li>
+  <li><b>Fats:</b> fatty acids are activated as acyl-CoA — another ATP → AMP + PPᵢ “deep discharge”.</li>
+</ul>
+<p class="dim">The pattern: charge the brick, build with the charged brick, destroy the pyrophosphate so
+the wall can’t un-build. You saw the ratchet in Copy the Code; it is everywhere.</p>
+
+<h3>Break — hydrolysis</h3>
+<div class="chips"><span class="chip hyd">hydrolysis</span><span class="chip en">releases energy</span></div>
+<div class="eq">A▬B + H₂O → A–OH + H–B</div>
+<p>The reverse move: water re-enters and the covalent bond splits. Digestion is hydrolysis running at
+industrial scale, with a dedicated pair of scissors for each bond type:</p>
+<div class="tscroll"><table>
+  <thead><tr><th>Polymer</th><th>Bond cut</th><th>Scissors (enzyme)</th><th>Where</th><th>Products</th></tr></thead>
+  <tbody>
+    <tr><td>Starch, glycogen</td><td>glycosidic</td><td>amylase, maltase</td><td>mouth, small intestine</td><td>glucose</td></tr>
+    <tr><td>Proteins</td><td>peptide</td><td>pepsin, trypsin &amp; co.</td><td>stomach, small intestine</td><td>amino acids</td></tr>
+    <tr><td>Fats</td><td>ester</td><td>lipase (+ bile to emulsify)</td><td>small intestine</td><td>fatty acids + glycerol</td></tr>
+    <tr><td>DNA, RNA</td><td>phosphodiester</td><td>nucleases</td><td>small intestine</td><td>nucleotides</td></tr>
+  </tbody>
+</table></div>
+<p>Hydrolysis also runs inside every cell, quietly: worn-out proteins are shredded for parts, and
+proofreading polymerases hydrolyse their own fresh mistakes.</p>
+<details class="fine"><summary>Fine print · hydration is not hydrolysis</summary>
+<p>Sometimes water <i>joins</i> a molecule without cutting anything — it adds across a double bond and the
+chain stays whole. That is hydration, and the Krebs cycle has a famous one (fumarate + H₂O → malate).
+Hydrolysis breaks; hydration decorates. Examiners love the difference.</p></details>
+
+<h3>Stick — hydrogen bonds</h3>
+<div class="chips"><span class="chip non">non-covalent</span><span class="chip non">reversible</span></div>
+<p>The δ+ ···· δ− lean that holds water together, zips DNA, and folds every protein into shape. One more
+job worth knowing: <b>recognition</b>. An enzyme grips its substrate — and a polymerase checks a base
+pair — largely through a handshake of hydrogen bonds. Right partner, all bonds line up; wrong partner,
+the handshake fails. Weak bonds are not a cheap substitute for real ones; they are the only bonds fast
+and forgiving enough to make and unmake a million times a second.</p>
+
+<h3>Pay — the ATP cycle</h3>
+<div class="chips"><span class="chip hyd">spend = hydrolysis</span><span class="chip con">recharge = condensation</span></div>
+<div class="eq">ATP + H₂O → ADP + Pᵢ + energy        ADP + Pᵢ + energy → ATP + H₂O</div>
+<p>Two ways the cell refills the battery. <b>Substrate-level:</b> a few reactions in glycolysis and the
+Krebs cycle hand a phosphate straight to ADP — quick, small change. <b>Oxidative phosphorylation:</b>
+the mitochondrion burns fuel to pump protons across its inner membrane, and the backflow spins
+ATP synthase — a literal rotary motor, ~100 revolutions per second, pressing ADP and Pᵢ together.
+That machine makes ~90% of your ATP.</p>
+<p>And the deep discharge: reactions that need an extra-hard shove cut ATP two notches down to
+AMP + PPᵢ (DNA ligase, amino-acid loading, fat activation). Free Pᵢ never recharges AMP directly —
+adenylate kinase first rescues it: AMP + ATP → 2 ADP. Rising AMP is therefore the cell’s sharpest
+low-battery alarm; a sensor protein (AMPK) reads it and switches the cell to power-saving mode.</p>
+
+<div class="box">
+  <h3>The fifth move we skipped: pass the electrons</h3>
+  <p>To keep the trainers honest-but-simple, one move stayed offstage: <b>redox</b> — transferring
+  electrons (usually travelling as hydrogen) from one molecule to another. Burning is redox done all at
+  once; respiration is the same chemistry in ~20 polite steps, with taxi molecules
+  (NAD⁺ → NADH) carrying electrons from food to the mitochondrial pumps. Most steps of the Krebs cycle
+  and the entire electron-transport chain are this fifth move. Keep it in your pocket for the Energy unit.</p>
+</div>
+
+<h2 id="cycles"><span class="n">Part 2 ·</span> Where the moves live: pathways and cycles</h2>
+
+<p>A <b>pathway</b> is a production line (start material → product); a <b>cycle</b> is a line bent into a
+loop, where the last product regenerates the first ingredient. Spotting the four moves inside them turns
+a page of arrows into familiar chemistry:</p>
+
+<div class="tscroll"><table>
+  <thead><tr><th>Pathway / cycle</th><th>Where</th><th>The moves at work</th></tr></thead>
+  <tbody>
+    <tr><td><b>Glycolysis</b> (pathway)</td><td>cytoplasm, all cells</td>
+        <td>Spends 2 ATP to prime glucose, earns 4 back by substrate-level recharge; net +2 ATP, no oxygen needed.</td></tr>
+    <tr><td><b>Krebs cycle</b></td><td>mitochondrial matrix</td>
+        <td>Opens with a textbook <b>condensation</b> (acetyl-CoA + oxaloacetate → citrate), includes one hydration — and the rest is mostly the fifth move, loading NADH taxis.</td></tr>
+    <tr><td><b>β-oxidation</b> (fat burning)</td><td>mitochondria</td>
+        <td>Snips fatty-acid chains two carbons at a time — a cousin of hydrolysis where CoA, not water, does the attacking — and feeds the pieces into Krebs.</td></tr>
+    <tr><td><b>Glycogen build / break</b></td><td>liver, muscle</td>
+        <td>Build: condensation from UDP-glucose. Break: not hydrolysis but <b>phosphorolysis</b> — phosphate attacks instead of water, so the freed glucose comes out pre-charged. Elegant frugality.</td></tr>
+    <tr><td><b>Urea cycle</b></td><td>liver</td>
+        <td>Condensations costing ~4 phosphate bonds per turn (one step is a true ATP → AMP + PPᵢ deep discharge), closed by a hydrolysis that snips urea off arginine.</td></tr>
+    <tr><td><b>Replication &amp; protein synthesis</b></td><td>nucleus, ribosomes</td>
+        <td>Polymer factories: charged bricks, condensation 5′→3′ or N→C, PPᵢ ratchets, H-bond proofing — the whole of <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a>.</td></tr>
+    <tr><td><b>Calvin cycle</b> (plants)</td><td>chloroplasts</td>
+        <td>The mirror image of respiration: light-charged ATP and electron taxis run condensations that build sugar from CO₂.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="animals"><span class="n">Part 3 ·</span> Same moves, different animals — and why</h2>
+
+<p>The core is untouchable: every animal runs the same four moves, the same ATP, the same genetic code.
+What evolution tunes is the <b>peripheral wiring</b> — and almost every difference traces back to one of
+four environmental pressures: water, diet, oxygen, temperature.</p>
+
+<h3>Water: three ways to dump nitrogen</h3>
+<p>Breaking surplus amino acids (hydrolysis, then deamination) leaves nitrogen as ammonia — cheap but
+toxic, and safe only when hugely diluted. What an animal does next depends on how much water it can
+spare:</p>
+<div class="tscroll"><table>
+  <thead><tr><th>Waste</th><th>Who</th><th>Water cost</th><th>ATP cost</th><th>Why it fits</th></tr></thead>
+  <tbody>
+    <tr><td><b>Ammonia</b></td><td>most fish, aquatic larvae</td><td>huge</td><td>≈ none</td>
+        <td>Water everywhere — just let it diffuse out of the gills.</td></tr>
+    <tr><td><b>Urea</b></td><td>mammals, adult amphibians, sharks</td><td>moderate</td><td>~4 bonds per molecule (urea cycle)</td>
+        <td>Land life, limited water: pay ATP to package nitrogen into something storable. Sharks go further and deliberately <i>keep</i> urea in their blood as an osmotic ballast against seawater.</td></tr>
+    <tr><td><b>Uric acid</b></td><td>birds, reptiles, insects</td><td>minimal (white paste)</td><td>highest</td>
+        <td>Sealed eggs (waste must sit in the shell without poisoning the embryo), flight weight, deserts.</td></tr>
+  </tbody>
+</table></div>
+<p class="dim">Same leftover nitrogen, three price plans — each trading ATP for water. Tadpole to frog,
+some amphibians literally switch plans mid-life as they leave the water.</p>
+
+<h3>Diet: pathways you can afford to lose</h3>
+<p><b>Vitamin C.</b> Most animals build their own ascorbate from glucose — a short condensation-and-redox
+pathway. Our primate ancestors, living on fruit, lost the last enzyme (GULO) to mutation roughly 60
+million years ago and never missed it — until sailors left the fruit behind and invented scurvy. Guinea
+pigs and some bats lost the same gene independently. The broken GULO still sits in your genome as a
+<b>pseudogene</b>: a molecular fossil, mutated exactly where the tree of life predicts.</p>
+<p><b>Milk.</b> All mammal infants make lactase, the scissors for milk sugar; most mammals — and most
+adult humans — switch the gene off after weaning. Several human populations that took up dairying
+(in Europe, East Africa, the Middle East) independently evolved regulatory mutations that keep lactase
+on for life. Different mutations, same effect, within the last ~10,000 years — evolution fast enough to
+carbon-date, and the reason lactose tolerance maps onto herding cultures.</p>
+<p><b>Cellulose.</b> Starch and cellulose are both pure glucose; the difference is one flip of the
+glycosidic bond’s geometry (α vs β) — and no vertebrate makes scissors for the β version. Cows, sheep
+and termites eat grass and wood anyway, by subcontracting: fermenter chambers full of microbes that do
+hydrolyse cellulose, with the host living off the microbes’ products. Your “fibre” is the cellulose
+your own enzymes must wave through.</p>
+
+<h3>Oxygen: fermentation with a twist</h3>
+<p>No oxygen, no electron-transport chain — then glycolysis alone must carry the battery load, and its
+waste becomes the problem. Your muscles briefly park the waste as lactate (the sprint burn). Crucian
+carp and goldfish, sealed under pond ice for months, cannot afford months of acid — so their muscles
+convert the waste onward to <b>ethanol</b>, which simply diffuses out through the gills. A fish that
+survives winter by brewing: same glycolysis as yours, one bolted-on enzyme step, driven by a very
+specific habitat.</p>
+
+<h3>Temperature: wasting energy on purpose</h3>
+<p>Mitochondria make ATP because protons must flow back through ATP synthase. Brown fat, abundant in
+hibernators and human babies, installs a bypass valve (the protein UCP1): protons leak straight through,
+no ATP is made, and the energy of food comes out as pure <b>heat</b>. Deliberately breaking the
+spend–recharge coupling from the Battery station is how a newborn — too small to shiver well — keeps
+warm, and how a hibernator reheats itself in spring. Pigs, oddly, carry a broken UCP1 gene — which is
+why piglets famously huddle.</p>
+<details class="fine"><summary>Fine print · hydrogen bonds vs ice</summary>
+<p>Antarctic fish swim in water slightly below 0 °C, kept liquid by salt. Their blood is less salty —
+it should freeze. It doesn’t, because they evolved antifreeze glycoproteins: molecules that hydrogen-bond
+onto the faces of any nascent ice crystal and stop it growing. The Stick move, weaponised against
+winter — and in one fish lineage the gene demonstrably evolved from a digestive-enzyme gene. Evolution
+rarely invents; it repurposes.</p></details>
+
+<h2 id="tree"><span class="n">Part 4 ·</span> Back to the tree</h2>
+<p>Notice what varied and what didn’t. Nitrogen plans, vitamin pathways, antifreeze, ethanol tricks —
+all peripheral, all young, all explainable by habitat and diet. The four moves themselves, ATP, the
+code — identical from gut bacteria to goldfish to you, unchanged since the last common ancestor.
+Biochemistry is a very old core wearing region-specific accessories; the accessories, including the
+broken genes, land on exactly the branches where the tree of life says they should. Which is, of course,
+how the tree was drawn: <a href="https://meridian-one-jet.vercel.app/">Build a Tree</a>.</p>
+
+</article>
+
+<footer class="foot">
+  <div class="cur">
+    <span class="chip con">U1.K2 · condensation &amp; hydrolysis</span>
+    <span class="chip con">U5.K1/K3 · ATP, respiration &amp; fermentation</span>
+    <span class="chip con">U6 · evolution &amp; adaptation</span>
+    <span class="chip con">U8.K3 · hydrogen bonds</span>
+  </div>
+  Values and mechanisms follow standard references (Alberts et&nbsp;al., <i>Molecular Biology of the Cell</i>;
+  Berg et&nbsp;al., <i>Biochemistry</i>). Companion trainers:
+  <a href="https://meridian-one-jet.vercel.app/makebreak.html">Make and Break</a> ·
+  <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a> ·
+  <a href="https://meridian-one-jet.vercel.app/">Build a Tree</a>.
+</footer>
+
+</div>
+</body>
+</html>
