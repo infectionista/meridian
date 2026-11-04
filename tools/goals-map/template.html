@@ -70,7 +70,10 @@ h1 .hi { color: var(--violet); }
 
 .node { cursor: pointer; }
 .node .shape { stroke-width: 2; }
-.node text.code { font-family: var(--mono); font-size: 8.5px; fill: var(--fg-dim); text-anchor: middle; pointer-events: none; }
+.node text.emoji { font-size: 13px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.trailpath { fill: none; stroke: var(--violet); stroke-width: 5; stroke-opacity: .35; stroke-linecap: round; stroke-dasharray: 10 8; }
+.trailnum circle { fill: var(--violet); stroke: #fff; stroke-width: 1.5; }
+.trailnum text { fill: #fff; font: 700 10px var(--ui); text-anchor: middle; }
 .node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none; }
 .node.dim { opacity: .14; }
 .node.sel .shape { stroke-width: 3.5; }
@@ -135,8 +138,9 @@ h1 .hi { color: var(--violet); }
   <p class="lede">Every learning goal of the course as one connected map. Solid links build skills inside a unit
     (Knowledge → Application → Creation); dashed violet links are bridges between units. Click any goal or link
     to read it — goals and bridges marked <b>⚡</b> already carry a trainer or reading: <b>press the ⚡ to open it</b>. The rest are slots waiting for one.
-    Drag to pan, scroll to zoom, drag nodes to untangle.</p>
+    Pick a trail to follow one story across the whole map. Drag to pan, scroll to zoom, drag nodes to untangle.</p>
   <div class="legend" id="legend"></div>
+  <div class="legend" id="trails"><span class="hint" style="margin:0">Trails:</span></div>
   <div class="legend">
     <button class="ghost" id="btnCross" aria-pressed="true" type="button">Cross-unit bridges: on</button>
     <button class="ghost" id="btnReset" type="button">Reset view</button>
@@ -216,6 +220,8 @@ edgeBadge.append('circle').attr('class', 'core').attr('r', 7.5);
 edgeBadge.append('text').attr('y', 3.2).attr('text-anchor', 'middle')
   .attr('font-size', '8.5px').attr('fill', '#fff').text('⚡');
 
+const trailG = root.append('g');
+
 /* ---------- nodes ---------- */
 
 function shapeFor(g, n, deep, soft) {
@@ -242,7 +248,7 @@ nodeSel.each(function (n) {
   const u = DATA.units[n.unit];
   shapeFor(d3.select(this), n, u.deep, u.soft);
 });
-nodeSel.append('text').attr('class', 'code').attr('y', -20).text(n => n.id);
+nodeSel.append('text').attr('class', 'emoji').text(n => n.emoji);
 nodeSel.append('text').attr('class', 'lbl').attr('y', 28).text(n => n.label);
 const nodeBadge = nodeSel.filter(n => n.links.length).append('a')
   .attr('href', n => n.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
@@ -254,6 +260,8 @@ nodeBadge.append('circle').attr('class', 'halo').attr('r', 12);
 nodeBadge.append('circle').attr('class', 'core').attr('r', 9);
 nodeBadge.append('text').attr('y', 3.6).attr('text-anchor', 'middle')
   .attr('font-size', '10px').attr('fill', '#fff').text('⚡');
+
+const trailNumG = root.append('g');
 
 /* ---------- ticking ---------- */
 
@@ -275,6 +283,7 @@ sim.on('tick', () => {
     return `translate(${mx},${my})`;
   });
   nodeSel.attr('transform', n => `translate(${n.x},${n.y})`);
+  if (activeTrail) drawTrail();
 });
 
 /* ---------- zoom ---------- */
@@ -312,6 +321,7 @@ function edgeVisible(e) {
 }
 
 function applyState(hoverId) {
+  const trailSet = activeTrail ? new Set(trailById(activeTrail).steps) : null;
   const neigh = new Set();
   if (hoverId) {
     neigh.add(hoverId);
@@ -322,11 +332,12 @@ function applyState(hoverId) {
     });
   }
   nodeSel
-    .classed('dim', n => !unitOn[n.unit] || (hoverId && !neigh.has(n.id)))
+    .classed('dim', n => trailSet ? !trailSet.has(n.id)
+      : (!unitOn[n.unit] || (hoverId && !neigh.has(n.id))))
     .classed('sel', n => selected && selected.kind === 'node' && selected.id === n.id);
   linkSel.style('display', e => edgeVisible(e) ? null : 'none');
   linkLine
-    .classed('dim', e => hoverId && e.s !== hoverId && e.t !== hoverId)
+    .classed('dim', e => trailSet ? true : (hoverId && e.s !== hoverId && e.t !== hoverId))
     .classed('sel', e => selected && selected.kind === 'edge' && selected.id === e.eid);
 }
 function hover(id) { applyState(id); }
@@ -348,9 +359,9 @@ function select(kind, id) {
       `<div class="chips">
         <span class="chip" style="background:${u.soft};color:${u.deep}">Unit ${n.unit} · ${u.name}</span>
         <span class="chip" style="background:var(--panel-2);color:var(--fg-dim)">${strand}</span>
-        <span class="chip" style="background:var(--panel-2);color:var(--fg-dim)">${n.id}</span>
       </div>
-      <h3>${n.label}</h3>
+      <h3>${n.emoji} ${n.label}</h3>
+      <p class="ev" style="margin-top:-2px">${n.id} · ${n.formal}</p>
       <p class="goal">${n.text}</p>
       <p class="ev"><b>Evidence:</b> ${n.evidence}</p>
       <div class="rsec"><h4>Attached resources</h4>${resourceHtml(n.links)}</div>`;
@@ -373,6 +384,40 @@ function select(kind, id) {
   applyState(null);
 }
 document.getElementById('panelClose').addEventListener('click', () => select(null));
+
+/* ---------- trails ---------- */
+
+let activeTrail = null;
+function trailById(id) { return DATA.trails.find(t => t.id === id); }
+function drawTrail() {
+  trailG.selectAll('*').remove();
+  trailNumG.selectAll('*').remove();
+  if (!activeTrail) return;
+  const pts = trailById(activeTrail).steps.map(c => nodeById.get(c));
+  trailG.append('path').attr('class', 'trailpath')
+    .attr('d', 'M' + pts.map(p => `${p.x},${p.y}`).join(' L '));
+  pts.forEach((n, i) => {
+    const g = trailNumG.append('g').attr('class', 'trailnum')
+      .attr('transform', `translate(${n.x - 17},${n.y - 17})`);
+    g.append('circle').attr('r', 9);
+    g.append('text').attr('y', 3.5).text(i + 1);
+  });
+}
+function setTrail(id) {
+  activeTrail = activeTrail === id ? null : id;
+  document.querySelectorAll('#trails .ghost').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.trail === activeTrail)));
+  drawTrail(); applyState(null);
+}
+const trailsRow = document.getElementById('trails');
+DATA.trails.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'ghost'; b.type = 'button'; b.dataset.trail = t.id;
+  b.textContent = t.name; b.title = t.desc;
+  b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => setTrail(t.id));
+  trailsRow.appendChild(b);
+});
 
 /* ---------- legend & controls ---------- */
 
@@ -398,7 +443,10 @@ document.getElementById('btnReset').addEventListener('click', () => {
   crossOn = true;
   const bc = document.getElementById('btnCross');
   bc.setAttribute('aria-pressed', 'true'); bc.textContent = 'Cross-unit bridges: on';
-  select(null); userInteracted = false; resetView();
+  select(null);
+  activeTrail = null; drawTrail();
+  document.querySelectorAll('#trails .ghost').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  userInteracted = false; resetView();
 });
 
 document.getElementById('hint').textContent =

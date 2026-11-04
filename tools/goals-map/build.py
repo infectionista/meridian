@@ -9,7 +9,7 @@ wb = openpyxl.load_workbook(HERE / 'Learning_goals_11-14_classroom_v2.xlsx', dat
 ws = wb['Learning goals']
 rows = list(ws.iter_rows(values_only=True))[1:]
 
-LABELS = {
+FORMAL = {
  'U1.K1':'Cell parts','U1.K2':'Specialised cells','U1.K3':'Diffusion & osmosis',
  'U1.K4':'Cell → tissue → organism','U1.A3':'Chloroplast hunt',
  'U1.A1':'Microscope & slides','U1.A2':'Potato osmosis','U1.C1':'Cell model',
@@ -25,6 +25,53 @@ LABELS = {
  'U8.K1':'Reactions & equations','U8.K2':'Acids, pH & energy','U8.A1':'Conservation of mass','U8.A2':'Cabbage indicator','U8.A3':'Rust investigation','U8.C1':'Hot & cold reactions',
  'U9.K1':'Snow & cholera','U9.K2':'Variables & causation','U9.A1':'Plan a fair test','U9.A2':'Data & graphs','U9.A3':'Claim vs evidence','U9.C1':'Full lab report',
 }
+
+KID = {
+ 'U1.K1':"What's inside a cell?",'U1.K2':'Cells with superpowers','U1.K3':'Why do raisins swell?',
+ 'U1.K4':'Is bark a different animal?','U1.A1':'Drive a microscope','U1.A2':'The potato experiment',
+ 'U1.A3':'The chloroplast hunt','U1.C1':'Build your own cell',
+ 'U2.K1':'The book written inside you','U2.K2':'The gene that fights malaria','U2.K3':'Why are we all different?',
+ 'U2.A1':'Predict the babies','U2.A2':'Evolution before your eyes','U2.A3':'Extract DNA in the kitchen','U2.C1':'Diary of a gene',
+ 'U3.K1':"A mosquito's four lives",'U3.K2':'What flowers are really for','U3.K3':'How humans begin',
+ 'U3.A1':"Break the mosquito's cycle",'U3.A2':'Take a flower apart','U3.C1':'Invent a flying seed',
+ 'U4.K1':'From cell to body','U4.K2':'Vaccine or antibiotic?','U4.K3':'The journey of your lunch','U4.K4':'Meet the microbes',
+ 'U4.A1':'Make your heart race','U4.A2':"What's really in your food?",'U4.A3':'Ride along with a germ','U4.C1':'Launch a health campaign',
+ 'U5.K1':'How plants eat sunlight','U5.K2':'Burning fuel without fire','U5.K3':'Solar panels & power plants',
+ 'U5.A1':'The hidden colours of leaves','U5.A2':'Make yeast burp','U5.C1':'Design your own experiment',
+ 'U6.K1':'Who eats whom?','U6.K2':'The tree of all life','U6.K3':'No bees, no breakfast',
+ 'U6.A1':'Name that creature','U6.A2':'Count a meadow','U6.C1':'Your Hochrindl field guide',
+ 'U7.K1':'What everything is made of','U7.K2':'The alphabet of matter','U7.K3':'Unmix the mixture',
+ 'U7.A1':'Why salt melts ice','U7.A2':'Rescue the salt','U7.A3':'How salty is your sea?','U7.C1':'Build a water filter',
+ 'U8.K1':'When stuff transforms','U8.K2':'Acid or alkali?','U8.A1':'Nothing ever disappears',
+ 'U8.A2':'The cabbage detector','U8.A3':'Make iron rust on purpose','U8.C1':'Hot packs & cold packs',
+ 'U9.K1':'The detective of Broad Street','U9.K2':'Does it really cause it?','U9.A1':'Plan a fair test',
+ 'U9.A2':'Turn numbers into pictures','U9.A3':"Don't get fooled",'U9.C1':'Your first real paper',
+}
+
+EMOJI = {
+ 'U1.K1':'🧫','U1.K2':'🩸','U1.K3':'🍇','U1.K4':'🌳','U1.A1':'🔬','U1.A2':'🥔','U1.A3':'🧅','U1.C1':'🏗️',
+ 'U2.K1':'🧬','U2.K2':'🌙','U2.K3':'🌈','U2.A1':'🎲','U2.A2':'🐛','U2.A3':'🍓','U2.C1':'💬',
+ 'U3.K1':'🦟','U3.K2':'🌼','U3.K3':'👶','U3.A1':'⛔','U3.A2':'🌷','U3.C1':'🪂',
+ 'U4.K1':'🫀','U4.K2':'💉','U4.K3':'🍽️','U4.K4':'🦠','U4.A1':'🏃','U4.A2':'🧪','U4.A3':'🚂','U4.C1':'📢',
+ 'U5.K1':'☀️','U5.K2':'🔥','U5.K3':'🔋','U5.A1':'🍃','U5.A2':'🍞','U5.C1':'💡',
+ 'U6.K1':'🕸️','U6.K2':'🌲','U6.K3':'🐝','U6.A1':'🔑','U6.A2':'🧭','U6.C1':'📔',
+ 'U7.K1':'⚛️','U7.K2':'🔤','U7.K3':'🔀','U7.A1':'❄️','U7.A2':'🧊','U7.A3':'🧂','U7.C1':'🚰',
+ 'U8.K1':'💥','U8.K2':'🍋','U8.A1':'⚖️','U8.A2':'🥬','U8.A3':'🔩','U8.C1':'🌡️',
+ 'U9.K1':'🕵️','U9.K2':'🎯','U9.A1':'📋','U9.A2':'📊','U9.A3':'🔍','U9.C1':'🏆',
+}
+
+TRAILS = [
+ {'id':'malaria','name':'🦟 The Malaria Trail','desc':'Follow malaria from a gene to the fight against it',
+  'steps':['U2.K2','U3.K1','U3.A1','U4.A3','U4.K2']},
+ {'id':'water','name':'💧 The Water Trail','desc':'From particles to the sea — and one famous pump',
+  'steps':['U7.K1','U1.K3','U1.A2','U7.C1','U9.K1','U7.A3']},
+ {'id':'energy','name':'☀️ The Energy Trail','desc':'Sunlight to a racing heart',
+  'steps':['U7.K2','U5.K1','U1.A3','U5.K3','U5.K2','U4.A1','U6.K1']},
+ {'id':'dna','name':'🧬 The DNA Trail','desc':'From the nucleus to the tree of all life',
+  'steps':['U1.K1','U2.K1','U2.A3','U2.K2','U2.K3','U6.K2']},
+ {'id':'detective','name':'🕵️ The Detective Trail','desc':'Think like a scientist, start to finish',
+  'steps':['U9.K1','U9.K2','U9.A1','U9.A2','U9.A3','U9.C1']},
+]
 
 UNITS = {
  1: {'name':'Cells & microscopy',        'deep':'#7733FF','soft':'#F1EAFF','ax':330,'ay':300},
@@ -51,7 +98,7 @@ for r in rows:
     strand = code.split('.')[1][0]
     nodes.append({
         'id': code, 'unit': unit, 'strand': strand,
-        'label': LABELS[code],
+        'label': KID[code], 'formal': FORMAL[code], 'emoji': EMOJI[code],
         'text': str(r[4]).strip(),
         'evidence': str(r[5]).strip(),
         'links': NODE_LINKS.get(code, []),
@@ -170,7 +217,15 @@ print('nodes:', len(nodes), 'edges:', len(edges),
       f"(unit {sum(1 for e in edges if e['type']=='unit')}, cross {sum(1 for e in edges if e['type']=='cross')})")
 print('isolated nodes:', isolated or 'none')
 
-data = {'units': UNITS, 'nodes': nodes, 'edges': edges}
+assert set(KID) == ids, 'KID labels do not match goal codes: ' + str(set(KID) ^ ids)
+assert set(EMOJI) == ids, 'EMOJI set does not match goal codes: ' + str(set(EMOJI) ^ ids)
+assert set(FORMAL) == ids, 'FORMAL set does not match goal codes: ' + str(set(FORMAL) ^ ids)
+for t in TRAILS:
+    for s in t['steps']:
+        assert s in ids, f"trail {t['id']}: unknown step {s}"
+print('trails:', len(TRAILS))
+
+data = {'units': UNITS, 'nodes': nodes, 'edges': edges, 'trails': TRAILS}
 tpl = open(HERE / 'template.html', encoding='utf-8').read()
 html = tpl.replace('__DATA__', json.dumps(data, ensure_ascii=False))
 open(ROOT / 'goals-map-11-14.html', 'w', encoding='utf-8').write(html)
