@@ -279,15 +279,28 @@ sim.on('tick', () => {
 
 /* ---------- zoom ---------- */
 
-const zoom = d3.zoom().scaleExtent([.35, 2.6]).on('zoom', ev => root.attr('transform', ev.transform));
+let userInteracted = false;
+const zoom = d3.zoom().scaleExtent([.35, 2.6]).on('zoom', ev => {
+  if (ev.sourceEvent) userInteracted = true;
+  root.attr('transform', ev.transform);
+});
 svg.call(zoom);
 svg.on('click', () => select(null));
+/* fit the actual bounding box of the nodes, centered, with padding */
 function resetView() {
+  const xs = DATA.nodes.map(n => n.x), ys = DATA.nodes.map(n => n.y);
+  const pad = 75;
+  const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad;
+  const minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad;
+  const bw = Math.max(1, maxX - minX), bh = Math.max(1, maxY - minY);
   const box = document.getElementById('graphCard').getBoundingClientRect();
-  const k = Math.min(box.width / W, box.height / H) * .96;
-  svg.transition().duration(400).call(zoom.transform,
-    d3.zoomIdentity.translate((box.width - W * k) / 2, (box.height - H * k) / 2).scale(k));
+  const k = Math.min(box.width / bw, box.height / bh, 1.5);
+  svg.transition().duration(450).call(zoom.transform,
+    d3.zoomIdentity
+      .translate((box.width - bw * k) / 2 - minX * k, (box.height - bh * k) / 2 - minY * k)
+      .scale(k));
 }
+function autofit() { if (!userInteracted) resetView(); }
 
 /* ---------- visibility, hover, selection ---------- */
 
@@ -385,14 +398,16 @@ document.getElementById('btnReset').addEventListener('click', () => {
   crossOn = true;
   const bc = document.getElementById('btnCross');
   bc.setAttribute('aria-pressed', 'true'); bc.textContent = 'Cross-unit bridges: on';
-  select(null); resetView();
+  select(null); userInteracted = false; resetView();
 });
 
 document.getElementById('hint').textContent =
   `${DATA.nodes.length} goals · ${DATA.edges.length} links`;
 
-window.addEventListener('resize', resetView);
-setTimeout(resetView, 60);
+window.addEventListener('resize', autofit);
+setTimeout(autofit, 250);
+setTimeout(autofit, 1200);
+sim.on('end', autofit);
 window.__S = () => ({ nodes: DATA.nodes.length, edges: DATA.edges.length, selected });
 </script>
 </body>
