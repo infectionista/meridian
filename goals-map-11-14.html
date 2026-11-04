@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Science Map 11–14</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a wall map of the 11-14 science curriculum. One big zoomable
+   force-graph canvas, a legend of unit chips above it, and a detail panel
+   that slides in on selection. Nodes carry resource slots for trainers and
+   readings; so do edges. Light white-and-lilac Meridian theme — same family
+   as Build a Tree, Make and Break, Copy the Code. */
+:root {
+  color-scheme: light;
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--fg);
+  font-family: var(--ui); font-size: 15px; line-height: 1.55; margin: 0;
+}
+.wrap {
+  max-width: 1280px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(22px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(30px, env(safe-area-inset-bottom, 0px));
+}
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--violet); }
+h1 { font-size: clamp(24px, 4.6vw, 36px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin: 6px 0 0; text-wrap: balance; }
+h1 .hi { color: var(--violet); }
+.lede { margin: 8px 0 0; color: var(--fg-dim); max-width: 78ch; font-size: 14px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0 10px; align-items: center; }
+.uchip {
+  font: 600 12px/1 var(--ui); border-radius: 999px; padding: 7px 12px;
+  border: 1.5px solid; cursor: pointer; background: #fff; white-space: nowrap;
+}
+.uchip.off { opacity: .3; }
+.uchip:focus-visible, .ghost:focus-visible, .lnk:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.ghost {
+  font: 600 12px/1 var(--ui); color: var(--fg-dim); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 9px; padding: 8px 12px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+.ghost[aria-pressed="true"] { background: var(--violet); border-color: var(--violet); color: #fff; }
+.hint { font-size: 12px; color: var(--fg-dim); margin-left: auto; }
+
+.stage { position: relative; }
+#graphCard {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; height: min(72vh, 760px); min-height: 440px;
+}
+#graph { width: 100%; height: 100%; display: block; cursor: grab; -webkit-user-select: none; user-select: none; }
+#graph text { -webkit-user-select: none; user-select: none; }
+#graph:active { cursor: grabbing; }
+
+.node { cursor: pointer; }
+.node .shape { stroke-width: 2; }
+.node text.code { font-family: var(--mono); font-size: 8.5px; fill: var(--fg-dim); text-anchor: middle; pointer-events: none; }
+.node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none; }
+.node.dim { opacity: .14; }
+.node.sel .shape { stroke-width: 3.5; }
+.badge { pointer-events: none; }
+
+.link { fill: none; stroke-linecap: round; }
+.link.unit { stroke-width: 1.6; stroke-opacity: .5; }
+.link.cross { stroke: var(--violet); stroke-width: 1.6; stroke-opacity: .55; stroke-dasharray: 5 5; }
+.link.dim { stroke-opacity: .05; }
+.link.sel { stroke-width: 3.2; stroke-opacity: .95; }
+.linkhit { stroke: transparent; stroke-width: 14px; fill: none; cursor: pointer; }
+.edgebadge { pointer-events: none; }
+
+#panel {
+  position: absolute; top: 14px; right: 14px; width: 330px; max-width: calc(100% - 28px);
+  max-height: calc(100% - 28px); overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; box-shadow: 0 10px 30px rgba(22,25,37,.10); display: none;
+}
+#panel.open { display: block; }
+#panel .close { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 18px; color: var(--fg-dim); cursor: pointer; line-height: 1; padding: 4px; }
+#panel .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 24px 8px 0; }
+.chip { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
+#panel h3 { margin: 2px 0 6px; font-size: 15px; line-height: 1.35; letter-spacing: -.01em; }
+#panel .goal { font-size: 13.5px; margin: 6px 0; }
+#panel .ev { font-size: 12px; color: var(--fg-dim); margin: 6px 0 0; }
+#panel .why { font-size: 13px; background: var(--panel-2); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+#panel .rsec { margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+#panel .rsec h4 { margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--violet); }
+.lnk {
+  display: block; font: 600 13px/1.3 var(--ui); color: var(--violet); text-decoration: none;
+  background: var(--violet-soft); border: 1px solid var(--violet); border-radius: 9px;
+  padding: 9px 11px; margin: 6px 0;
+}
+.lnk:hover { background: #E7DBFF; }
+.lnk .k { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-dim); display: block; margin-top: 2px; }
+.slot { font-size: 12.5px; color: var(--fg-dim); background: var(--paper); border: 1px dashed var(--line); border-radius: 9px; padding: 9px 11px; }
+
+.shapekey { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 10px; font-size: 12px; color: var(--fg-dim); }
+.shapekey svg { vertical-align: -3px; margin-right: 5px; }
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; margin-top: 16px; }
+.foot a { color: var(--violet); font-weight: 600; }
+
+@media (max-width: 760px) {
+  #panel { top: auto; bottom: 10px; left: 10px; right: 10px; width: auto; max-height: 48%; }
+  #graphCard { height: 70vh; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Life Sciences · Meridian Learning World</div>
+  <h1>Science Map <span class="hi">11–14</span></h1>
+  <p class="lede">Every learning goal of the course as one connected map. Solid links build skills inside a unit
+    (Knowledge → Application → Creation); dashed violet links are bridges between units. Click any goal or link
+    to read it — goals and bridges marked <b>⚡</b> already carry a trainer or reading, the rest are slots waiting for one.
+    Drag to pan, scroll to zoom, drag nodes to untangle.</p>
+  <div class="legend" id="legend"></div>
+  <div class="legend">
+    <button class="ghost" id="btnCross" aria-pressed="true" type="button">Cross-unit bridges: on</button>
+    <button class="ghost" id="btnReset" type="button">Reset view</button>
+    <span class="hint" id="hint"></span>
+  </div>
+</header>
+
+<div class="stage">
+  <div id="graphCard"><svg id="graph" role="img" aria-label="Interactive map of learning goals"></svg></div>
+  <aside id="panel" aria-live="polite">
+    <button class="close" id="panelClose" type="button" aria-label="Close">×</button>
+    <div id="panelBody"></div>
+  </aside>
+</div>
+
+<div class="shapekey" id="shapekey">
+  <span><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="#F1EAFF" stroke="#7733FF" stroke-width="2"/></svg>Knowledge</span>
+  <span><svg width="16" height="16"><rect x="2" y="2" width="12" height="12" rx="3" fill="#F1EAFF" stroke="#7733FF" stroke-width="2"/></svg>Application</span>
+  <span><svg width="18" height="18"><rect x="4.5" y="4.5" width="9" height="9" rx="2" fill="#F1EAFF" stroke="#7733FF" stroke-width="2" transform="rotate(45 9 9)"/></svg>Creation</span>
+  <span>⚡ has a trainer / reading attached</span>
+</div>
+
+<footer class="foot">
+  Part of the Meridian trainer suite:
+  <a href="https://meridian-one-jet.vercel.app/makebreak.html">Make and Break</a> ·
+  <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a> ·
+  <a href="https://meridian-one-jet.vercel.app/">Build a Tree</a>
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+'use strict';
+
+const DATA = {"units": {"1": {"name": "Cells & microscopy", "deep": "#7733FF", "soft": "#F1EAFF", "ax": 330, "ay": 300}, "2": {"name": "Genes & evolution", "deep": "#B05684", "soft": "#FBEFF5", "ax": 640, "ay": 195}, "3": {"name": "Reproduction & life cycles", "deep": "#E8590C", "soft": "#FFEFE3", "ax": 950, "ay": 175}, "4": {"name": "Human body & health", "deep": "#C2374B", "soft": "#FDEDEF", "ax": 1265, "ay": 330}, "5": {"name": "Energy for life", "deep": "#0B8A75", "soft": "#CBF7ED", "ax": 955, "ay": 795}, "6": {"name": "Ecosystems & biodiversity", "deep": "#5B9E22", "soft": "#E2FDC7", "ax": 1270, "ay": 665}, "7": {"name": "Matter & particles", "deep": "#2563EB", "soft": "#E7EFFD", "ax": 330, "ay": 700}, "8": {"name": "Chemical reactions", "deep": "#B8860B", "soft": "#FFF6DC", "ax": 620, "ay": 860}, "9": {"name": "Thinking like a scientist", "deep": "#64748B", "soft": "#EEF2F6", "ax": 800, "ay": 490}}, "nodes": [{"id": "U1.K1", "unit": 1, "strand": "K", "label": "Cell parts", "text": "I can name the parts of an animal cell and a plant cell and say what each part does, and list the three things only plant cells have: a cell wall, chloroplasts and a large vacuole.", "evidence": "Labelled diagrams of an animal and a plant cell + short quiz.", "links": []}, {"id": "U1.K2", "unit": 1, "strand": "K", "label": "Specialised cells", "text": "I can explain how a cell's structure suits its job, using the red blood cell with no nucleus as my example, and I can describe what a single-celled organism is.", "evidence": "Matching task: specialised cell → feature → job.", "links": []}, {"id": "U1.K3", "unit": 1, "strand": "K", "label": "Diffusion & osmosis", "text": "I can explain diffusion and osmosis using the particle model.", "evidence": "Short written explanation with a diagram.", "links": []}, {"id": "U1.K4", "unit": 1, "strand": "K", "label": "Cell → tissue → organism", "text": "I can put cell → tissue → organ → organism in order for a plant as well as an animal, and show that bark, leaves and roots are organs of one and the same organism — the tree.", "evidence": "Level-ladder sorting task using parts of a real tree + oral check.", "links": []}, {"id": "U1.A1", "unit": 1, "strand": "A", "label": "Microscope & slides", "text": "I can prepare a slide, focus a microscope on cells, and draw what I see, stating the magnification I used.", "evidence": "On-site practical (onion and cheek cells): checklist + scientific drawing.", "links": []}, {"id": "U1.A2", "unit": 1, "strand": "A", "label": "Potato osmosis", "text": "I can predict what will happen to plant tissue in a strong or a weak solution, and explain why it happened.", "evidence": "On-site potato osmosis: prediction, results table, explanation.", "links": []}, {"id": "U1.A3", "unit": 1, "strand": "A", "label": "Chloroplast hunt", "text": "I can examine cells from different parts of a plant (onion skin, leaf, root), spot which ones contain chloroplasts, and use that to predict — and then test — which parts of a plant can photosynthesise.", "evidence": "On-site microscopy (onion epidermis vs green leaf): drawings + a green-or-not verdict table.", "links": []}, {"id": "U1.C1", "unit": 1, "strand": "C", "label": "Cell model", "text": "I can build a model or analogy of a cell that shows what every organelle does, include one specialised cell in it, and explain it out loud in two minutes.", "evidence": "Model + 2-minute explanation, scored with a rubric.", "links": []}, {"id": "U2.K1", "unit": 2, "strand": "K", "label": "DNA & chromosomes", "text": "I can explain what DNA, genes and chromosomes are, say how many chromosomes are in a body cell (46) and in an egg or sperm (23), and describe how DNA is packed into the nucleus.", "evidence": "Quiz + labelled diagram from DNA to chromosome.", "links": []}, {"id": "U2.K2", "unit": 2, "strand": "K", "label": "Mutation: sickle & malaria", "text": "I can define a mutation and explain that its effect can be harmful, neutral or useful depending on the environment, using sickle cell and malaria as my example.", "evidence": "Oral questions using a malaria map and a sickle-cell map.", "links": []}, {"id": "U2.K3", "unit": 2, "strand": "K", "label": "Variation & selection", "text": "I can explain variation, the difference between sexual and asexual reproduction, dominant and recessive alleles, natural selection, and selective breeding.", "evidence": "Short quiz.", "links": []}, {"id": "U2.A1", "unit": 2, "strand": "A", "label": "Punnett squares", "text": "I can use a Punnett square to predict the offspring of a simple cross.", "evidence": "Worksheet problems.", "links": []}, {"id": "U2.A2", "unit": 2, "strand": "A", "label": "Selection on a new case", "text": "I can explain step by step how natural selection changes a population in a case I have not been taught, such as mosquitoes becoming resistant to insecticide.", "evidence": "Written case task.", "links": []}, {"id": "U2.A3", "unit": 2, "strand": "A", "label": "Strawberry DNA", "text": "I can extract DNA from strawberries and explain what each step of the method is for.", "evidence": "On-site practical: method followed safely + explanation of each step.", "links": []}, {"id": "U2.C1", "unit": 2, "strand": "C", "label": "Gene comic", "text": "I can create a comic or story told by a gene across several generations that shows mutation, inheritance and selection correctly.", "evidence": "Comic or story scored for accuracy, clarity and originality.", "links": []}, {"id": "U3.K1", "unit": 3, "strand": "K", "label": "Mosquito life cycle", "text": "I can describe complete metamorphosis using the Anopheles mosquito life cycle (egg, larva, pupa, adult) and explain why only the females bite.", "evidence": "Ordering cards + labelled life-cycle drawing.", "links": []}, {"id": "U3.K2", "unit": 3, "strand": "K", "label": "Flowers & pollination", "text": "I can name the parts of a flower and describe pollination, fertilisation and seed dispersal.", "evidence": "Labelled flower diagram + short quiz.", "links": []}, {"id": "U3.K3", "unit": 3, "strand": "K", "label": "Human reproduction", "text": "I can describe human reproduction: egg and sperm, fertilisation, pregnancy and birth.", "evidence": "Short quiz.", "links": []}, {"id": "U3.A1", "unit": 3, "strand": "A", "label": "Break the cycle", "text": "I can use the Anopheles life cycle to explain where malaria control can break it, and say whether a given method targets the larvae or the adults.", "evidence": "Case task: match control methods to life stages and justify.", "links": []}, {"id": "U3.A2", "unit": 3, "strand": "A", "label": "Flower dissection", "text": "I can dissect a flower, identify its parts, and say what each part is for.", "evidence": "On-site dissection: labelled photo or drawing.", "links": []}, {"id": "U3.C1", "unit": 3, "strand": "C", "label": "Seed dispersal design", "text": "I can design, test and improve a seed-dispersal model, record my drop tests in a table, and explain what I changed and why.", "evidence": "On-site design challenge: drop tests, results table, improvement explained.", "links": []}, {"id": "U4.K1", "unit": 4, "strand": "K", "label": "Body organisation", "text": "I can describe the levels of organisation in the body and what the immune, nervous and digestive systems do, including the liver, and explain why blood counts as a connective tissue.", "evidence": "Labelled body-systems diagram + short quiz.", "links": []}, {"id": "U4.K2", "unit": 4, "strand": "K", "label": "Vaccines vs antibiotics", "text": "I can explain how a vaccine trains the immune system, using Pasteur's rabies vaccine, and say how an antibiotic is different from a vaccine.", "evidence": "Oral questions + written comparison: vaccine vs antibiotic.", "links": []}, {"id": "U4.K3", "unit": 4, "strand": "K", "label": "Digestion & organs", "text": "I can describe digestion and what enzymes do, what a balanced diet is, how the lungs, heart and circulation work, and what the skeleton and muscles do.", "evidence": "Quiz after each topic + labelled diagrams.", "links": []}, {"id": "U4.K4", "unit": 4, "strand": "K", "label": "Microbes & health risks", "text": "I can name the main types of microbe (bacteria, viruses, fungi, protists) and describe how smoking, alcohol and drugs affect health.", "evidence": "Sorting task + short written answers.", "links": []}, {"id": "U4.A1", "unit": 4, "strand": "A", "label": "Exercise physiology", "text": "I can measure heart rate and breathing rate before and after exercise, and explain why they changed.", "evidence": "On-site practical: data table, graph, explanation.", "links": []}, {"id": "U4.A2", "unit": 4, "strand": "A", "label": "Food tests", "text": "I can test food for starch, sugar, protein and fat, and use my results to say something about a balanced diet.", "evidence": "On-site food tests: results table + conclusion.", "links": []}, {"id": "U4.A3", "unit": 4, "strand": "A", "label": "Pathogen journey", "text": "I can trace a pathogen through the body (rabies, cholera or malaria), naming the systems it passes through and the defences it meets.", "evidence": "Written case task.", "links": []}, {"id": "U4.C1", "unit": 4, "strand": "C", "label": "Health campaign", "text": "I can create a health campaign on diet, smoking, alcohol or vaccination, and back every claim in it with evidence.", "evidence": "Product scored for accuracy, use of evidence and clarity.", "links": []}, {"id": "U5.K1", "unit": 5, "strand": "K", "label": "Photosynthesis", "text": "I can describe photosynthesis, write its word equation, and say where in a plant it happens.", "evidence": "Quiz + labelled leaf diagram.", "links": []}, {"id": "U5.K2", "unit": 5, "strand": "K", "label": "Respiration & fermentation", "text": "I can describe aerobic and anaerobic respiration, including fermentation by yeast, write their word equations, and say how the two differ.", "evidence": "Comparison table.", "links": []}, {"id": "U5.K3", "unit": 5, "strand": "K", "label": "Chloroplasts & mitochondria", "text": "I can explain that chloroplasts capture light to build sugar and mitochondria burn sugar for energy in every cell, that a green plant does both, and I can follow the sugar from a leaf to a root.", "evidence": "Annotated tree diagram (sugar route) + short quiz.", "links": []}, {"id": "U5.A1", "unit": 5, "strand": "A", "label": "Leaf chromatography", "text": "I can separate leaf pigments by chromatography and explain what the result shows.", "evidence": "On-site practical: chromatogram + explanation.", "links": []}, {"id": "U5.A2", "unit": 5, "strand": "A", "label": "Yeast experiment", "text": "I can measure how sugar or temperature changes yeast fermentation, and explain my result.", "evidence": "On-site practical: prediction, results, conclusion.", "links": []}, {"id": "U5.C1", "unit": 5, "strand": "C", "label": "Design an experiment", "text": "I can design an experiment to test one factor that affects photosynthesis or respiration, naming my variables and my control.", "evidence": "Experiment plan scored on question, variables, control and method.", "links": []}, {"id": "U6.K1", "unit": 6, "strand": "K", "label": "Food webs", "text": "I can describe food chains and webs and how energy flows through them, and explain predation, competition, mutualism and parasitism with an example of each.", "evidence": "Food-web diagram + short quiz.", "links": []}, {"id": "U6.K2", "unit": 6, "strand": "K", "label": "Tree of life", "text": "I can describe how living things are classified: the tree of life with bacteria, archaea and eukaryotes, the main eukaryote groups, and why viruses sit outside the tree.", "evidence": "Sorting task + labelled tree of life.", "links": [{"t": "Build a Tree — phylogenetics trainer", "u": "https://meridian-one-jet.vercel.app/", "k": "trainer"}]}, {"id": "U6.K3", "unit": 6, "strand": "K", "label": "Pollinators & toxins", "text": "I can explain why pollinators matter for our food, how toxins build up along a food web, and how people change biodiversity.", "evidence": "Short written answers.", "links": []}, {"id": "U6.A1", "unit": 6, "strand": "A", "label": "Identification keys", "text": "I can use an identification key to name organisms I have found myself.", "evidence": "On-site key exercise with real specimens.", "links": []}, {"id": "U6.A2", "unit": 6, "strand": "A", "label": "Fieldwork survey", "text": "I can survey a meadow with quadrats, or a stream for invertebrates, and use my data to compare biodiversity or water quality.", "evidence": "On-site fieldwork: data table, comparison, conclusion.", "links": []}, {"id": "U6.C1", "unit": 6, "strand": "C", "label": "Hochrindl field guide", "text": "I can build a food web or a field guide for the Hochrindl area from my own observations, and predict what happens if one species disappears.", "evidence": "Product + short oral defence, scored with a rubric.", "links": []}, {"id": "U7.K1", "unit": 7, "strand": "K", "label": "Particle model", "text": "I can use the particle model to describe solids, liquids and gases, changes of state, and diffusion.", "evidence": "Particle diagrams + short quiz.", "links": []}, {"id": "U7.K2", "unit": 7, "strand": "K", "label": "Atoms & formulas", "text": "I can tell apart atoms, elements, compounds and mixtures, read simple formulas such as H₂O, CO₂ and O₂, and find metals and non-metals on the periodic table.", "evidence": "Sorting task + short quiz.", "links": []}, {"id": "U7.K3", "unit": 7, "strand": "K", "label": "Separating mixtures", "text": "I can describe filtration, evaporation, distillation and chromatography, and explain what solubility means.", "evidence": "Matching task: mixture → separation method.", "links": []}, {"id": "U7.A1", "unit": 7, "strand": "A", "label": "Particle explanations", "text": "I can explain something I have observed using the particle model, such as why salt melts ice or how ink spreads through water.", "evidence": "On-site practical (ice, snow & salt): written explanation.", "links": []}, {"id": "U7.A2", "unit": 7, "strand": "A", "label": "Separate a mixture", "text": "I can separate a mixture (rock salt, or ink by chromatography) and explain each step I took.", "evidence": "On-site practical: method, results, purity check.", "links": []}, {"id": "U7.A3", "unit": 7, "strand": "A", "label": "Seawater salinity", "text": "I can measure the salinity of a seawater sample by evaporating a weighed amount, compare samples from different seas, and suggest reasons why the world’s oceans differ in saltiness.", "evidence": "On-site practical with samples the class brings: results table + world-map comparison.", "links": []}, {"id": "U7.C1", "unit": 7, "strand": "C", "label": "Water filter", "text": "I can design and build a water filter, test it, and explain why filtering alone may not make water safe to drink.", "evidence": "Design challenge: build, test, written evaluation.", "links": []}, {"id": "U8.K1", "unit": 8, "strand": "K", "label": "Reactions & equations", "text": "I can tell a physical change from a chemical one, list the signs that a reaction has happened, and write word equations.", "evidence": "Sorting task + word-equation quiz.", "links": []}, {"id": "U8.K2", "unit": 8, "strand": "K", "label": "Acids, pH & energy", "text": "I can describe acids, alkalis, the pH scale and neutralisation, explain burning and rusting, and say which reactions release heat and which take it in.", "evidence": "Short quiz.", "links": []}, {"id": "U8.A1", "unit": 8, "strand": "A", "label": "Conservation of mass", "text": "I can show that mass is conserved in a reaction carried out in a sealed bag, and explain why it is.", "evidence": "On-site practical: measurements + explanation.", "links": []}, {"id": "U8.A2", "unit": 8, "strand": "A", "label": "Cabbage indicator", "text": "I can make a red-cabbage indicator, test household substances with it, and put them in order of pH.", "evidence": "On-site practical: results table + conclusion.", "links": []}, {"id": "U8.A3", "unit": 8, "strand": "A", "label": "Rust investigation", "text": "I can plan and run a week-long investigation into what makes iron nails rust, and record what I observe.", "evidence": "On-site investigation: plan, observations, conclusion.", "links": []}, {"id": "U8.C1", "unit": 8, "strand": "C", "label": "Hot & cold reactions", "text": "I can design an investigation to find which reaction heats up or cools down the most, run it, and propose a use for the result.", "evidence": "Plan + test + poster, scored with a rubric.", "links": []}, {"id": "U9.K1", "unit": 9, "strand": "K", "label": "Snow & cholera", "text": "I can explain what makes a hypothesis testable, and describe how John Snow tested his idea about cholera in London in 1854.", "evidence": "Oral questions + short written answer.", "links": []}, {"id": "U9.K2", "unit": 9, "strand": "K", "label": "Variables & causation", "text": "I can name the independent, dependent and control variables in an experiment, explain why measurements are repeated, and explain why a correlation on its own does not prove a cause.", "evidence": "Short quiz.", "links": []}, {"id": "U9.A1", "unit": 9, "strand": "A", "label": "Plan a fair test", "text": "I can plan a fair test with a clear question, named variables, a control, and a safety check.", "evidence": "Planning sheet before each on-site practical.", "links": []}, {"id": "U9.A2", "unit": 9, "strand": "A", "label": "Data & graphs", "text": "I can record data in a table, draw a graph, calculate an average, and point out an anomaly.", "evidence": "Practical write-ups through the year.", "links": []}, {"id": "U9.A3", "unit": 9, "strand": "A", "label": "Claim vs evidence", "text": "I can judge whether a claim or a headline is actually supported by its evidence.", "evidence": "Case task: correlation or cause?", "links": []}, {"id": "U9.C1", "unit": 9, "strand": "C", "label": "Full lab report", "text": "I can write a full report of my own investigation: question, method, results, conclusion and evaluation.", "evidence": "Lab report scored on IB MYP criteria B and C.", "links": []}], "edges": [{"s": "U1.K1", "t": "U1.K2", "type": "unit", "reason": "Cell types build on knowing the parts.", "links": []}, {"s": "U1.K1", "t": "U1.A1", "type": "unit", "reason": "Draw and label what you see down the microscope.", "links": []}, {"s": "U1.K3", "t": "U1.A2", "type": "unit", "reason": "Osmosis predicted on paper, then tested in a potato.", "links": []}, {"s": "U1.K2", "t": "U1.C1", "type": "unit", "reason": "The model must include one specialised cell.", "links": []}, {"s": "U1.K1", "t": "U1.A3", "type": "unit", "reason": "Know the organelles, then hunt for chloroplasts.", "links": []}, {"s": "U1.K2", "t": "U1.K4", "type": "unit", "reason": "Specialised cells team up into tissues and organs.", "links": []}, {"s": "U1.K1", "t": "U1.C1", "type": "unit", "reason": "The model shows every organelle doing its job.", "links": []}, {"s": "U2.K1", "t": "U2.K2", "type": "unit", "reason": "A mutation is a change in the DNA you can now describe.", "links": []}, {"s": "U2.K2", "t": "U2.K3", "type": "unit", "reason": "Harmful or useful depending on environment — that is what selection acts on.", "links": []}, {"s": "U2.K3", "t": "U2.A1", "type": "unit", "reason": "Alleles become predictions in a Punnett square.", "links": []}, {"s": "U2.K3", "t": "U2.A2", "type": "unit", "reason": "Selection logic applied to a case you were never taught.", "links": []}, {"s": "U2.K1", "t": "U2.A3", "type": "unit", "reason": "Extract and actually see the DNA you learned about.", "links": []}, {"s": "U2.K2", "t": "U2.C1", "type": "unit", "reason": "The comic must show mutation correctly.", "links": []}, {"s": "U2.K3", "t": "U2.C1", "type": "unit", "reason": "The comic must show inheritance and selection correctly.", "links": []}, {"s": "U3.K1", "t": "U3.A1", "type": "unit", "reason": "Know the cycle to know where to break it.", "links": []}, {"s": "U3.K2", "t": "U3.A2", "type": "unit", "reason": "Parts named on the diagram, then found in a real flower.", "links": []}, {"s": "U3.K2", "t": "U3.C1", "type": "unit", "reason": "Dispersal is the last chapter of the flower story.", "links": []}, {"s": "U4.K1", "t": "U4.A3", "type": "unit", "reason": "The pathogen is traced through the systems you mapped.", "links": []}, {"s": "U4.K2", "t": "U4.A3", "type": "unit", "reason": "On its way the pathogen meets the defences.", "links": []}, {"s": "U4.K4", "t": "U4.A3", "type": "unit", "reason": "Know your microbe before you trace it.", "links": []}, {"s": "U4.K3", "t": "U4.A1", "type": "unit", "reason": "Heart, lungs and circulation measured under load.", "links": []}, {"s": "U4.K3", "t": "U4.A2", "type": "unit", "reason": "Nutrients named, then detected in real food.", "links": []}, {"s": "U4.K2", "t": "U4.C1", "type": "unit", "reason": "A vaccination campaign needs the immunology.", "links": []}, {"s": "U4.K3", "t": "U4.C1", "type": "unit", "reason": "A diet campaign needs the nutrition.", "links": []}, {"s": "U4.K4", "t": "U4.C1", "type": "unit", "reason": "A smoking campaign needs the health effects.", "links": []}, {"s": "U5.K1", "t": "U5.A1", "type": "unit", "reason": "The pigments behind the photosynthesis equation, separated.", "links": []}, {"s": "U5.K2", "t": "U5.A2", "type": "unit", "reason": "Fermentation from the comparison table, measured in yeast.", "links": []}, {"s": "U5.K1", "t": "U5.C1", "type": "unit", "reason": "Design an experiment around photosynthesis.", "links": []}, {"s": "U5.K2", "t": "U5.C1", "type": "unit", "reason": "…or around respiration.", "links": []}, {"s": "U5.K1", "t": "U5.K3", "type": "unit", "reason": "Photosynthesis makes the sugar this goal follows.", "links": []}, {"s": "U5.K2", "t": "U5.K3", "type": "unit", "reason": "Respiration burns it — in plants too.", "links": []}, {"s": "U6.K1", "t": "U6.K3", "type": "unit", "reason": "Toxins travel along the web you drew.", "links": []}, {"s": "U6.K2", "t": "U6.A1", "type": "unit", "reason": "Classification in theory, identification keys in the field.", "links": []}, {"s": "U6.K1", "t": "U6.A2", "type": "unit", "reason": "Webs and biodiversity need real field data.", "links": []}, {"s": "U6.K1", "t": "U6.C1", "type": "unit", "reason": "Build the food web from your own observations.", "links": []}, {"s": "U6.K3", "t": "U6.C1", "type": "unit", "reason": "Predict what one species loss does to the system.", "links": []}, {"s": "U7.K1", "t": "U7.A1", "type": "unit", "reason": "The particle model explains what you observed.", "links": []}, {"s": "U7.K3", "t": "U7.A2", "type": "unit", "reason": "Choose the separation method, then run it.", "links": []}, {"s": "U7.K3", "t": "U7.C1", "type": "unit", "reason": "Filtration scaled up into a working water filter.", "links": []}, {"s": "U7.K3", "t": "U7.A3", "type": "unit", "reason": "Evaporation, now used to weigh the salt in the sea.", "links": []}, {"s": "U8.K1", "t": "U8.A1", "type": "unit", "reason": "The word equation predicts the sealed-bag masses.", "links": []}, {"s": "U8.K2", "t": "U8.A2", "type": "unit", "reason": "pH theory tested with your own indicator.", "links": []}, {"s": "U8.K1", "t": "U8.A3", "type": "unit", "reason": "Signs of a slow reaction, watched for a week.", "links": []}, {"s": "U8.K2", "t": "U8.C1", "type": "unit", "reason": "Exothermic and endothermic, compared by experiment.", "links": []}, {"s": "U9.K2", "t": "U9.A1", "type": "unit", "reason": "Variables and controls become a written plan.", "links": []}, {"s": "U9.A1", "t": "U9.A2", "type": "unit", "reason": "A planned test produces data worth recording.", "links": []}, {"s": "U9.A2", "t": "U9.C1", "type": "unit", "reason": "Tables and graphs become a full report.", "links": []}, {"s": "U9.K2", "t": "U9.A3", "type": "unit", "reason": "Correlation vs causation is the judging rule.", "links": []}, {"s": "U9.K1", "t": "U9.A3", "type": "unit", "reason": "Snow's 1854 logic applied to today's headlines.", "links": []}, {"s": "U7.K1", "t": "U1.K3", "type": "cross", "reason": "The particle model is what makes diffusion and osmosis make sense.", "links": []}, {"s": "U7.K2", "t": "U5.K1", "type": "cross", "reason": "H2O, CO2 and O2 — the formulas reappear in the photosynthesis equation.", "links": []}, {"s": "U8.K1", "t": "U5.K2", "type": "cross", "reason": "Word equations are the grammar of the respiration equations.", "links": []}, {"s": "U7.K3", "t": "U5.A1", "type": "cross", "reason": "Chromatography learned on ink, reused on leaf pigments.", "links": []}, {"s": "U1.K1", "t": "U2.K1", "type": "cross", "reason": "DNA lives in the nucleus you labelled.", "links": []}, {"s": "U2.K2", "t": "U3.K1", "type": "cross", "reason": "The sickle-cell story meets the mosquito that spreads malaria.", "links": []}, {"s": "U3.K1", "t": "U4.A3", "type": "cross", "reason": "The life cycle delivers the pathogen into the body.", "links": []}, {"s": "U2.K3", "t": "U6.K2", "type": "cross", "reason": "Variation and selection are what grow the tree of life.", "links": [{"t": "Build a Tree — build the tree from differences", "u": "https://meridian-one-jet.vercel.app/", "k": "trainer"}]}, {"s": "U3.K2", "t": "U6.K3", "type": "cross", "reason": "Pollination is exactly why pollinators matter for food.", "links": []}, {"s": "U5.K2", "t": "U4.A1", "type": "cross", "reason": "Respiration explains the racing heart and faster breathing.", "links": []}, {"s": "U4.K3", "t": "U5.K2", "type": "cross", "reason": "Digested glucose is the fuel respiration burns.", "links": []}, {"s": "U8.K2", "t": "U4.K3", "type": "cross", "reason": "Stomach acid: pH chemistry inside digestion.", "links": []}, {"s": "U7.C1", "t": "U4.A3", "type": "cross", "reason": "Filtered is not safe to drink — the cholera lesson.", "links": []}, {"s": "U1.K2", "t": "U4.K1", "type": "cross", "reason": "Specialised cells are what tissues and organs are made of.", "links": []}, {"s": "U3.K3", "t": "U2.K3", "type": "cross", "reason": "Sexual reproduction is where variation comes from.", "links": []}, {"s": "U5.K1", "t": "U6.K1", "type": "cross", "reason": "Photosynthesis feeds every food chain.", "links": []}, {"s": "U4.K4", "t": "U6.K2", "type": "cross", "reason": "The microbe types each sit on their own branch of the tree.", "links": []}, {"s": "U9.A3", "t": "U4.C1", "type": "cross", "reason": "Every claim in the campaign must survive the evidence test.", "links": []}, {"s": "U9.K1", "t": "U4.A3", "type": "cross", "reason": "Cholera twice: as an epidemiological case and as a pathogen.", "links": []}, {"s": "U6.A2", "t": "U9.A2", "type": "cross", "reason": "Field counts become tables, graphs and averages.", "links": []}, {"s": "U9.A1", "t": "U5.C1", "type": "cross", "reason": "An experiment design is a fair test by another name.", "links": []}, {"s": "U1.A3", "t": "U5.K1", "type": "cross", "reason": "Green parts have chloroplasts — and that is exactly where photosynthesis happens.", "links": []}, {"s": "U1.K4", "t": "U4.K1", "type": "cross", "reason": "The same level ladder — cell, tissue, organ, organism — runs through the human body.", "links": []}, {"s": "U5.K3", "t": "U6.K1", "type": "cross", "reason": "Squirrels cannot photosynthesise — that is why food chains exist.", "links": []}, {"s": "U9.K1", "t": "U6.K1", "type": "cross", "reason": "The pine-cone hypotheses: lovable, testable — and checkable.", "links": []}, {"s": "U7.A3", "t": "U9.A2", "type": "cross", "reason": "Salinity measurements become tables, averages and a world map.", "links": []}]};
+
+/* ---------- setup ---------- */
+
+const W = 1600, H = 1000;
+const svg = d3.select('#graph').attr('viewBox', [0, 0, W, H]);
+const root = svg.append('g');
+
+const unitOn = {}; Object.keys(DATA.units).forEach(u => unitOn[u] = true);
+let crossOn = true;
+let selected = null; /* {kind:'node'|'edge', id} */
+
+const nodeById = new Map(DATA.nodes.map(n => [n.id, n]));
+DATA.edges.forEach((e, i) => { e.eid = 'e' + i; e.source = e.s; e.target = e.t; });
+
+/* ---------- forces ---------- */
+
+const sim = d3.forceSimulation(DATA.nodes)
+  .force('link', d3.forceLink(DATA.edges).id(d => d.id)
+    .distance(e => e.type === 'unit' ? 74 : 150).strength(e => e.type === 'unit' ? .55 : .12))
+  .force('charge', d3.forceManyBody().strength(-190))
+  .force('x', d3.forceX(d => DATA.units[d.unit].ax).strength(.14))
+  .force('y', d3.forceY(d => DATA.units[d.unit].ay).strength(.14))
+  .force('collide', d3.forceCollide(34));
+
+/* ---------- edges ---------- */
+
+const linkG = root.append('g');
+const linkSel = linkG.selectAll('g').data(DATA.edges).join('g');
+const linkLine = linkSel.append('path')
+  .attr('class', e => 'link ' + e.type)
+  .attr('stroke', e => e.type === 'unit' ? DATA.units[nodeById.get(e.s).unit].deep : null);
+const linkHit = linkSel.append('path').attr('class', 'linkhit')
+  .on('click', (ev, e) => { ev.stopPropagation(); select('edge', e.eid); });
+const edgeBadge = linkSel.filter(e => e.links.length)
+  .append('circle').attr('class', 'edgebadge').attr('r', 5)
+  .attr('fill', '#7733FF').attr('stroke', '#fff').attr('stroke-width', 1.5);
+
+/* ---------- nodes ---------- */
+
+function shapeFor(g, n, deep, soft) {
+  if (n.strand === 'K') g.append('circle').attr('class', 'shape').attr('r', 14).attr('fill', soft).attr('stroke', deep);
+  else if (n.strand === 'A') g.append('rect').attr('class', 'shape').attr('x', -12).attr('y', -12)
+    .attr('width', 24).attr('height', 24).attr('rx', 6).attr('fill', soft).attr('stroke', deep);
+  else g.append('rect').attr('class', 'shape').attr('x', -11).attr('y', -11)
+    .attr('width', 22).attr('height', 22).attr('rx', 4).attr('fill', soft).attr('stroke', deep)
+    .attr('transform', 'rotate(45)');
+}
+
+const nodeG = root.append('g');
+const nodeSel = nodeG.selectAll('g').data(DATA.nodes).join('g')
+  .attr('class', 'node')
+  .call(d3.drag()
+    .on('start', (ev, d) => { if (!ev.active) sim.alphaTarget(.25).restart(); d.fx = d.x; d.fy = d.y; })
+    .on('drag', (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+    .on('end', (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }))
+  .on('click', (ev, d) => { ev.stopPropagation(); select('node', d.id); })
+  .on('mouseenter', (ev, d) => hover(d.id))
+  .on('mouseleave', () => hover(null));
+
+nodeSel.each(function (n) {
+  const u = DATA.units[n.unit];
+  shapeFor(d3.select(this), n, u.deep, u.soft);
+});
+nodeSel.append('text').attr('class', 'code').attr('y', -20).text(n => n.id);
+nodeSel.append('text').attr('class', 'lbl').attr('y', 28).text(n => n.label);
+nodeSel.filter(n => n.links.length).append('g').attr('class', 'badge')
+  .attr('transform', 'translate(12,-12)')
+  .call(g => {
+    g.append('circle').attr('r', 7.5).attr('fill', '#7733FF').attr('stroke', '#fff').attr('stroke-width', 1.5);
+    g.append('text').attr('y', 3).attr('text-anchor', 'middle')
+      .attr('font-size', '9px').attr('fill', '#fff').text('⚡');
+  });
+
+/* ---------- ticking ---------- */
+
+sim.on('tick', () => {
+  DATA.nodes.forEach(n => {
+    n.x = Math.max(40, Math.min(W - 40, n.x));
+    n.y = Math.max(40, Math.min(H - 40, n.y));
+  });
+  const path = e => {
+    const sx = e.source.x, sy = e.source.y, tx = e.target.x, ty = e.target.y;
+    const mx = (sx + tx) / 2 + (ty - sy) * .08, my = (sy + ty) / 2 + (sx - tx) * .08;
+    return `M${sx},${sy} Q${mx},${my} ${tx},${ty}`;
+  };
+  linkLine.attr('d', path);
+  linkHit.attr('d', path);
+  edgeBadge.attr('cx', e => (e.source.x + e.target.x) / 2 + (e.target.y - e.source.y) * .08)
+           .attr('cy', e => (e.source.y + e.target.y) / 2 + (e.source.x - e.target.x) * .08);
+  nodeSel.attr('transform', n => `translate(${n.x},${n.y})`);
+});
+
+/* ---------- zoom ---------- */
+
+const zoom = d3.zoom().scaleExtent([.35, 2.6]).on('zoom', ev => root.attr('transform', ev.transform));
+svg.call(zoom);
+svg.on('click', () => select(null));
+function resetView() {
+  const box = document.getElementById('graphCard').getBoundingClientRect();
+  const k = Math.min(box.width / W, box.height / H) * .96;
+  svg.transition().duration(400).call(zoom.transform,
+    d3.zoomIdentity.translate((box.width - W * k) / 2, (box.height - H * k) / 2).scale(k));
+}
+
+/* ---------- visibility, hover, selection ---------- */
+
+function edgeVisible(e) {
+  const a = nodeById.get(e.s), b = nodeById.get(e.t);
+  if (!unitOn[a.unit] || !unitOn[b.unit]) return false;
+  if (e.type === 'cross' && !crossOn) return false;
+  return true;
+}
+
+function applyState(hoverId) {
+  const neigh = new Set();
+  if (hoverId) {
+    neigh.add(hoverId);
+    DATA.edges.forEach(e => {
+      if (!edgeVisible(e)) return;
+      if (e.s === hoverId) neigh.add(e.t);
+      if (e.t === hoverId) neigh.add(e.s);
+    });
+  }
+  nodeSel
+    .classed('dim', n => !unitOn[n.unit] || (hoverId && !neigh.has(n.id)))
+    .classed('sel', n => selected && selected.kind === 'node' && selected.id === n.id);
+  linkSel.style('display', e => edgeVisible(e) ? null : 'none');
+  linkLine
+    .classed('dim', e => hoverId && e.s !== hoverId && e.t !== hoverId)
+    .classed('sel', e => selected && selected.kind === 'edge' && selected.id === e.eid);
+}
+function hover(id) { applyState(id); }
+
+function resourceHtml(links) {
+  if (!links.length) return '<div class="slot">Resource slot — a trainer or background reading will attach here.</div>';
+  return links.map(l =>
+    `<a class="lnk" href="${l.u}">${l.t}<span class="k">${l.k}</span></a>`).join('');
+}
+
+function select(kind, id) {
+  if (!kind) { selected = null; document.getElementById('panel').classList.remove('open'); applyState(null); return; }
+  selected = { kind, id };
+  const body = document.getElementById('panelBody');
+  if (kind === 'node') {
+    const n = nodeById.get(id), u = DATA.units[n.unit];
+    const strand = n.strand === 'K' ? 'Knowledge' : n.strand === 'A' ? 'Application' : 'Creation';
+    body.innerHTML =
+      `<div class="chips">
+        <span class="chip" style="background:${u.soft};color:${u.deep}">Unit ${n.unit} · ${u.name}</span>
+        <span class="chip" style="background:var(--panel-2);color:var(--fg-dim)">${strand}</span>
+        <span class="chip" style="background:var(--panel-2);color:var(--fg-dim)">${n.id}</span>
+      </div>
+      <h3>${n.label}</h3>
+      <p class="goal">${n.text}</p>
+      <p class="ev"><b>Evidence:</b> ${n.evidence}</p>
+      <div class="rsec"><h4>Attached resources</h4>${resourceHtml(n.links)}</div>`;
+  } else {
+    const e = DATA.edges.find(x => x.eid === id);
+    const a = nodeById.get(e.s), b = nodeById.get(e.t);
+    body.innerHTML =
+      `<div class="chips">
+        <span class="chip" style="background:var(--violet-soft);color:var(--violet)">${e.type === 'unit' ? 'Skill path' : 'Cross-unit bridge'}</span>
+      </div>
+      <h3>${a.label} <span style="color:var(--violet)">→</span> ${b.label}</h3>
+      <div class="chips">
+        <span class="chip" style="background:${DATA.units[a.unit].soft};color:${DATA.units[a.unit].deep}">${a.id}</span>
+        <span class="chip" style="background:${DATA.units[b.unit].soft};color:${DATA.units[b.unit].deep}">${b.id}</span>
+      </div>
+      <div class="why">${e.reason}</div>
+      <div class="rsec"><h4>Attached resources</h4>${resourceHtml(e.links)}</div>`;
+  }
+  document.getElementById('panel').classList.add('open');
+  applyState(null);
+}
+document.getElementById('panelClose').addEventListener('click', () => select(null));
+
+/* ---------- legend & controls ---------- */
+
+const legend = document.getElementById('legend');
+Object.entries(DATA.units).forEach(([u, info]) => {
+  const b = document.createElement('button');
+  b.className = 'uchip'; b.type = 'button';
+  b.style.borderColor = info.deep; b.style.color = info.deep; b.style.background = info.soft;
+  b.textContent = `U${u} · ${info.name}`;
+  b.addEventListener('click', () => { unitOn[u] = !unitOn[u]; b.classList.toggle('off', !unitOn[u]); applyState(null); });
+  legend.appendChild(b);
+});
+
+document.getElementById('btnCross').addEventListener('click', (ev) => {
+  crossOn = !crossOn;
+  ev.currentTarget.setAttribute('aria-pressed', String(crossOn));
+  ev.currentTarget.textContent = 'Cross-unit bridges: ' + (crossOn ? 'on' : 'off');
+  applyState(null);
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  Object.keys(unitOn).forEach(u => unitOn[u] = true);
+  legend.querySelectorAll('.uchip').forEach(b => b.classList.remove('off'));
+  crossOn = true;
+  const bc = document.getElementById('btnCross');
+  bc.setAttribute('aria-pressed', 'true'); bc.textContent = 'Cross-unit bridges: on';
+  select(null); resetView();
+});
+
+document.getElementById('hint').textContent =
+  `${DATA.nodes.length} goals · ${DATA.edges.length} links`;
+
+window.addEventListener('resize', resetView);
+setTimeout(resetView, 60);
+window.__S = () => ({ nodes: DATA.nodes.length, edges: DATA.edges.length, selected });
+</script>
+</body>
+</html>
