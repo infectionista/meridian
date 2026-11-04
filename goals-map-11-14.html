@@ -74,7 +74,12 @@ h1 .hi { color: var(--violet); }
 .node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none; }
 .node.dim { opacity: .14; }
 .node.sel .shape { stroke-width: 3.5; }
-.badge { pointer-events: none; }
+.badge-link { cursor: pointer; }
+.badge-link .core { fill: var(--violet); stroke: #fff; stroke-width: 1.5; transition: fill .15s; }
+.badge-link:hover .core { fill: #5A1FD6; }
+.badge-link .halo { fill: none; stroke: var(--violet); stroke-width: 2;
+  transform-box: fill-box; transform-origin: center; animation: haloPulse 2.2s ease-out infinite; }
+@keyframes haloPulse { 0% { transform: scale(.7); opacity: .55; } 70% { transform: scale(1.3); opacity: 0; } 100% { transform: scale(1.3); opacity: 0; } }
 
 .link { fill: none; stroke-linecap: round; }
 .link.unit { stroke-width: 1.6; stroke-opacity: .5; }
@@ -82,7 +87,6 @@ h1 .hi { color: var(--violet); }
 .link.dim { stroke-opacity: .05; }
 .link.sel { stroke-width: 3.2; stroke-opacity: .95; }
 .linkhit { stroke: transparent; stroke-width: 14px; fill: none; cursor: pointer; }
-.edgebadge { pointer-events: none; }
 
 #panel {
   position: absolute; top: 14px; right: 14px; width: 330px; max-width: calc(100% - 28px);
@@ -130,7 +134,7 @@ h1 .hi { color: var(--violet); }
   <h1>Science Map <span class="hi">11–14</span></h1>
   <p class="lede">Every learning goal of the course as one connected map. Solid links build skills inside a unit
     (Knowledge → Application → Creation); dashed violet links are bridges between units. Click any goal or link
-    to read it — goals and bridges marked <b>⚡</b> already carry a trainer or reading, the rest are slots waiting for one.
+    to read it — goals and bridges marked <b>⚡</b> already carry a trainer or reading: <b>press the ⚡ to open it</b>. The rest are slots waiting for one.
     Drag to pan, scroll to zoom, drag nodes to untangle.</p>
   <div class="legend" id="legend"></div>
   <div class="legend">
@@ -203,8 +207,14 @@ const linkLine = linkSel.append('path')
 const linkHit = linkSel.append('path').attr('class', 'linkhit')
   .on('click', (ev, e) => { ev.stopPropagation(); select('edge', e.eid); });
 const edgeBadge = linkSel.filter(e => e.links.length)
-  .append('circle').attr('class', 'edgebadge').attr('r', 5)
-  .attr('fill', '#7733FF').attr('stroke', '#fff').attr('stroke-width', 1.5);
+  .append('a')
+  .attr('href', e => e.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
+  .attr('class', 'badge-link')
+  .on('click', ev => ev.stopPropagation());
+edgeBadge.append('title').text(e => 'Open: ' + e.links[0].t);
+edgeBadge.append('circle').attr('class', 'core').attr('r', 7.5);
+edgeBadge.append('text').attr('y', 3.2).attr('text-anchor', 'middle')
+  .attr('font-size', '8.5px').attr('fill', '#fff').text('⚡');
 
 /* ---------- nodes ---------- */
 
@@ -234,13 +244,16 @@ nodeSel.each(function (n) {
 });
 nodeSel.append('text').attr('class', 'code').attr('y', -20).text(n => n.id);
 nodeSel.append('text').attr('class', 'lbl').attr('y', 28).text(n => n.label);
-nodeSel.filter(n => n.links.length).append('g').attr('class', 'badge')
-  .attr('transform', 'translate(12,-12)')
-  .call(g => {
-    g.append('circle').attr('r', 7.5).attr('fill', '#7733FF').attr('stroke', '#fff').attr('stroke-width', 1.5);
-    g.append('text').attr('y', 3).attr('text-anchor', 'middle')
-      .attr('font-size', '9px').attr('fill', '#fff').text('⚡');
-  });
+const nodeBadge = nodeSel.filter(n => n.links.length).append('a')
+  .attr('href', n => n.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
+  .attr('class', 'badge-link')
+  .attr('transform', 'translate(14,-14)')
+  .on('click', ev => ev.stopPropagation());
+nodeBadge.append('title').text(n => 'Open: ' + n.links[0].t);
+nodeBadge.append('circle').attr('class', 'halo').attr('r', 12);
+nodeBadge.append('circle').attr('class', 'core').attr('r', 9);
+nodeBadge.append('text').attr('y', 3.6).attr('text-anchor', 'middle')
+  .attr('font-size', '10px').attr('fill', '#fff').text('⚡');
 
 /* ---------- ticking ---------- */
 
@@ -256,8 +269,11 @@ sim.on('tick', () => {
   };
   linkLine.attr('d', path);
   linkHit.attr('d', path);
-  edgeBadge.attr('cx', e => (e.source.x + e.target.x) / 2 + (e.target.y - e.source.y) * .08)
-           .attr('cy', e => (e.source.y + e.target.y) / 2 + (e.source.x - e.target.x) * .08);
+  edgeBadge.attr('transform', e => {
+    const mx = (e.source.x + e.target.x) / 2 + (e.target.y - e.source.y) * .08;
+    const my = (e.source.y + e.target.y) / 2 + (e.source.x - e.target.x) * .08;
+    return `translate(${mx},${my})`;
+  });
   nodeSel.attr('transform', n => `translate(${n.x},${n.y})`);
 });
 
