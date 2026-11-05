@@ -74,7 +74,8 @@ h1 .hi { color: var(--violet); }
 .trailpath { fill: none; stroke: var(--violet); stroke-width: 5; stroke-opacity: .35; stroke-linecap: round; stroke-dasharray: 10 8; }
 .trailnum circle { fill: var(--violet); stroke: #fff; stroke-width: 1.5; }
 .trailnum text { fill: #fff; font: 700 10px var(--ui); text-anchor: middle; }
-.node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none; }
+.node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none;
+                  paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; }
 .node.dim { opacity: .14; }
 .node.sel .shape { stroke-width: 3.5; }
 .badge-link { cursor: pointer; }
@@ -192,7 +193,44 @@ const sim = d3.forceSimulation(DATA.nodes)
   .force('charge', d3.forceManyBody().strength(-190))
   .force('x', d3.forceX(d => DATA.units[d.unit].ax).strength(.14))
   .force('y', d3.forceY(d => DATA.units[d.unit].ay).strength(.14))
-  .force('collide', d3.forceCollide(34));
+  .force('collide', d3.forceCollide(34))
+  .force('rect', rectCollide());
+
+/* Rectangle collision on each node's full footprint (icon + label below),
+   so long labels can never sit on a neighbour's label or icon. */
+function rectCollide() {
+  const PADX = 8, TOP = 26, BOT = 44;
+  let nodes = [];
+  function force(alpha) {
+    const k = alpha * .8;
+    for (let i = 0; i < nodes.length; i++) {
+      const a = nodes[i], ahw = Math.max(27, (a.lw || 54) / 2) + PADX;
+      for (let j = i + 1; j < nodes.length; j++) {
+        const b = nodes[j], bhw = Math.max(27, (b.lw || 54) / 2) + PADX;
+        const dx = b.x - a.x;
+        const ox = ahw + bhw - Math.abs(dx);
+        if (ox <= 0) continue;
+        const oy = Math.min(a.y + BOT, b.y + BOT) - Math.max(a.y - TOP, b.y - TOP);
+        if (oy <= 0) continue;
+        const aFree = a.fx == null, bFree = b.fx == null;
+        if (!aFree && !bFree) continue;
+        const share = (aFree && bFree) ? .5 : 1;
+        if (ox < oy) {
+          const s = Math.min(ox, 40) * k * share * (dx > 0 || (dx === 0 && i % 2) ? 1 : -1);
+          if (aFree) a.vx -= s;
+          if (bFree) b.vx += s;
+        } else {
+          const dy = b.y - a.y;
+          const s = Math.min(oy, 40) * k * share * (dy > 0 || (dy === 0 && i % 2) ? 1 : -1);
+          if (aFree) a.vy -= s;
+          if (bFree) b.vy += s;
+        }
+      }
+    }
+  }
+  force.initialize = n => nodes = n;
+  return force;
+}
 
 /* ---------- edges ---------- */
 
@@ -243,6 +281,16 @@ nodeSel.each(function (n) {
 });
 nodeSel.append('text').attr('class', 'emoji').text(n => n.emoji);
 nodeSel.append('text').attr('class', 'lbl').attr('y', 28).text(n => n.label);
+
+/* measure real label widths for the rectangle collision */
+function measureLabels() {
+  nodeSel.select('text.lbl').each(function(n) { n.lw = this.getComputedTextLength(); });
+}
+measureLabels();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
+  measureLabels();
+  sim.alpha(.6).restart();
+});
 const nodeBadge = nodeSel.filter(n => n.links.length).append('a')
   .attr('href', n => n.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
   .attr('class', 'badge-link')
@@ -258,7 +306,7 @@ const trailNumG = root.append('g');
 
 /* ---------- ticking ---------- */
 
-sim.on('tick', () => {
+function ticked() {
   DATA.nodes.forEach(n => {
     n.x = Math.max(40, Math.min(W - 40, n.x));
     n.y = Math.max(40, Math.min(H - 40, n.y));
@@ -277,7 +325,42 @@ sim.on('tick', () => {
   });
   nodeSel.attr('transform', n => `translate(${n.x},${n.y})`);
   if (activeTrail) drawTrail();
-});
+}
+sim.on('tick', ticked);
+
+/* Hard final pass: when the simulation stops, directly push apart any
+   residual footprint overlaps the soft force left behind. */
+function separateLabels() {
+  const PADX = 10, TOP = 28, BOT = 46;
+  for (let it = 0; it < 60; it++) {
+    let moved = false;
+    for (let i = 0; i < DATA.nodes.length; i++) {
+      const a = DATA.nodes[i], ahw = Math.max(27, (a.lw || 54) / 2) + PADX;
+      for (let j = i + 1; j < DATA.nodes.length; j++) {
+        const b = DATA.nodes[j], bhw = Math.max(27, (b.lw || 54) / 2) + PADX;
+        const dx = b.x - a.x;
+        const ox = ahw + bhw - Math.abs(dx);
+        if (ox <= 0) continue;
+        const oy = Math.min(a.y + BOT, b.y + BOT) - Math.max(a.y - TOP, b.y - TOP);
+        if (oy <= 0) continue;
+        moved = true;
+        if (ox < oy) {
+          const s = (dx > 0 || (dx === 0 && i % 2) ? 1 : -1) * (ox / 2 + .5);
+          a.x -= s; b.x += s;
+        } else {
+          const dy = b.y - a.y;
+          const s = (dy > 0 || (dy === 0 && i % 2) ? 1 : -1) * (oy / 2 + .5);
+          a.y -= s; b.y += s;
+        }
+      }
+    }
+    DATA.nodes.forEach(n => {
+      n.x = Math.max(40, Math.min(W - 40, n.x));
+      n.y = Math.max(40, Math.min(H - 40, n.y));
+    });
+    if (!moved) break;
+  }
+}
 
 /* ---------- zoom ---------- */
 
@@ -290,10 +373,12 @@ svg.call(zoom);
 svg.on('click', () => select(null));
 /* fit the actual bounding box of the nodes, centered, with padding */
 function resetView() {
-  const xs = DATA.nodes.map(n => n.x), ys = DATA.nodes.map(n => n.y);
-  const pad = 75;
-  const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad;
-  const minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad;
+  const hw = n => Math.max(27, (n.lw || 54) / 2);
+  const pad = 45;
+  const minX = Math.min(...DATA.nodes.map(n => n.x - hw(n))) - pad;
+  const maxX = Math.max(...DATA.nodes.map(n => n.x + hw(n))) + pad;
+  const minY = Math.min(...DATA.nodes.map(n => n.y)) - pad - 26;
+  const maxY = Math.max(...DATA.nodes.map(n => n.y)) + pad + 44;
   const bw = Math.max(1, maxX - minX), bh = Math.max(1, maxY - minY);
   const box = document.getElementById('graphCard').getBoundingClientRect();
   const k = Math.min(box.width / bw, box.height / bh, 1.5);
@@ -448,7 +533,7 @@ document.getElementById('hint').textContent =
 window.addEventListener('resize', autofit);
 setTimeout(autofit, 250);
 setTimeout(autofit, 1200);
-sim.on('end', autofit);
+sim.on('end', () => { separateLabels(); ticked(); autofit(); });
 window.__S = () => ({ nodes: DATA.nodes.length, edges: DATA.edges.length, selected });
 </script>
 </body>
