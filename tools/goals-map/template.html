@@ -23,6 +23,8 @@
   --violet-soft: #F1EAFF;
   --mint:        #CBF7ED;
   --mint-deep:   #0B8A75;
+  --pink-deep:   #B05684;
+  --orange-deep: #D95B12;
   --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
   --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
 }
@@ -81,6 +83,15 @@ h1 .hi { color: var(--violet); }
 .badge-link { cursor: pointer; }
 .badge-link .core { fill: var(--violet); stroke: #fff; stroke-width: 1.5; transition: fill .15s; }
 .badge-link:hover .core { fill: #5A1FD6; }
+.badge-link.k-slides .core { fill: var(--mint-deep); stroke: #fff; }
+.badge-link.k-slides .halo { stroke: var(--mint-deep); }
+.badge-link.k-slides:hover .core { fill: #086a5b; }
+.badge-link.k-reading .core { fill: var(--pink-deep); stroke: #fff; }
+.badge-link.k-reading .halo { stroke: var(--pink-deep); }
+.badge-link.k-reading:hover .core { fill: #934669; }
+.badge-link.k-assignment .core { fill: var(--orange-deep); stroke: #fff; }
+.badge-link.k-assignment .halo { stroke: var(--orange-deep); }
+.badge-link.k-assignment:hover .core { fill: #b34a0e; }
 .badge-link .halo { fill: none; stroke: var(--violet); stroke-width: 2;
   transform-box: fill-box; transform-origin: center; animation: haloPulse 2.2s ease-out infinite; }
 @keyframes haloPulse { 0% { transform: scale(.7); opacity: .55; } 70% { transform: scale(1.3); opacity: 0; } 100% { transform: scale(1.3); opacity: 0; } }
@@ -161,7 +172,7 @@ h1 .hi { color: var(--violet); }
   <span><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="#F1EAFF" stroke="#7733FF" stroke-width="2"/></svg>Knowledge</span>
   <span><svg width="16" height="16"><rect x="2" y="2" width="12" height="12" rx="3" fill="#F1EAFF" stroke="#7733FF" stroke-width="2"/></svg>Application</span>
   <span><svg width="18" height="18"><rect x="4.5" y="4.5" width="9" height="9" rx="2" fill="#F1EAFF" stroke="#7733FF" stroke-width="2" transform="rotate(45 9 9)"/></svg>Creation</span>
-  <span>⚡ has a trainer / reading attached</span>
+  <span><b style="color:var(--violet)">⚡ trainer</b> · <b style="color:var(--mint-deep)">▶ slides</b> · <b style="color:var(--pink-deep)">≡ reading</b> · <b style="color:var(--orange-deep)">✎ assignment</b> — click the badge to open</span>
 </div>
 
 </div>
@@ -241,15 +252,20 @@ const linkLine = linkSel.append('path')
   .attr('stroke', e => e.type === 'unit' ? DATA.units[nodeById.get(e.s).unit].deep : null);
 const linkHit = linkSel.append('path').attr('class', 'linkhit')
   .on('click', (ev, e) => { ev.stopPropagation(); select('edge', e.eid); });
+const KIND_GLYPH = { trainer: '⚡', slides: '▶', reading: '≡', assignment: '✎' };
+const kGlyph = l => KIND_GLYPH[l.k] || '⚡';
+const kClass = l => 'badge-link k-' + (l.k || 'trainer');
+
 const edgeBadge = linkSel.filter(e => e.links.length)
   .append('a')
   .attr('href', e => e.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
-  .attr('class', 'badge-link')
+  .attr('class', e => kClass(e.links[0]))
   .on('click', ev => ev.stopPropagation());
-edgeBadge.append('title').text(e => 'Open: ' + e.links[0].t);
+edgeBadge.append('title').text(e => 'Open: ' + e.links[0].t +
+  (e.links.length > 1 ? ` (+${e.links.length - 1} more — click the link line)` : ''));
 edgeBadge.append('circle').attr('class', 'core').attr('r', 7.5);
 edgeBadge.append('text').attr('y', 3.2).attr('text-anchor', 'middle')
-  .attr('font-size', '8.5px').attr('fill', '#fff').text('⚡');
+  .attr('font-size', '8.5px').attr('fill', '#fff').text(e => kGlyph(e.links[0]));
 
 const trailG = root.append('g');
 
@@ -293,14 +309,22 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
 });
 const nodeBadge = nodeSel.filter(n => n.links.length).append('a')
   .attr('href', n => n.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
-  .attr('class', 'badge-link')
+  .attr('class', n => kClass(n.links[0]))
   .attr('transform', 'translate(14,-14)')
   .on('click', ev => ev.stopPropagation());
-nodeBadge.append('title').text(n => 'Open: ' + n.links[0].t);
+nodeBadge.append('title').text(n => 'Open: ' + n.links[0].t +
+  (n.links.length > 1 ? ` (+${n.links.length - 1} more — click the goal)` : ''));
 nodeBadge.append('circle').attr('class', 'halo').attr('r', 12);
 nodeBadge.append('circle').attr('class', 'core').attr('r', 9);
 nodeBadge.append('text').attr('y', 3.6).attr('text-anchor', 'middle')
-  .attr('font-size', '10px').attr('fill', '#fff').text('⚡');
+  .attr('font-size', '10px').attr('fill', '#fff').text(n => kGlyph(n.links[0]));
+nodeBadge.filter(n => n.links.length > 1).append('circle')
+  .attr('cx', 8).attr('cy', 7).attr('r', 5.5).attr('fill', '#fff')
+  .attr('stroke', 'var(--line)').attr('stroke-width', 1);
+nodeBadge.filter(n => n.links.length > 1).append('text')
+  .attr('x', 8).attr('y', 9.6).attr('text-anchor', 'middle')
+  .attr('font-size', '7.5px').attr('font-weight', '700').attr('fill', 'var(--fg)')
+  .text(n => n.links.length);
 
 const trailNumG = root.append('g');
 
@@ -423,7 +447,7 @@ function hover(id) { applyState(id); }
 function resourceHtml(links) {
   if (!links.length) return '<div class="slot">Resource slot — a trainer or background reading will attach here.</div>';
   return links.map(l =>
-    `<a class="lnk" href="${l.u}">${l.t}<span class="k">${l.k}</span></a>`).join('');
+    `<a class="lnk" href="${l.u}" target="_blank" rel="noopener">${l.t}<span class="k">${l.k}</span></a>`).join('');
 }
 
 function select(kind, id) {

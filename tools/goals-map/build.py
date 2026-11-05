@@ -89,11 +89,28 @@ UNITS = {
 
 BT = 'https://meridian-one-jet.vercel.app/'
 ES = 'https://meridian-one-jet.vercel.app/eatsun.html'
+MAT = 'https://meridian-one-jet.vercel.app/materials/'
+
+def L(t, u, k):
+    return {'t': t, 'u': u, 'k': k}
+
+TRAINER_ES = L('Eat the Sun — cells & photosynthesis trainer', ES, 'trainer')
+
 NODE_LINKS = {
- 'U6.K2': [{'t':'Build a Tree — phylogenetics trainer','u':BT,'k':'trainer'}],
- 'U1.A3': [{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}],
- 'U5.K1': [{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}],
- 'U5.K3': [{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}],
+ 'U6.K2': [L('Build a Tree — phylogenetics trainer', BT, 'trainer'),
+           L('Tree of Life — lesson slides', MAT + 'tree-of-life-slides.pdf', 'slides'),
+           L('Tree of Life — background reading', MAT + 'tree-of-life-reading.pdf', 'reading')],
+ 'U1.A3': [TRAINER_ES],
+ 'U5.K1': [TRAINER_ES],
+ 'U5.K3': [TRAINER_ES],
+ 'U2.K1': [L('The Code of Life — DNA slides', MAT + 'dna-slides.pdf', 'slides')],
+ 'U4.A3': [L('Inner Space: Malaria — lesson slides', MAT + 'malaria-slides.pdf', 'slides')],
+ 'U3.K1': [L('Inner Space: Malaria — lesson slides', MAT + 'malaria-slides.pdf', 'slides')],
+ 'U9.K1': [L('Epidemic Forensics: Soho 1854 — lesson slides', MAT + 'soho-1854-slides.pdf', 'slides')],
+ 'U4.K2': [L('Rabies 1885 — lesson slides', MAT + 'rabies-slides.pdf', 'slides')],
+ 'U9.A3': [L('Medical Detective — CER workbook (.docx)', MAT + 'medical-detective-workbook.docx', 'assignment'),
+           L('Medical Detective — how to solve the workbook', MAT + 'medical-detective-instructions.pdf', 'reading'),
+           L('Cosmic Epidemics: Is It Real? — lesson slides', MAT + 'cosmic-epidemics-slides.pdf', 'slides')],
 }
 
 nodes = []
