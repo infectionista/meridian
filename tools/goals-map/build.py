@@ -71,6 +71,8 @@ TRAILS = [
   'steps':['U1.K1','U2.K1','U2.A3','U2.K2','U2.K3','U6.K2']},
  {'id':'detective','name':'🕵️ The Detective Trail','desc':'Think like a scientist, start to finish',
   'steps':['U9.K1','U9.K2','U9.A1','U9.A2','U9.A3','U9.C1']},
+ {'id':'eatsun','name':'🌿 The Eat the Sun Trail','desc':'From cell parts to the two energy machines — the route of the Eat the Sun trainer',
+  'steps':['U1.K1','U1.K4','U1.A3','U5.K1','U5.K2','U5.K3']},
 ]
 
 UNITS = {
