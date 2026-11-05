@@ -86,8 +86,12 @@ UNITS = {
 }
 
 BT = 'https://meridian-one-jet.vercel.app/'
+ES = 'https://meridian-one-jet.vercel.app/eatsun.html'
 NODE_LINKS = {
  'U6.K2': [{'t':'Build a Tree — phylogenetics trainer','u':BT,'k':'trainer'}],
+ 'U1.A3': [{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}],
+ 'U5.K1': [{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}],
+ 'U5.K3': [{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}],
 }
 
 nodes = []
@@ -189,7 +193,8 @@ edges = [
  E('U9.K1','U4.A3','cross','Cholera twice: as an epidemiological case and as a pathogen.'),
  E('U6.A2','U9.A2','cross','Field counts become tables, graphs and averages.'),
  E('U9.A1','U5.C1','cross','An experiment design is a fair test by another name.'),
- E('U1.A3','U5.K1','cross','Green parts have chloroplasts — and that is exactly where photosynthesis happens.'),
+ E('U1.A3','U5.K1','cross','Green parts have chloroplasts — and that is exactly where photosynthesis happens.',
+   links=[{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}]),
  E('U1.K4','U4.K1','cross','The same level ladder — cell, tissue, organ, organism — runs through the human body.'),
  E('U5.K3','U6.K1','cross','Squirrels cannot photosynthesise — that is why food chains exist.'),
  E('U9.K1','U6.K1','cross','The pine-cone hypotheses: lovable, testable — and checkable.'),
