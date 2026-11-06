@@ -76,6 +76,16 @@ h1 .hi { color: var(--violet); }
 .trailpath { fill: none; stroke: var(--violet); stroke-width: 5; stroke-opacity: .35; stroke-linecap: round; stroke-dasharray: 10 8; }
 .trailnum circle { fill: var(--violet); stroke: #fff; stroke-width: 1.5; }
 .trailnum text { fill: #fff; font: 700 10px var(--ui); text-anchor: middle; }
+.trailnum.done circle { fill: var(--mint-deep); }
+.node.earned .shape { stroke: var(--mint-deep) !important; stroke-width: 3.5 !important; }
+#kidDialog { position: fixed; top: 86px; right: 18px; z-index: 50; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; width: 248px;
+  box-shadow: 0 10px 30px rgba(22,25,37,.14); display: flex; flex-direction: column; gap: 8px; }
+#kidDialog b { font-size: 13px; }
+#kidDialog input { font: 500 14px var(--ui); padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--paper); color: var(--fg); }
+#kidErr { font-size: 12px; color: var(--pink-deep); min-height: 1em; }
+#kidStat { font-size: 12.5px; color: var(--mint-deep); font-weight: 700; }
 .node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none;
                   paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; }
 .node.dim { opacity: .14; }
@@ -156,7 +166,17 @@ h1 .hi { color: var(--violet); }
   <div class="legend">
     <button class="ghost" id="btnCross" aria-pressed="true" type="button">Cross-unit bridges: on</button>
     <button class="ghost" id="btnReset" type="button">Reset view</button>
+    <button class="ghost" id="kidBtn" type="button">👤 Who&rsquo;s exploring?</button>
+    <span id="kidStat"></span>
     <span class="hint" id="hint"></span>
+  </div>
+  <div id="kidDialog" hidden>
+    <b>Sign in to collect achievements</b>
+    <input id="kidName" placeholder="Your name" autocomplete="off">
+    <input id="kidCode" placeholder="Secret code" inputmode="numeric" autocomplete="off">
+    <button class="ghost" id="kidGo" type="button">Let&rsquo;s go</button>
+    <button class="ghost" id="kidOut" type="button" hidden>Sign out</button>
+    <span id="kidErr"></span>
   </div>
 </header>
 
@@ -260,7 +280,7 @@ const edgeBadge = linkSel.filter(e => e.links.length)
   .append('a')
   .attr('href', e => e.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
   .attr('class', e => kClass(e.links[0]))
-  .on('click', ev => ev.stopPropagation());
+  .on('click', (ev, e) => { ev.stopPropagation(); PROG.mark('open', e.s); PROG.mark('open', e.t); });
 edgeBadge.append('title').text(e => 'Open: ' + e.links[0].t +
   (e.links.length > 1 ? ` (+${e.links.length - 1} more — click the link line)` : ''));
 edgeBadge.append('circle').attr('class', 'core').attr('r', 7.5);
@@ -311,7 +331,7 @@ const nodeBadge = nodeSel.filter(n => n.links.length).append('a')
   .attr('href', n => n.links[0].u).attr('target', '_blank').attr('rel', 'noopener')
   .attr('class', n => kClass(n.links[0]))
   .attr('transform', 'translate(14,-14)')
-  .on('click', ev => ev.stopPropagation());
+  .on('click', (ev, n) => { ev.stopPropagation(); PROG.mark('open', n.id); });
 nodeBadge.append('title').text(n => 'Open: ' + n.links[0].t +
   (n.links.length > 1 ? ` (+${n.links.length - 1} more — click the goal)` : ''));
 nodeBadge.append('circle').attr('class', 'halo').attr('r', 12);
@@ -467,6 +487,8 @@ function select(kind, id) {
       <p class="goal">${n.text}</p>
       <p class="ev"><b>Evidence:</b> ${n.evidence}</p>
       <div class="rsec"><h4>Attached resources</h4>${resourceHtml(n.links)}</div>`;
+    body.querySelectorAll('.lnk').forEach(a => a.addEventListener('click', () => PROG.mark('open', id)));
+    if (!n.links.length) PROG.mark('open', id);
   } else {
     const e = DATA.edges.find(x => x.eid === id);
     const a = nodeById.get(e.s), b = nodeById.get(e.t);
@@ -481,6 +503,7 @@ function select(kind, id) {
       </div>
       <div class="why">${e.reason}</div>
       <div class="rsec"><h4>Attached resources</h4>${resourceHtml(e.links)}</div>`;
+    body.querySelectorAll('.lnk').forEach(a => a.addEventListener('click', () => { PROG.mark('open', e.s); PROG.mark('open', e.t); }));
   }
   document.getElementById('panel').classList.add('open');
   applyState(null);
@@ -499,10 +522,11 @@ function drawTrail() {
   trailG.append('path').attr('class', 'trailpath')
     .attr('d', 'M' + pts.map(p => `${p.x},${p.y}`).join(' L '));
   pts.forEach((n, i) => {
-    const g = trailNumG.append('g').attr('class', 'trailnum')
+    const done = PROG.stepDone(n.id);
+    const g = trailNumG.append('g').attr('class', 'trailnum' + (done ? ' done' : ''))
       .attr('transform', `translate(${n.x - 17},${n.y - 17})`);
     g.append('circle').attr('r', 9);
-    g.append('text').attr('y', 3.5).text(i + 1);
+    g.append('text').attr('y', 3.5).text(done ? '✓' : i + 1);
   });
 }
 function setTrail(id) {
@@ -511,6 +535,97 @@ function setTrail(id) {
     b.setAttribute('aria-pressed', String(b.dataset.trail === activeTrail)));
   drawTrail(); applyState(null);
 }
+
+/* ---------- personal progress (Google Apps Script backend) ---------- */
+
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+
+/* node → trainer slug, derived from the trainer links in the data */
+const NODE_TRAINER = {};
+DATA.nodes.forEach(n => (n.links || []).forEach(l => {
+  if (l.k !== 'trainer') return;
+  const m = l.u.match(/\/([\w-]+)\.html/);
+  NODE_TRAINER[n.id] = m ? m[1] : 'buildatree';
+}));
+
+function decorateTrails() {
+  document.querySelectorAll('#trails .ghost').forEach(b => {
+    const done = PROG.has('trail:' + b.dataset.trail);
+    let m = b.querySelector('.mdl');
+    if (done && !m) { m = document.createElement('span'); m.className = 'mdl'; m.textContent = ' 🏅'; b.appendChild(m); }
+    if (!done && m) m.remove();
+  });
+}
+function refreshNodes() { nodeSel.classed('earned', n => PROG.stepDone(n.id)); }
+
+var PROG = (() => {
+  let kid = null, keys = new Set();
+  try { kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) {}
+
+  function jsonp(params, cb) {
+    const fn = '__p' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = d => { delete window[fn]; s.remove(); cb && cb(d); };
+    s.onerror = () => { delete window[fn]; s.remove(); cb && cb({ ok: false, error: 'network' }); };
+    s.src = PROGRESS_URL + '?' + Object.entries(Object.assign({}, params, { callback: fn, t: Date.now() }))
+      .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
+    document.head.appendChild(s);
+  }
+  const has = k => keys.has(k);
+  function stepDone(nodeId) {
+    if (keys.has('open:' + nodeId)) return true;
+    const tr = NODE_TRAINER[nodeId];
+    return !!tr && keys.has('trainer:' + tr);
+  }
+  const count = pre => { let n = 0; keys.forEach(k => { if (k.startsWith(pre)) n++; }); return n; };
+  function refresh() {
+    document.getElementById('kidStat').textContent = kid
+      ? `👤 ${kid.name} · ⚡ ${count('trainer:')} · 🏅 ${count('trail:')}` : '';
+    document.getElementById('kidBtn').textContent = kid ? '👤 ' + kid.name : '👤 Who’s exploring?';
+    decorateTrails(); refreshNodes(); drawTrail();
+  }
+  function mark(type, id) {
+    if (!kid) return;
+    const key = type + ':' + id;
+    if (keys.has(key)) return;
+    keys.add(key);
+    jsonp({ name: kid.name, code: kid.code, action: 'mark', type: type, id: id }, d => {
+      if (d.ok && d.keys) keys = new Set(d.keys);
+      refresh(); checkTrails();
+    });
+    refresh(); checkTrails();
+  }
+  function checkTrails() {
+    if (!kid) return;
+    DATA.trails.forEach(t => {
+      if (keys.has('trail:' + t.id)) return;
+      if (t.steps.every(stepDone)) {
+        mark('trail', t.id);
+        document.getElementById('hint').textContent = '🏅 Trail complete: ' + t.name + '!';
+      }
+    });
+  }
+  function login(name, code, cb) {
+    jsonp({ name: name, code: code }, d => {
+      if (d.ok) {
+        kid = { name: d.name, code: code };
+        localStorage.setItem('meridian-kid', JSON.stringify(kid));
+        keys = new Set(d.keys); refresh(); checkTrails();
+      }
+      cb(d);
+    });
+  }
+  function logout() { kid = null; keys = new Set(); localStorage.removeItem('meridian-kid'); refresh(); }
+  function load() {
+    if (!kid) { refresh(); return; }
+    jsonp({ name: kid.name, code: kid.code }, d => {
+      if (d.ok) keys = new Set(d.keys);
+      else if (d.error === 'auth') { kid = null; localStorage.removeItem('meridian-kid'); }
+      refresh(); checkTrails();
+    });
+  }
+  return { mark, stepDone, has, login, logout, load, get kid() { return kid; } };
+})();
 const trailsRow = document.getElementById('trails');
 DATA.trails.forEach(t => {
   const b = document.createElement('button');
@@ -558,7 +673,32 @@ window.addEventListener('resize', autofit);
 setTimeout(autofit, 250);
 setTimeout(autofit, 1200);
 sim.on('end', () => { separateLabels(); ticked(); autofit(); });
-window.__S = () => ({ nodes: DATA.nodes.length, edges: DATA.edges.length, selected });
+
+/* ---------- sign-in dialog ---------- */
+const kidDlg = document.getElementById('kidDialog');
+document.getElementById('kidBtn').addEventListener('click', () => {
+  kidDlg.hidden = !kidDlg.hidden;
+  document.getElementById('kidOut').hidden = !PROG.kid;
+  document.getElementById('kidErr').textContent = '';
+  if (PROG.kid) document.getElementById('kidName').value = PROG.kid.name;
+});
+document.getElementById('kidGo').addEventListener('click', () => {
+  const name = document.getElementById('kidName').value.trim();
+  const code = document.getElementById('kidCode').value.trim();
+  const err = document.getElementById('kidErr');
+  if (!name || !code) { err.textContent = 'Name and code, please.'; return; }
+  err.textContent = 'Checking…';
+  PROG.login(name, code, d => {
+    if (d.ok) { kidDlg.hidden = true; document.getElementById('kidCode').value = ''; }
+    else err.textContent = d.error === 'auth' ? 'Hmm — that name or code doesn’t match.' : 'Network hiccup — try again.';
+  });
+});
+document.getElementById('kidCode').addEventListener('keydown', ev => { if (ev.key === 'Enter') document.getElementById('kidGo').click(); });
+document.getElementById('kidOut').addEventListener('click', () => { PROG.logout(); kidDlg.hidden = true; });
+PROG.load();
+
+window.__S = () => ({ nodes: DATA.nodes.length, edges: DATA.edges.length, selected, kid: PROG.kid });
+window.__PROG = PROG;
 </script>
 </body>
 </html>

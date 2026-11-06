@@ -670,7 +670,7 @@ function renderStage5() {
   if (q.submitted) {
     const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
     band = h('div', { class: 'scoreband' },
-      score === QUIZ.length ? `${score} / ${QUIZ.length} — the forest has no secrets from you. Detective rank: ecologist.`
+      score === QUIZ.length ? `${score} / ${QUIZ.length} — the forest has no secrets from you. Detective rank: ecologist.` + (kidSignedIn() ? ' 🏅 Saved to your Science Map!' : '')
         : `${score} / ${QUIZ.length}. Walk the stations once more — the web will wait.`);
   }
   return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
@@ -682,7 +682,7 @@ function renderStage5() {
           ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
           : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => {
               S.quiz.submitted = true;
-              if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) S.done[5] = true;
+              if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) { S.done[5] = true; awardTrainer(); }
               render();
             } }, 'Check my answers'),
         h('span', { class: 'meter' }, 'Covers ', h('b', {}, 'U6.K1 · food webs & energy flow'))),
@@ -714,6 +714,26 @@ function render() {
   renderLog();
 }
 $('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hook: report a passed quiz to the Science Map backend */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function awardTrainer() {
+  try {
+    const kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null');
+    if (!kid) return;
+    const fn = '__aw' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?name=' + encodeURIComponent(kid.name) + '&code=' + encodeURIComponent(kid.code) +
+      '&action=mark&type=trainer&id=passthesun&callback=' + fn + '&t=' + Date.now();
+    document.head.appendChild(s);
+  } catch (e) {}
+}
+function kidSignedIn() {
+  try { return !!JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return false; }
+}
+
 window.__S = () => S;
 render();
 </script>
