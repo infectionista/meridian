@@ -987,24 +987,39 @@ function renderDone() {
 document.getElementById('reset').addEventListener('click', () => start(ds.key));
 start('names');
 
-/* progress hook: report completion to the Science Map backend */
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
 const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
-let __awardSent = false;
-function awardTrainer() {
-  if (__awardSent) return;
-  try {
-    const kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null');
-    if (!kid) return;
-    __awardSent = true;
-    const fn = '__aw' + Math.random().toString(36).slice(2);
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
     const s = document.createElement('script');
     window[fn] = () => { delete window[fn]; s.remove(); };
     s.onerror = () => { delete window[fn]; s.remove(); };
-    s.src = PROGRESS_URL + '?name=' + encodeURIComponent(kid.name) + '&code=' + encodeURIComponent(kid.code) +
-      '&action=mark&type=trainer&id=buildatree&callback=' + fn + '&t=' + Date.now();
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
     document.head.appendChild(s);
     setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
-  } catch (e) {}
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'buildatree' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'buildatree:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
 }
 
 </script>

@@ -562,7 +562,9 @@ var PROG = (() => {
   let kid = null, keys = new Set();
   try { kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) {}
 
-  function jsonp(params, cb) {
+  /* primary transport: fetch WITHOUT cookies — dodges Google's
+     multi-account interstitials; script-tag JSONP as a fallback */
+  function jsonpTag(params, cb) {
     const fn = '__p' + Math.random().toString(36).slice(2);
     const s = document.createElement('script');
     let settled = false, tm;
@@ -577,6 +579,16 @@ var PROG = (() => {
     s.src = PROGRESS_URL + '?' + Object.entries(Object.assign({}, params, { callback: fn, t: Date.now() }))
       .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
     document.head.appendChild(s);
+  }
+  function jsonp(params, cb) {
+    const url = PROGRESS_URL + '?' + Object.entries(Object.assign({}, params, { t: Date.now() }))
+      .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
+    let settled = false;
+    const tm = setTimeout(() => { if (!settled) { settled = true; jsonpTag(params, cb); } }, 12000);
+    fetch(url, { credentials: 'omit', redirect: 'follow' })
+      .then(r => r.json())
+      .then(d => { if (!settled) { settled = true; clearTimeout(tm); cb && cb(d); } })
+      .catch(() => { if (!settled) { settled = true; clearTimeout(tm); jsonpTag(params, cb); } });
   }
   /* cold starts can stall the first request — retry once before giving up */
   function jsonpRetry(params, cb) {
