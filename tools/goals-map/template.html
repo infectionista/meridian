@@ -565,8 +565,15 @@ var PROG = (() => {
   function jsonp(params, cb) {
     const fn = '__p' + Math.random().toString(36).slice(2);
     const s = document.createElement('script');
-    window[fn] = d => { delete window[fn]; s.remove(); cb && cb(d); };
-    s.onerror = () => { delete window[fn]; s.remove(); cb && cb({ ok: false, error: 'network' }); };
+    let settled = false, tm;
+    const finish = d => {
+      if (settled) return;
+      settled = true; clearTimeout(tm); delete window[fn]; s.remove();
+      cb && cb(d);
+    };
+    window[fn] = finish;
+    s.onerror = () => finish({ ok: false, error: 'network' });
+    tm = setTimeout(() => finish({ ok: false, error: 'network' }), 12000);
     s.src = PROGRESS_URL + '?' + Object.entries(Object.assign({}, params, { callback: fn, t: Date.now() }))
       .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
     document.head.appendChild(s);
@@ -690,7 +697,9 @@ document.getElementById('kidGo').addEventListener('click', () => {
   err.textContent = 'Checking…';
   PROG.login(name, code, d => {
     if (d.ok) { kidDlg.hidden = true; document.getElementById('kidCode').value = ''; }
-    else err.textContent = d.error === 'auth' ? 'Hmm — that name or code doesn’t match.' : 'Network hiccup — try again.';
+    else err.textContent = d.error === 'auth'
+      ? 'Hmm — that name or code doesn’t match.'
+      : 'Can’t reach the progress server from this browser — open the map in Chrome or Safari and try again.';
   });
 });
 document.getElementById('kidCode').addEventListener('keydown', ev => { if (ev.key === 'Enter') document.getElementById('kidGo').click(); });
