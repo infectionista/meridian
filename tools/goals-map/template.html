@@ -573,10 +573,17 @@ var PROG = (() => {
     };
     window[fn] = finish;
     s.onerror = () => finish({ ok: false, error: 'network' });
-    tm = setTimeout(() => finish({ ok: false, error: 'network' }), 20000);
+    tm = setTimeout(() => finish({ ok: false, error: 'network' }), 12000);
     s.src = PROGRESS_URL + '?' + Object.entries(Object.assign({}, params, { callback: fn, t: Date.now() }))
       .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
     document.head.appendChild(s);
+  }
+  /* cold starts can stall the first request — retry once before giving up */
+  function jsonpRetry(params, cb) {
+    jsonp(params, d => {
+      if (!d.ok && d.error === 'network') jsonp(params, cb);
+      else cb && cb(d);
+    });
   }
   const has = k => keys.has(k);
   function stepDone(nodeId) {
@@ -596,7 +603,7 @@ var PROG = (() => {
     const key = type + ':' + id;
     if (keys.has(key)) return;
     keys.add(key);
-    jsonp({ name: kid.name, code: kid.code, action: 'mark', type: type, id: id }, d => {
+    jsonpRetry({ name: kid.name, code: kid.code, action: 'mark', type: type, id: id }, d => {
       if (d.ok && d.keys) keys = new Set(d.keys);
       refresh(); checkTrails();
     });
@@ -613,7 +620,7 @@ var PROG = (() => {
     });
   }
   function login(name, code, cb) {
-    jsonp({ name: name, code: code }, d => {
+    jsonpRetry({ name: name, code: code }, d => {
       if (d.ok) {
         kid = { name: d.name, code: code };
         localStorage.setItem('meridian-kid', JSON.stringify(kid));
@@ -625,12 +632,13 @@ var PROG = (() => {
   function logout() { kid = null; keys = new Set(); localStorage.removeItem('meridian-kid'); refresh(); }
   function load() {
     if (!kid) { refresh(); return; }
-    jsonp({ name: kid.name, code: kid.code }, d => {
+    jsonpRetry({ name: kid.name, code: kid.code }, d => {
       if (d.ok) keys = new Set(d.keys);
       else if (d.error === 'auth') { kid = null; localStorage.removeItem('meridian-kid'); }
       refresh(); checkTrails();
     });
   }
+  jsonp({ mode: 'ping' }, () => {});  /* wake the backend while the kid is still reading */
   return { mark, stepDone, has, login, logout, load, get kid() { return kid; } };
 })();
 const trailsRow = document.getElementById('trails');
