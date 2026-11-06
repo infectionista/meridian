@@ -961,6 +961,7 @@ function renderDone() {
   const host = document.getElementById('done');
   if (clusters.length !== 1) { host.hidden = true; return; }
   host.hidden = false;
+  awardTrainer();
   const root = clusters[0];
   const total = steps.length;
   const deepest = steps[steps.length - 1];
@@ -985,6 +986,26 @@ function renderDone() {
 
 document.getElementById('reset').addEventListener('click', () => start(ds.key));
 start('names');
+
+/* progress hook: report completion to the Science Map backend */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  try {
+    const kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null');
+    if (!kid) return;
+    __awardSent = true;
+    const fn = '__aw' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?name=' + encodeURIComponent(kid.name) + '&code=' + encodeURIComponent(kid.code) +
+      '&action=mark&type=trainer&id=buildatree&callback=' + fn + '&t=' + Date.now();
+    document.head.appendChild(s);
+  } catch (e) {}
+}
+
 </script>
 
 </body></html>

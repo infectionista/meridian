@@ -773,7 +773,7 @@ function renderStage5() {
   let band = null;
   if (q.submitted) {
     const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
-    if (score === QUIZ.length) S.done[5] = true;
+    if (score === QUIZ.length) { S.done[5] = true; awardTrainer(); }
     band = h('div', { class: 'scoreband' },
       h('span', {}, score === QUIZ.length
         ? `${score} / ${QUIZ.length} — cleared for replication duty.`
@@ -826,6 +826,26 @@ function render() {
 }
 
 $('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+
+/* progress hook: report completion to the Science Map backend */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  try {
+    const kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null');
+    if (!kid) return;
+    __awardSent = true;
+    const fn = '__aw' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?name=' + encodeURIComponent(kid.name) + '&code=' + encodeURIComponent(kid.code) +
+      '&action=mark&type=trainer&id=makebreak&callback=' + fn + '&t=' + Date.now();
+    document.head.appendChild(s);
+  } catch (e) {}
+}
 
 window.__S = () => S; /* for automated smoke tests */
 render();
