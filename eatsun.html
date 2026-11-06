@@ -743,6 +743,7 @@ function renderStage6() {
           ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
           : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => {
               S.quiz.submitted = true;
+              const wrongQs = QUIZ.map((it, qi) => S.quiz.picked[qi] === it.a ? null : qi + 1).filter(Boolean); reportQuiz(QUIZ.length - wrongQs.length, QUIZ.length, wrongQs); 
               if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) { S.done[6] = true; awardTrainer(); }
               render();
             } }, 'Check my answers'),
@@ -788,6 +789,23 @@ function awardTrainer() {
     s.onerror = () => { delete window[fn]; s.remove(); };
     s.src = PROGRESS_URL + '?name=' + encodeURIComponent(kid.name) + '&code=' + encodeURIComponent(kid.code) +
       '&action=mark&type=trainer&id=eatsun&callback=' + fn + '&t=' + Date.now();
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  } catch (e) {}
+}
+
+/* quiz telemetry: every submitted attempt goes to the Quiz log */
+function reportQuiz(score, total, wrong) {
+  try {
+    const kid = JSON.parse(localStorage.getItem('meridian-kid') || 'null');
+    if (!kid) return;
+    const id = 'eatsun:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok');
+    const fn = '__qz' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?name=' + encodeURIComponent(kid.name) + '&code=' + encodeURIComponent(kid.code) +
+      '&action=mark&type=quiz&id=' + encodeURIComponent(id) + '&callback=' + fn + '&t=' + Date.now();
     document.head.appendChild(s);
     setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
   } catch (e) {}

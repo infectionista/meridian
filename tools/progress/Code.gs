@@ -24,7 +24,7 @@
  *   open:U2.K1            — открыт материал узла
  */
 
-const TYPES = ['trainer', 'trail', 'step', 'open'];
+const TYPES = ['trainer', 'trail', 'step', 'open', 'quiz'];
 
 /* ---------- entry points ---------- */
 
@@ -60,19 +60,53 @@ function doPost(e) {
 
 function mark_(name, type, id) {
   type = String(type || '').trim().toLowerCase();
-  id = String(id || '').trim().replace(/[^\w:. \-]/g, '').slice(0, 64);
+  id = String(id || '').trim().replace(/[^\w:.,\/ \-]/g, '').slice(0, 64);
   if (TYPES.indexOf(type) < 0 || !id) return { ok: false, error: 'bad request' };
   const key = type + ':' + id;
 
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
+    if (type === 'quiz') {           // every attempt is logged, no achievement
+      logQuiz_(name, id);
+      return { ok: true, quiz: true };
+    }
     logEvent_(name, type, id);
     const isNew = setState_(name, key);
     return { ok: true, key: key, new: isNew, keys: stateKeys_(name) };
   } finally {
     lock.releaseLock();
   }
+}
+
+/* Quiz attempts: raw rows in 'Quiz log', aggregates in 'Quiz stats'
+   (per trainer: Attempts | Perfect | Q<n> errors columns). */
+function logQuiz_(name, id) {
+  const sh = sheet_('Quiz log', ['When', 'Name', 'Trainer', 'Score', 'Total', 'Wrong questions']);
+  const m = String(id).match(/^([\w-]+):(\d+)\/(\d+):(.*)$/);
+  if (!m) { sh.appendRow([new Date(), name, id, '', '', '']); return; }
+  const slug = m[1], score = Number(m[2]), total = Number(m[3]);
+  const wrong = m[4] === 'ok' ? [] :
+    m[4].split(',').map(function (x) { return Number(x); })
+        .filter(function (x) { return x >= 1 && x <= 40; });
+  sh.appendRow([new Date(), name, slug, score, total, wrong.join(', ')]);
+
+  const st = sheet_('Quiz stats', ['Trainer', 'Attempts', 'Perfect']);
+  let row = findRow_(st, slug);
+  if (row === 0) { row = st.getLastRow() + 1; st.getRange(row, 1).setValue(slug); }
+  bump_(st, row, 2);
+  if (score === total) bump_(st, row, 3);
+  const header = st.getRange(1, 1, 1, Math.max(st.getLastColumn(), 3)).getValues()[0];
+  wrong.forEach(function (q) {
+    const key = 'Q' + q + ' errors';
+    let col = header.indexOf(key) + 1;
+    if (col === 0) { col = header.length + 1; header.push(key); st.getRange(1, col).setValue(key).setFontWeight('bold'); }
+    bump_(st, row, col);
+  });
+}
+function bump_(sh, row, col) {
+  const c = sh.getRange(row, col);
+  c.setValue((Number(c.getValue()) || 0) + 1);
 }
 
 function auth_(name, code) {
