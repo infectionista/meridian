@@ -573,7 +573,7 @@ var PROG = (() => {
     };
     window[fn] = finish;
     s.onerror = () => finish({ ok: false, error: 'network' });
-    tm = setTimeout(() => finish({ ok: false, error: 'network' }), 12000);
+    tm = setTimeout(() => finish({ ok: false, error: 'network' }), 20000);
     s.src = PROGRESS_URL + '?' + Object.entries(Object.assign({}, params, { callback: fn, t: Date.now() }))
       .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
     document.head.appendChild(s);
@@ -587,7 +587,7 @@ var PROG = (() => {
   const count = pre => { let n = 0; keys.forEach(k => { if (k.startsWith(pre)) n++; }); return n; };
   function refresh() {
     document.getElementById('kidStat').textContent = kid
-      ? `👤 ${kid.name} · ⚡ ${count('trainer:')} · 🏅 ${count('trail:')}` : '';
+      ? `⚡ ${count('trainer:')} · 🏅 ${count('trail:')}` : '';
     document.getElementById('kidBtn').textContent = kid ? '👤 ' + kid.name : '👤 Who’s exploring?';
     decorateTrails(); refreshNodes(); drawTrail();
   }
@@ -704,6 +704,10 @@ document.getElementById('kidGo').addEventListener('click', () => {
 });
 document.getElementById('kidCode').addEventListener('keydown', ev => { if (ev.key === 'Enter') document.getElementById('kidGo').click(); });
 document.getElementById('kidOut').addEventListener('click', () => { PROG.logout(); kidDlg.hidden = true; });
+document.addEventListener('click', ev => {
+  if (!kidDlg.hidden && !kidDlg.contains(ev.target) && ev.target.id !== 'kidBtn') kidDlg.hidden = true;
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') kidDlg.hidden = true; });
 PROG.load();
 
 window.__S = () => ({ nodes: DATA.nodes.length, edges: DATA.edges.length, selected, kid: PROG.kid });
