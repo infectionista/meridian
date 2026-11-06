@@ -86,6 +86,9 @@ h1 .hi { color: var(--violet); }
   border-radius: 8px; background: var(--paper); color: var(--fg); }
 #kidErr { font-size: 12px; color: var(--pink-deep); min-height: 1em; }
 #kidStat { font-size: 12.5px; color: var(--mint-deep); font-weight: 700; }
+/* progress sign-in temporarily hidden (2026-11-06, Oksana's call) —
+   remove this rule to bring it back */
+#kidBtn, #kidStat, #kidDialog { display: none !important; }
 .node text.lbl  { font-family: var(--ui); font-size: 10.5px; font-weight: 600; fill: var(--fg); text-anchor: middle; pointer-events: none;
                   paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; }
 .node.dim { opacity: .14; }
