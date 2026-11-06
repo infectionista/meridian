@@ -95,6 +95,8 @@ def L(t, u, k):
     return {'t': t, 'u': u, 'k': k}
 
 TRAINER_ES = L('Eat the Sun — cells & photosynthesis trainer', ES, 'trainer')
+PTS = 'https://meridian-one-jet.vercel.app/passthesun.html'
+TRAINER_PTS = L('Pass the Sun — food webs & energy flow trainer', PTS, 'trainer')
 
 NODE_LINKS = {
  'U6.K2': [L('Build a Tree — phylogenetics trainer', BT, 'trainer'),
@@ -108,6 +110,7 @@ NODE_LINKS = {
  'U3.K1': [L('Inner Space: Malaria — lesson slides', MAT + 'malaria-slides.pdf', 'slides')],
  'U9.K1': [L('Epidemic Forensics: Soho 1854 — lesson slides', MAT + 'soho-1854-slides.pdf', 'slides')],
  'U4.K2': [L('Rabies 1885 — lesson slides', MAT + 'rabies-slides.pdf', 'slides')],
+ 'U6.K1': [TRAINER_PTS],
  'U9.A3': [L('Medical Detective — CER workbook (.docx)', MAT + 'medical-detective-workbook.docx', 'assignment'),
            L('Medical Detective — how to solve the workbook', MAT + 'medical-detective-instructions.pdf', 'reading'),
            L('Cosmic Epidemics: Is It Real? — lesson slides', MAT + 'cosmic-epidemics-slides.pdf', 'slides')],
@@ -215,7 +218,8 @@ edges = [
  E('U1.A3','U5.K1','cross','Green parts have chloroplasts — and that is exactly where photosynthesis happens.',
    links=[{'t':'Eat the Sun — cells & photosynthesis trainer','u':ES,'k':'trainer'}]),
  E('U1.K4','U4.K1','cross','The same level ladder — cell, tissue, organ, organism — runs through the human body.'),
- E('U5.K3','U6.K1','cross','Squirrels cannot photosynthesise — that is why food chains exist.'),
+ E('U5.K3','U6.K1','cross','Squirrels cannot photosynthesise — that is why food chains exist.',
+   links=[TRAINER_PTS]),
  E('U9.K1','U6.K1','cross','The pine-cone hypotheses: lovable, testable — and checkable.'),
  E('U7.A3','U9.A2','cross','Salinity measurements become tables, averages and a world map.'),
 ]

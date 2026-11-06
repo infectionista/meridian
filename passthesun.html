@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pass the Sun</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Pass the Sun — food chains, webs, energy flow and the four deals,
+   for the 11-14 course. Sequel to Eat the Sun: same Meridian family. */
+:root {
+  color-scheme: light;
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --leaf:        #5B9E22;
+  --leaf-soft:   #E2FDC7;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--fg);
+  font-family: var(--ui); font-size: 15px; line-height: 1.55; margin: 0;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+}
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--violet); }
+h1 { font-size: clamp(27px, 5.4vw, 42px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0; text-wrap: balance; }
+h1 .hi { color: var(--orange-deep); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 68ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--orange-deep);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.card > h2 { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--violet); margin: 0 0 12px; }
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .stagegrid { grid-template-columns: 1fr; } }
+.scene svg { width: 100%; height: auto; display: block; user-select: none; }
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+.act.sun { background: var(--orange-deep); }
+.act.sun:hover { background: #b34a0e; }
+
+.meter { font: 500 13px/1.3 var(--ui); color: var(--fg-dim); background: var(--panel-2); border-radius: 8px; padding: 9px 12px; }
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+.toast.good { color: var(--mint-deep); }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+.rx h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.rx .eq {
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.rx td, .rx th { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.rx tr:first-child :is(td, th) { border-top: 0; }
+.rx th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--violet); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.chip.leaf { background: var(--leaf-soft); color: var(--leaf); }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+.chip.mint { background: var(--mint); color: var(--mint-deep); }
+.chip.sun { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; }
+.logtable tr.off { opacity: .38; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--orange-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--violet-soft); color: var(--violet); font-weight: 700; }
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.foot a { color: var(--violet); font-weight: 600; }
+
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.big { font-size: 13px; fill: var(--fg); font-weight: 700; }
+.pickable { cursor: pointer; }
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  transform-box: fill-box; animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-26px); } }
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+@keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences · Ecosystems &amp; biodiversity</div>
+    <h1>Pass the <span class="hi">Sun</span></h1>
+    <p class="lede">In <a href="https://meridian-one-jet.vercel.app/eatsun.html" style="color:var(--leaf);font-weight:600">Eat the Sun</a>
+      a leaf cooked sugar out of sunlight — and a squirrel stole it. That stolen sunshine is now travelling
+      through the forest, eater by eater. Follow it up the chain, weave the real web, watch most of it
+      leak away, and learn the four deals every creature signs.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stations"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Big ideas collected <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five ideas — together they explain why the forest needs its plants, why foxes are rare, and why ticks are not just tiny predators.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U6.K1 · food webs</span>
+      <span class="chip vio">follows U5 · photosynthesis &amp; the two machines</span>
+    </div>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-11-14.html">Science Map 11–14</a> ·
+    <a href="https://meridian-one-jet.vercel.app/eatsun.html">Eat the Sun (previous lesson)</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse','marker','defs']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+/* ---------------- state ---------------- */
+
+const STAGE_META = [
+  { n: 1, label: 'Chain' },
+  { n: 2, label: 'Web' },
+  { n: 3, label: 'The leak' },
+  { n: 4, label: 'Four deals' },
+  { n: 5, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: '<b>Station 1 · Build the chain.</b> Sunshine has just landed on a meadow. Click the creatures <b>in the order the energy travels</b> — start with whoever can actually eat sunlight. The arrows you draw always point where the energy goes.',
+  2: '<b>Station 2 · Weave the web.</b> One chain was a nice story — the real forest is messier. Click a <b>hungry creature</b>, then click <b>its dinner</b>, and keep going until all nine menu lines are drawn. Watch what shape appears.',
+  3: '<b>Station 3 · The leak.</b> The grass of this meadow caught 1000 energy units of sunshine. Pass the energy up the chain and watch what actually arrives. Spoiler: the forest has a leak — and the leak is built in.',
+  4: '<b>Station 4 · Four deals.</b> Eating is not the only deal in the forest. Read each pair and decide: predation, competition, mutualism or parasitism? Keep score — some of these are sneaky.',
+  5: '<b>Quiz.</b> Six questions. Ace them and you can read any food web like a detective reads a map.',
+};
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    logged: new Set(),
+    s1: { order: [], msg: '' },
+    s2: { links: [], pick: null, msg: '' },
+    s3: { level: 0 },
+    s4: { idx: 0, score: 0, answered: null },
+    quiz: { picked: {}, submitted: false },
+  };
+}
+S = freshState();
+
+const LOG = [
+  { id: 'enter', name: 'Energy enters through the green cooks', note: 'producers photosynthesise; everyone else just steals the sugar' },
+  { id: 'arrow', name: 'Arrows show where the energy goes', note: 'grass → rabbit means the rabbit GETS the energy' },
+  { id: 'web',   name: 'Webs bend, chains snap', note: 'every eater has a backup meal — that is why forests survive losses' },
+  { id: 'leak',  name: 'About 90% leaks at every step', note: 'burned as heat, movement, living — that is why foxes are rare' },
+  { id: 'deals', name: 'Four deals: hunt, rival, team up, freeload', note: 'predation +/−, competition −/−, mutualism +/+, parasitism slow +/−' },
+];
+function logIdea(id) { S.logged.add(id); }
+
+/* ================= station 1 · chain ================= */
+
+const CHAIN = [
+  { id: 'grass', name: 'Grass', emoji: '🌿', x: 180, y: 190 },
+  { id: 'hopper', name: 'Grasshopper', emoji: '🦗', x: 330, y: 190 },
+  { id: 'bird', name: 'Songbird', emoji: '🐦', x: 480, y: 190 },
+  { id: 'fox', name: 'Fox', emoji: '🦊', x: 600, y: 190 },
+];
+const LEVELS = ['PRODUCER', 'CONSUMER 1', 'CONSUMER 2', 'CONSUMER 3'];
+const WRONG1 = {
+  fox: 'A fox can’t eat sunlight — there are no chloroplasts in fur. (Eat the Sun, remember?)',
+  bird: 'The songbird can’t cook from light either. Who in this meadow CAN?',
+  hopper: 'Close to the ground, but a grasshopper still can’t photosynthesise. Who can?',
+};
+
+function clickChain(id) {
+  if (S.done[1]) return;
+  const next = CHAIN[S.s1.order.length];
+  if (id === next.id) {
+    S.s1.order.push(id);
+    S.s1.msg = 'good:' + (S.s1.order.length === 1
+      ? 'Yes — grass is the only one here that can eat sunlight.'
+      : `Energy moves on: ${CHAIN[S.s1.order.length - 2].name} → ${next.name}.`);
+    if (S.s1.order.length === CHAIN.length) { S.done[1] = true; logIdea('enter'); logIdea('arrow'); }
+  } else if (S.s1.order.includes(id)) {
+    S.s1.msg = 'bad:Already in the chain — who eats ' + CHAIN[S.s1.order.length - 1].name.toLowerCase() + '?';
+  } else {
+    S.s1.msg = 'bad:' + (S.s1.order.length === 0
+      ? (WRONG1[id] || 'Start with the one that eats sunlight.')
+      : `Not yet — the ${CHAIN.find(c => c.id === id).name.toLowerCase()} doesn’t eat ${CHAIN[S.s1.order.length - 1].name.toLowerCase()}.`);
+  }
+  render();
+}
+
+function renderScene1() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 290', role: 'img', 'aria-label': 'Build the food chain from the sun to the fox' });
+  /* sun */
+  svg.append(h('circle', { cx: 60, cy: 100, r: 30, fill: 'var(--orange)', stroke: 'var(--orange-deep)', 'stroke-width': 2 }));
+  svg.append(h('text', { x: 60, y: 107, class: 'lab big', 'text-anchor': 'middle' }, '☀️'));
+  svg.append(h('text', { x: 60, y: 150, class: 'lab', 'text-anchor': 'middle' }, '1 000 000 km away'));
+  /* sun ray to grass once grass picked */
+  if (S.s1.order.length > 0) {
+    svg.append(h('path', { d: 'M 85 115 Q 130 150 150 175', fill: 'none', stroke: 'var(--orange-deep)', 'stroke-width': 2.5, 'stroke-dasharray': '6 4', class: 'pop' }));
+    svg.append(h('text', { x: 108, y: 135, class: 'lab', fill: 'var(--orange-deep)' }, 'light'));
+  }
+  /* chain arrows */
+  for (let i = 1; i < S.s1.order.length; i++) {
+    const a = CHAIN[i - 1], b = CHAIN[i];
+    svg.append(h('path', { d: `M ${a.x + 34} ${a.y} L ${b.x - 40} ${b.y}`, stroke: 'var(--fg)', 'stroke-width': 2.5, class: 'pop' }));
+    svg.append(h('path', { d: `M ${b.x - 40} ${b.y} l -9 -5 v 10 z`, fill: 'var(--fg)', class: 'pop' }));
+    svg.append(h('text', { x: (a.x + b.x) / 2 - 3, y: b.y - 12, class: 'lab', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, '⚡'));
+  }
+  /* creatures */
+  CHAIN.forEach((c, i) => {
+    const placed = S.s1.order.includes(c.id);
+    const g = h('g', { class: 'pickable', tabindex: '0', role: 'button', 'aria-label': c.name,
+      onclick: () => clickChain(c.id),
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); clickChain(c.id); } } });
+    g.append(h('circle', { cx: c.x, cy: c.y, r: 30,
+      fill: placed ? 'var(--leaf-soft)' : 'var(--panel-2)',
+      stroke: placed ? 'var(--leaf)' : 'var(--line)', 'stroke-width': placed ? 2.5 : 1.5, class: placed ? 'pop' : null }));
+    g.append(h('text', { x: c.x, y: c.y + 8, 'text-anchor': 'middle', 'font-size': '24px' }, c.emoji));
+    g.append(h('text', { x: c.x, y: c.y + 52, class: 'lab big', 'text-anchor': 'middle' }, c.name));
+    if (placed) g.append(h('text', { x: c.x, y: c.y - 42, class: 'lab', 'text-anchor': 'middle', fill: 'var(--violet)' },
+      LEVELS[S.s1.order.indexOf(c.id)]));
+    svg.append(g);
+  });
+  svg.append(h('text', { x: 330, y: 282, class: 'lab', 'text-anchor': 'middle' }, 'the arrow always points where the energy GOES — at the eater'));
+  return svg;
+}
+
+function renderStage1() {
+  const doneBar = S.done[1] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Chain complete: sun → grass → grasshopper → songbird → fox. One producer, three consumers — and every arrow is sunshine changing hands.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: weave the web →')) : null;
+  const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene1(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'chain: ', h('b', {}, `${S.s1.order.length} / 4`))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Who is who in a chain'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Role'), h('th', {}, 'Job')),
+        h('tr', {}, h('td', {}, '🌿 Producer'), h('td', {}, 'cooks its own sugar from sunlight — the only door energy enters through')),
+        h('tr', {}, h('td', {}, '🦗 Consumer'), h('td', {}, 'can’t cook — eats someone to get their sugar')),
+        h('tr', {}, h('td', {}, '⚡ Arrow'), h('td', {}, 'points at the eater: it shows where the energy goes'))),
+      h('p', { class: 'sub' }, 'The fox never touches a leaf — yet every gram of fox is rebuilt grass. The sunshine just changed hands three times.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Why do people draw the arrows backwards?'),
+        h('p', {}, 'Because “fox eats bird” feels like fox → bird. But scientists track the ENERGY, and the energy flows bird → fox. Draw the arrow at the eater and every ecologist will nod.'))
+    ));
+}
+
+/* ================= station 2 · web ================= */
+
+const SPECIES = [
+  { id: 'oak', name: 'Oak', emoji: '🌳', x: 120, y: 258 },
+  { id: 'grass', name: 'Grass', emoji: '🌿', x: 330, y: 256 },
+  { id: 'cat', name: 'Caterpillar', emoji: '🐛', x: 92, y: 150 },
+  { id: 'mouse', name: 'Mouse', emoji: '🐭', x: 268, y: 162 },
+  { id: 'rabbit', name: 'Rabbit', emoji: '🐇', x: 470, y: 180 },
+  { id: 'tit', name: 'Songbird', emoji: '🐦', x: 140, y: 56 },
+  { id: 'owl', name: 'Owl', emoji: '🦉', x: 330, y: 44 },
+  { id: 'fox', name: 'Fox', emoji: '🦊', x: 520, y: 62 },
+];
+const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
+/* eater: meals */
+const MENU = {
+  cat: ['oak'], mouse: ['oak', 'grass'], rabbit: ['grass'],
+  tit: ['cat'], owl: ['mouse', 'tit'], fox: ['mouse', 'rabbit'],
+};
+const ALL_LINKS = Object.entries(MENU).flatMap(([e, ms]) => ms.map(m => e + '<' + m));
+const WRONG2 = {
+  'owl<oak': 'Owls don’t eat oak trees. Not even acorn-flavoured ones.',
+  'owl<grass': 'An owl on a salad diet? It would quit by Tuesday.',
+  'fox<oak': 'Foxes can’t digest wood — the acorns go to someone smaller.',
+  'rabbit<mouse': 'Rabbits are strict vegetarians. The mouse is safe. From the rabbit.',
+  'cat<grass': 'This caterpillar is an oak-leaf specialist — many insects eat only one plant.',
+  'tit<oak': 'The songbird wants protein for its chicks — leaves won’t do.',
+};
+
+function clickSpecies(id) {
+  if (S.done[2]) return;
+  const s2 = S.s2;
+  if (s2.pick === null) {
+    if (id === 'oak' || id === 'grass') { s2.msg = 'bad:Plants aren’t hungry — they cook for themselves. Pick an EATER first.'; }
+    else if ((MENU[id] || []).every(m => s2.links.includes(id + '<' + m))) { s2.msg = 'good:' + SP[id].name + ' is full — its whole menu is drawn. Feed someone else.'; }
+    else { s2.pick = id; s2.msg = ''; }
+  } else if (s2.pick === id) {
+    s2.pick = null; s2.msg = '';
+  } else {
+    const key = s2.pick + '<' + id;
+    if (s2.links.includes(key)) { s2.msg = 'bad:Already on the menu.'; }
+    else if ((MENU[s2.pick] || []).includes(id)) {
+      s2.links.push(key);
+      s2.msg = 'good:' + SP[id].name + ' → ' + SP[s2.pick].name + '. The energy moves on.';
+      s2.pick = null;
+      if (s2.links.length === ALL_LINKS.length) { S.done[2] = true; logIdea('web'); }
+    } else {
+      s2.msg = 'bad:' + (WRONG2[key] || SP[s2.pick].name + ' sniffs at that and walks away. Try another dinner.');
+      s2.pick = null;
+    }
+  }
+  render();
+}
+
+function renderScene2() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 330', role: 'img', 'aria-label': 'Weave the forest food web' });
+  /* drawn links */
+  S.s2.links.forEach(key => {
+    const [e, m] = key.split('<');
+    const a = SP[m], b = SP[e];
+    const mx = (a.x + b.x) / 2 + (a.y > b.y ? 18 : -18), my = (a.y + b.y) / 2;
+    svg.append(h('path', { d: `M ${a.x} ${a.y - 26} Q ${mx} ${my} ${b.x} ${b.y + 30}`,
+      fill: 'none', stroke: 'var(--fg-dim)', 'stroke-width': 1.8, opacity: .65 }));
+    svg.append(h('text', { x: mx, y: my, class: 'lab', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, '⚡'));
+  });
+  /* species */
+  SPECIES.forEach(sp => {
+    const picked = S.s2.pick === sp.id;
+    const isPlant = sp.id === 'oak' || sp.id === 'grass';
+    const full = !isPlant && (MENU[sp.id] || []).every(m => S.s2.links.includes(sp.id + '<' + m));
+    const g = h('g', { class: 'pickable', tabindex: '0', role: 'button', 'aria-label': sp.name,
+      onclick: () => clickSpecies(sp.id),
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); clickSpecies(sp.id); } } });
+    g.append(h('circle', { cx: sp.x, cy: sp.y, r: 26,
+      fill: picked ? 'var(--violet-soft)' : isPlant ? 'var(--leaf-soft)' : full ? 'var(--mint)' : 'var(--panel-2)',
+      stroke: picked ? 'var(--violet)' : isPlant ? 'var(--leaf)' : full ? 'var(--mint-deep)' : 'var(--line)',
+      'stroke-width': picked ? 3 : 1.5, class: picked ? 'pop' : null }));
+    g.append(h('text', { x: sp.x, y: sp.y + 7, 'text-anchor': 'middle', 'font-size': '20px' }, sp.emoji));
+    g.append(h('text', { x: sp.x, y: sp.y + 44, class: 'lab', 'text-anchor': 'middle' }, sp.name + (full ? ' ✓' : '')));
+    svg.append(g);
+  });
+  svg.append(h('text', { x: 330, y: 322, class: 'lab', 'text-anchor': 'middle' },
+    S.s2.pick ? `${SP[S.s2.pick].name} is hungry — click its dinner` : 'click a hungry creature, then its dinner'));
+  return svg;
+}
+
+function renderStage2() {
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Nine menu lines — and look: it’s not a chain, it’s a WEB. Now imagine the rabbits vanish. A chain would snap. Your web bends: the fox shrugs and eats more mice. That’s why forests survive bad years.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: follow the energy →')) : null;
+  const [kind, msg] = S.s2.msg ? S.s2.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene2(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'menu lines drawn: ', h('b', {}, `${S.s2.links.length} / ${ALL_LINKS.length}`)),
+        S.s2.pick ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.s2.pick = null; render(); } }, 'Cancel pick') : null),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Why a web and not a chain'),
+      h('div', { class: 'chips' }, h('span', { class: 'chip leaf' }, '2 producers'), h('span', { class: 'chip vio' }, '3 herbivores'), h('span', { class: 'chip sun' }, '3 hunters')),
+      h('p', {}, 'Almost nobody eats just one thing, and almost everybody is on more than one menu. The mouse feeds two hunters; the oak feeds two eaters. Draw every menu line honestly and a chain always turns into a web.'),
+      h('p', { class: 'sub' }, 'Ecologists call the picture you just drew a food web — and they use it to predict what happens when one species disappears or a new one invades.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Where do mushrooms fit?'),
+        h('p', {}, 'Decomposers — fungi, worms, bacteria — eat the leftovers: fallen leaves, droppings, the dead. They run the forest’s recycling plant and return the raw materials to the soil. Without them the web would drown in its own rubbish.'))
+    ));
+}
+
+/* ================= station 3 · the leak ================= */
+
+const PYRAMID = [
+  { name: 'Grass of the meadow', emoji: '🌿', units: 1000, w: 440 },
+  { name: 'Rabbits & mice', emoji: '🐇', units: 100, w: 220 },
+  { name: 'Fox', emoji: '🦊', units: 10, w: 90 },
+];
+
+function passUp() {
+  if (S.s3.level >= 2) return;
+  S.s3.level++;
+  render();
+  const y = 200 - S.s3.level * 62;
+  fx(180, y, '💨 heat');
+  fx(330, y - 14, '🏃 moving');
+  fx(470, y, '💩 not digested');
+  if (S.s3.level === 2) { S.done[3] = true; logIdea('leak'); render(); }
+}
+
+function renderScene3() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 300', role: 'img', 'aria-label': 'Energy pyramid with leaks' });
+  svg.append(h('text', { x: 330, y: 26, class: 'lab big', 'text-anchor': 'middle' }, 'the energy pyramid of one meadow'));
+  PYRAMID.forEach((lv, i) => {
+    const visible = i <= S.s3.level;
+    const y = 240 - i * 62;
+    svg.append(h('rect', { x: 330 - lv.w / 2, y: y - 40, width: lv.w, height: 48, rx: 10,
+      fill: visible ? (i === 0 ? 'var(--leaf-soft)' : i === 1 ? 'var(--orange-soft)' : 'var(--pink-soft)') : 'var(--panel-2)',
+      stroke: visible ? (i === 0 ? 'var(--leaf)' : i === 1 ? 'var(--orange-deep)' : 'var(--pink-deep)') : 'var(--line)',
+      'stroke-width': visible ? 2 : 1, opacity: visible ? 1 : .45, class: visible && i === S.s3.level && i > 0 ? 'pop' : null }));
+    svg.append(h('text', { x: 330, y: y - 18, class: 'lab big', 'text-anchor': 'middle', opacity: visible ? 1 : .45 },
+      `${lv.emoji} ${lv.name} — ${visible ? lv.units : '?'} ⚡`));
+    if (i < 2) svg.append(h('text', { x: 330 + lv.w / 2 + 48, y: y - 36, class: 'lab', 'text-anchor': 'middle', opacity: i < S.s3.level ? 1 : .3 }, '~90% leaks ↗'));
+  });
+  svg.append(h('text', { x: 330, y: 290, class: 'lab', 'text-anchor': 'middle' },
+    'every creature’s mitochondria burn sugar day and night — the burning escapes as heat'));
+  return svg;
+}
+
+function renderStage3() {
+  const doneBar = S.done[3] ? h('div', { class: 'donebar' },
+    h('span', {}, '1000 → 100 → 10. Only about a tenth survives each handover — the rest is spent on living. That’s why a meadow feeds crowds of rabbits but only one fox, and why nothing hunts foxes for a living: a fox-eater would get 1 unit and starve.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: the four deals →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene3(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act sun', type: 'button', disabled: S.s3.level >= 2, onclick: passUp },
+          S.s3.level === 0 ? '⚡ Pass the energy up' : S.s3.level === 1 ? '⚡ Pass it up again' : 'Pyramid complete'),
+        h('span', { class: 'meter' }, 'levels filled: ', h('b', {}, `${S.s3.level + 1} / 3`))),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Where does 90% go?'),
+      h('div', { class: 'eq' }, '1000 ⚡ grass → 100 ⚡ rabbits → 10 ⚡ fox'),
+      h('p', {}, 'A rabbit doesn’t store everything it eats. Most sugar is burned in its mitochondria the same day — for hopping, staying warm, just being alive. That burning leaves as heat. Some food is never digested at all. Only the leftovers become rabbit — and only rabbit-the-substance can feed a fox.'),
+      h('p', { class: 'sub' }, 'This is the same fire-without-flames from Eat the Sun, running in every creature at once. The forest leaks sunshine from a million tiny power plants — and the leak is why pyramids are wide at the bottom.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Is it exactly 10%?'),
+        h('p', {}, 'No — it ranges from about 5% to 20% depending on the eater and the meal. “About a tenth” is the honest rule of thumb ecologists actually use.'))
+    ));
+}
+
+/* ================= station 4 · four deals ================= */
+
+const DEALS = [
+  { id: 'pred', name: 'Predation', score: '+ / −', blurb: 'one hunts, one is dinner — quick and final' },
+  { id: 'comp', name: 'Competition', score: '− / −', blurb: 'nobody gets eaten, both get less' },
+  { id: 'mut', name: 'Mutualism', score: '+ / +', blurb: 'both walk away better off' },
+  { id: 'para', name: 'Parasitism', score: '+ / − (slow)', blurb: 'one steals, slowly, keeping the victim alive' },
+];
+const CASES = [
+  { pair: '🦊 × 🐇', txt: 'A fox catches a rabbit.', a: 'pred',
+    why: 'Fox +, rabbit − (very). Quick and final — that’s predation.' },
+  { pair: '🦉 × 🦊', txt: 'The owl and the fox both hunt the same mice in the same meadow.', a: 'comp',
+    why: 'Neither eats the other — but every mouse the owl takes is a mouse the fox doesn’t get. Both lose a little: competition.' },
+  { pair: '🐝 × 🌸', txt: 'A bee drinks nectar from a flower and flies off dusted with pollen.', a: 'mut',
+    why: 'The bee gets lunch, the flower gets its pollen delivered. + / + — mutualism.' },
+  { pair: '🕷️ × 🦊', txt: 'A tick rides on the fox for weeks, sipping its blood.', a: 'para',
+    why: 'The tick wins, the fox slowly loses — but stays alive, because a dead fox is a useless home. Parasitism.' },
+  { pair: '🐿️ × 🌳', txt: 'A squirrel buries hundreds of acorns for winter — and forgets some. They sprout.', a: 'mut',
+    why: 'The squirrel gets a pantry, the oak gets its children planted. The forgetful thief from Eat the Sun turns out to be the oak’s gardener: mutualism.' },
+  { pair: '🌿 × 🌳', txt: 'Mistletoe grows on an oak branch and taps the oak’s water and sugar pipes.', a: 'para',
+    why: 'A plant robbing a plant! It drinks from the oak’s pipes for years without killing it. Parasitism needs no teeth.' },
+  { pair: '🐿️ × 🐿️', txt: 'Two squirrels find one pine cone.', a: 'comp',
+    why: 'Same species, same prize — one pantry stays emptier. Competition is fiercest between creatures that want exactly the same things.' },
+  { pair: '🐞 × 🐛', txt: 'A ladybird eats aphids off a rose, dozens a day.', a: 'pred',
+    why: 'Tiny but true predation: the ladybird eats them whole and moves on. Gardeners adore this particular hunter.' },
+];
+
+function answerCase(dealId) {
+  if (S.s4.answered !== null) return;
+  S.s4.answered = dealId;
+  if (dealId === CASES[S.s4.idx].a) S.s4.score++;
+  render();
+}
+function nextCase() {
+  if (S.s4.idx < CASES.length - 1) { S.s4.idx++; S.s4.answered = null; }
+  else { S.done[4] = true; logIdea('deals'); }
+  render();
+}
+
+function renderStage4() {
+  const c = CASES[S.s4.idx];
+  const answered = S.s4.answered !== null;
+  const right = answered && S.s4.answered === c.a;
+  const doneBar = S.done[4] ? h('div', { class: 'donebar' },
+    h('span', {}, `All eight sorted — ${S.s4.score} / 8 on the first try. You now know the four deals every creature in the forest signs.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Take the quiz →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Case file ', h('span', { class: 'count' }, `${S.s4.idx + 1} / ${CASES.length} · score ${S.s4.score}`)),
+      h('p', { style: 'font-size:34px;margin:4px 0 2px;text-align:center' }, c.pair),
+      h('p', { style: 'font-weight:600;text-align:center;margin:4px 0 14px' }, c.txt),
+      h('div', { class: 'scenebtns', style: 'justify-content:center' },
+        ...DEALS.map(d => h('button', {
+          class: 'act' + (answered ? (d.id === c.a ? '' : ' alt') : ' alt'), type: 'button',
+          disabled: answered ? 'disabled' : null, onclick: () => answerCase(d.id) }, d.name))),
+      h('p', { class: 'toast' + (right ? ' good' : ''), style: 'text-align:center' },
+        answered ? ((right ? '✓ Correct! ' : `✗ It’s ${DEALS.find(d => d.id === c.a).name.toLowerCase()}. `) + c.why) : ''),
+      answered && !S.done[4] ? h('div', { class: 'scenebtns', style: 'justify-content:center' },
+        h('button', { class: 'act', type: 'button', onclick: nextCase }, S.s4.idx === CASES.length - 1 ? 'Finish →' : 'Next case →')) : null,
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The four deals'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Deal'), h('th', {}, 'Scoreboard'), h('th', {}, 'In one line')),
+        ...DEALS.map(d => h('tr', {},
+          h('td', {}, h('b', {}, d.name)),
+          h('td', { style: 'font-family:var(--mono)' }, d.score),
+          h('td', {}, d.blurb)))),
+      h('p', { class: 'sub' }, 'Predator or parasite? Ask about speed: a predator ends it in minutes; a parasite may sip for years — killing the host would mean losing its home and kitchen.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Can one pair be two deals at once?'),
+        h('p', {}, 'Nature loves fine print. The squirrel that plants oaks also EATS most of the acorns — so squirrel × oak is part predation (on seeds), part mutualism (planting). Ecologists argue about which side outweighs. Real science lives in exactly these arguments.'))
+    ));
+}
+
+/* ================= station 5 · quiz ================= */
+
+const QUIZ = [
+  { q: 'In a food web, the arrow grass → rabbit means…',
+    opts: ['The grass eats the rabbit', 'The rabbit gets the grass’s energy — arrows point at the eater', 'The rabbit is faster than grass'],
+    a: 1, why: 'Arrows track the energy. It flows FROM the meal TO the eater.' },
+  { q: 'Who is the producer in the meadow?',
+    opts: ['The fox — it’s the strongest', 'The mouse — it eats everything', 'The grass — it’s the only one that makes sugar from sunlight'],
+    a: 2, why: 'Producers photosynthesise. Every other creature just passes that sugar along.' },
+  { q: 'Why does one meadow feed hundreds of rabbits but only one fox?',
+    opts: ['Foxes are shy', 'About 90% of the energy is burned and lost at every step of the chain', 'Rabbits breed faster'],
+    a: 1, why: 'Each level gets roughly a tenth of the one below. By the fox’s level, little sunshine is left.' },
+  { q: 'The squirrel buries acorns and forgets some, which grow into oaks. This deal is…',
+    opts: ['Parasitism', 'Mutualism — pantry for the squirrel, planted children for the oak', 'Competition'],
+    a: 1, why: 'Both sides win: + / +. The oak pays in acorns for a planting service.' },
+  { q: 'What’s the difference between a parasite and a predator?',
+    opts: ['A parasite steals slowly and keeps its victim alive; a predator ends it fast', 'A parasite is always smaller than a flea', 'There is no difference'],
+    a: 0, why: 'A dead host is a lost home — so the tick sips for weeks. The fox has no such patience.' },
+  { q: 'All the rabbits vanish in a hard winter. What saves the fox?',
+    opts: ['Nothing — it starves like in a chain', 'The web: the fox switches to mice, which eat grass and acorns', 'It starts eating grass'],
+    a: 1, why: 'That is exactly why webs matter: every hunter has a backup menu. (And no — fox stomachs can’t run on salad.)' },
+];
+
+function renderStage5() {
+  const q = S.quiz;
+  const items = QUIZ.map((it, qi) => {
+    const picked = q.picked[qi];
+    const cls = q.submitted ? (picked === it.a ? 'q right' : 'q wrong') : 'q';
+    return h('div', { class: cls },
+      h('p', { class: 'qt' }, `${qi + 1}. ${it.q}`),
+      ...it.opts.map((op, oi) => h('label', {},
+        h('input', { type: 'radio', name: 'q' + qi, checked: picked === oi ? 'checked' : null,
+          disabled: q.submitted ? 'disabled' : null,
+          onchange: () => { S.quiz.picked[qi] = oi; render(); } }),
+        h('span', {}, op))),
+      q.submitted ? h('p', { class: 'why' }, (picked === it.a ? '✓ ' : `✗ Correct: “${it.opts[it.a]}”. `) + it.why) : null);
+  });
+  const allPicked = Object.keys(q.picked).length === QUIZ.length;
+  let band = null;
+  if (q.submitted) {
+    const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
+    band = h('div', { class: 'scoreband' },
+      score === QUIZ.length ? `${score} / ${QUIZ.length} — the forest has no secrets from you. Detective rank: ecologist.`
+        : `${score} / ${QUIZ.length}. Walk the stations once more — the web will wait.`);
+  }
+  return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Quiz · chains, webs and deals'),
+      ...items,
+      h('div', { class: 'scenebtns' },
+        q.submitted
+          ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
+          : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => {
+              S.quiz.submitted = true;
+              if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) S.done[5] = true;
+              render();
+            } }, 'Check my answers'),
+        h('span', { class: 'meter' }, 'Covers ', h('b', {}, 'U6.K1 · food webs & energy flow'))),
+      band));
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 5 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+window.__S = () => S;
+render();
+</script>
+</body>
+</html>
