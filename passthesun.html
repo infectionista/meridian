@@ -670,8 +670,8 @@ function renderStage5() {
   if (q.submitted) {
     const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
     band = h('div', { class: 'scoreband' },
-      score === QUIZ.length ? `${score} / ${QUIZ.length} — the forest has no secrets from you. Detective rank: ecologist.` + (kidSignedIn() ? ' 🏅 Saved to your Science Map!' : '')
-        : `${score} / ${QUIZ.length}. Walk the stations once more — the web will wait.`);
+      score === QUIZ.length ? `${score} / ${QUIZ.length} — the forest has no secrets from you. Detective rank: ecologist.` + (kidSignedIn() ? ' 🏅 Saved to your Science Map!' : ' Sign in on the Science Map, then try again to collect ⚡.')
+        : `${score} / ${QUIZ.length}. Walk the stations once more — the web will wait.` + (kidSignedIn() ? ' ⚡ lands on your map only at 6 / 6.' : ''));
   }
   return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
     h('div', { class: 'card' },
