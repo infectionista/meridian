@@ -192,10 +192,8 @@ tr.on .dot { background: var(--grn); box-shadow: 0 0 8px rgba(163,230,53,.7); }
   <header>
     <div class="eyebrow">Life Sciences with Daniel</div>
     <h1>What <span class="hi">DNA</span> remembers</h1>
-    <p class="lede">On the bench: a jar with a <b>king&rsquo;s blood</b>, one molecule that every living
-      thing carries, and a family tree with room for you on it. Today&rsquo;s lab: read a face out of a
-      220-year-old drop, find the barcode that compares a human with a bacterium, run the copying
-      machine yourself &mdash; and count your way to the tree of life.</p>
+    <p class="lede">A jar with a <b>king&rsquo;s blood</b>. One molecule that every living thing has.
+      And a family tree with room for you on it. Five stops &mdash; you do the work.</p>
     <div class="controls">
       <div class="seg" id="segStages" aria-label="Stations"></div>
       <button class="ghost" id="btnReset" type="button">Start over</button>
@@ -208,7 +206,7 @@ tr.on .dot { background: var(--grn); box-shadow: 0 0 8px rgba(163,230,53,.7); }
   <section class="card" id="logCard">
     <h2>Lab log <span class="count" id="logCount">0 / 5</span></h2>
     <table class="logtable" id="logTable"></table>
-    <p class="logdone" id="logDone" hidden>Five entries. You now own the single best idea in biology: everything alive is one family, and the family tree is written in letters you can count.</p>
+    <p class="logdone" id="logDone" hidden>Five for five. Everything alive is one family, and the family tree is written in letters you can count.</p>
   </section>
 
   <footer class="foot">
@@ -271,12 +269,12 @@ const STAGE_META = [
 ];
 
 const NOTES = {
-  1: '<b>Station 1 \u00b7 The king in the jar.</b> Paris, 21 January 1793: the king is beheaded, and a witness dips his handkerchief in the blood. The cloth ends up sealed in a decorated gourd. 220 years later, scientists open it. Flip the evidence, then make the calls they had to make.',
-  2: '<b>Station 2 \u00b7 The universal barcode.</b> To compare a human with a mushroom with a gut bacterium you need one molecule they all carry. Find it, then read it stretch by stretch.',
-  3: '<b>Station 3 \u00b7 The copying machine.</b> First run the copier yourself, then let it run for centuries and watch the typos pile up. Distance IS time.',
-  4: '<b>Station 4 \u00b7 Build the tree.</b> Four organisms, twenty letters each, six pairs. Count, fill the matrix, then pick the tree the numbers demand.',
-  5: '<b>Station 5 \u00b7 You\u2019re on it too.</b> Last jar: you. Hang yourself on the tree and collect the punchline.',
-  6: '<b>Quiz.</b> Six questions. All six right = certified tree-reader.',
+  1: '<b>Station 1 · The king in the jar.</b> Paris, 1793. A king is killed. A man in the crowd soaks his handkerchief in the blood and keeps it. 220 years later a lab opens the jar. You make the calls.',
+  2: '<b>Station 2 · The barcode everyone has.</b> You, a mushroom, a gut bacterium. To compare them you need one thing all three have. Find it, then read it.',
+  3: '<b>Station 3 · The copying machine.</b> First copy a strand yourself. Then let the machine run for 300 generations and watch the mistakes add up.',
+  4: '<b>Station 4 · Build the tree.</b> Four living things, twenty letters each, six pairs. Count them, fill the table, then pick the tree the numbers allow.',
+  5: '<b>Station 5 · You are on it too.</b> Last jar: you. Put yourself on the tree.',
+  6: '<b>Quiz.</b> Six questions. Get all six and you can read trees.',
 };
 
 let S;
@@ -296,11 +294,11 @@ function freshState() {
 S = freshState();
 
 const LOG = [
-  { id: 'capsule', name: 'DNA is a time capsule', note: 'letters survive centuries - a dried drop can describe a face' },
-  { id: 'job',   name: 'Parasite is a job, not a family', note: 'malaria and the tapeworm share a lifestyle — not an ancestor' },
-  { id: 'barcode', name: 'One molecule everybody has', note: 'ribosome RNA: frozen stretches to line up, variable ones to count' },
-  { id: 'clock', name: 'Typos tick like a clock', note: 'copying mistakes pile up — more differences means a longer time apart' },
-  { id: 'tree',  name: 'Fewest differences = closest cousins', note: 'count letters, draw the tree — and yes, you are on it' },
+  { id: 'capsule', name: 'DNA is a time capsule', note: 'a dried drop still knows what a face looked like' },
+  { id: 'job',   name: 'Parasite is a job, not a family', note: 'same way of living, different families' },
+  { id: 'barcode', name: 'One molecule everybody has', note: 'frozen parts to line up, changing parts to count' },
+  { id: 'clock', name: 'Typos tick like a clock', note: 'more mistakes = more time apart' },
+  { id: 'tree',  name: 'Fewest differences = closest cousins', note: 'count the letters, draw the tree, find yourself' },
 ];
 function logIdea(id) { S.logged.add(id); }
 
@@ -334,20 +332,20 @@ function drawJar(svg, jar, x, y, opts = {}) {
 
 const KINGQ = [
   { ask: 'Can scientists still read DNA from dried blood after 220 years?',
-    opts: [['Yes - DNA is tough; labs read far older samples', true],
+    opts: [['Yes - labs read much older samples', true],
            ['No - DNA falls apart within a year', false],
            ['Only if the cells are still alive', false]],
-    why: 'DNA is a remarkably sturdy molecule. Labs routinely read genomes tens of thousands of years old - mammoths, Neanderthals. A 220-year-old drop is easy mode.' },
-  { ask: 'Three cards, three mismatches. Your verdict?',
+    why: 'DNA is tough. Labs read it from mammoths and Neanderthals, tens of thousands of years old. 220 years is easy.' },
+  { ask: 'Three cards. Nothing matches. What do you say?',
     opts: [['The blood is probably not the king\u2019s', true],
            ['All the old portraits must be wrong', false],
            ['DNA cannot predict eye colour', false]],
-    why: 'When the genetic portrait contradicts everything known about a person - eyes, height AND ancestry - it is the relic that fails the test, not the king. Scientific Reports, 2014.' },
-  { ask: 'The final nail: the Y chromosome of living male-line relatives of the royal family did not match the gourd either. What did DNA just do?',
+    why: 'The eyes, the height and the family roots all say no. So the jar is fake, not the king. (Scientific Reports, 2014)' },
+  { ask: 'Last check: men alive today from the same royal family have a different Y chromosome. So what did DNA just do?',
     opts: [['Busted a 220-year-old fake relic', true],
            ['Proved the king was never executed', false],
            ['Found the real king\u2019s blood', false]],
-    why: 'The letters do not flatter and do not lie. The same letters that unmasked a souvenir are the ones you will use today to build a real family tree.' },
+    why: 'DNA does not lie to make people happy. These are the same letters you will use to build a tree today.' },
 ];
 
 function answerKing(ok) {
@@ -384,9 +382,9 @@ function renderScene1() {
 }
 
 const EVIDENCE = [
-  { id: 'eyes',   label: 'Eyes',         genome: 'brown',       king: 'blue',           note: 'one switch near the HERC2 gene decides blue vs brown' },
-  { id: 'height', label: 'Height',       genome: 'ordinary',    king: 'about 190 cm',   note: 'hundreds of tiny effects add up; the king was the tallest man at Court' },
-  { id: 'roots',  label: 'Family roots', genome: 'north Italy', king: 'German-Polish',  note: 'whole-genome patterns point to where a family lived' },
+  { id: 'eyes',   label: 'Eyes',         genome: 'brown',       king: 'blue',           note: 'one switch in the DNA decides blue or brown' },
+  { id: 'height', label: 'Height',       genome: 'ordinary',    king: 'about 190 cm',   note: 'the king was the tallest man at court' },
+  { id: 'roots',  label: 'Family roots', genome: 'north Italy', king: 'German-Polish',  note: 'the DNA shows where a family came from' },
 ];
 
 function flipCard(id) {
@@ -430,7 +428,7 @@ function renderScene1board() {
 function renderStage1() {
   const q = KINGQ[Math.min(S.s1.q, KINGQ.length - 1)];
   const doneBar = S.done[1] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Case closed: the \u201Croyal relic\u201D was almost certainly a souvenir of someone else entirely. Remember the trick though - a genome can sketch a face. Now let\u2019s see why letters beat looks every time.'),
+    h('span', {}, 'Case closed. The famous relic was almost certainly someone else’s blood. But look what DNA did: it drew a face out of a dried drop.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: bodies lie \u2192')) : null;
   const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
   const cardsUp = Object.keys(S.s1.cards).length === EVIDENCE.length;
@@ -439,7 +437,7 @@ function renderStage1() {
     h('div', { class: 'card scene' },
       S.s1.q === 0 ? renderScene1() : renderScene1board(),
       S.s1.q === 1 && !cardsUp ? h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, h('b', {}, 'Tap all three cards: what the genome said vs what is known about Louis XVI.')),
+        h('span', { class: 'meter' }, h('b', {}, 'Tap all three cards. Left: what the DNA said. Right: what we know about the king.')),
         h('span', { class: 'meter' }, 'flipped: ', h('b', {}, Object.keys(S.s1.cards).length + ' / 3'))) : null,
       asking ? h('div', { class: 'scenebtns' },
         h('span', { class: 'meter' }, h('b', {}, q.ask))) : null,
@@ -449,16 +447,16 @@ function renderStage1() {
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'A portrait drawn from letters'),
+      h('h3', {}, 'A face made of letters'),
       h('div', { class: 'eq' }, 'dried blood \u2192 DNA letters \u2192 a sketch of a face'),
       h('table', {},
         h('tr', {}, h('th', {}, 'Read from the genome'), h('th', {}, 'How')),
-        h('tr', {}, h('td', {}, 'Eye colour'), h('td', {}, 'a famous switch near one gene (HERC2) decides blue vs brown')),
-        h('tr', {}, h('td', {}, 'Height'), h('td', {}, 'hundreds of tiny effects added up - a tall person shows an excess of \u201Ctall\u201D variants')),
-        h('tr', {}, h('td', {}, 'Ancestry'), h('td', {}, 'whole-genome patterns point to where the family lived'))),
-      h('p', { class: 'sub' }, 'The gourd genome was the first ever sequenced from a person of recent history - and its portrait (brown eyes, average height, north-Italian roots) matched the king on nothing. Same tools, by the way, that police use for DNA photofits today.'),
-      h('details', { class: 'fine' }, h('summary', {}, 'The twin relic that fell with it'),
-        h('p', {}, 'A mummified head said to be king Henri IV \u201Cmatched\u201D the gourd at first - then living male-line relatives of the family showed a different Y chromosome from both relics. Two legends busted by one molecule. Science checks itself; that is the whole point of it.'))
+        h('tr', {}, h('td', {}, 'Eye colour'), h('td', {}, 'one switch in the DNA: blue or brown')),
+        h('tr', {}, h('td', {}, 'Height'), h('td', {}, 'many tiny DNA changes add up to tall or short')),
+        h('tr', {}, h('td', {}, 'Ancestry'), h('td', {}, 'patterns show where the family came from'))),
+      h('p', { class: 'sub' }, 'This was the first full genome ever read from a person of recent history. The face it drew matched the king on nothing. Police use the same trick today.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'The other fake'),
+        h('p', {}, 'A mummified head was sold as king Henri IV. At first it seemed to match the jar. Then living men from the same family turned out to have a different Y chromosome from both. Two stories busted by one molecule.'))
     ));
 }
 
@@ -466,9 +464,9 @@ function renderStage1() {
 
 const MOLECULES = [
   { id: 'hb',  name: 'Haemoglobin', ok: false, why: 'Only animals with blood carry it. A mushroom has none.' },
-  { id: 'chl', name: 'Chlorophyll', ok: false, why: 'Plants and some bacteria only. You have none of it.' },
+  { id: 'chl', name: 'Chlorophyll', ok: false, why: 'Only plants and some bacteria. You have none.' },
   { id: 'col', name: 'Collagen',    ok: false, why: 'Animal glue. Bacteria never invented it.' },
-  { id: 'rna', name: 'Ribosome RNA', ok: true,  why: 'Every living cell builds proteins, so every living cell has a ribosome - and the RNA inside it. 16S in bacteria, 18S in you.' },
+  { id: 'rna', name: 'Ribosome RNA', ok: true,  why: 'Every living cell makes proteins, so every living cell has a ribosome - and RNA inside it. Called 16S in bacteria, 18S in you.' },
 ];
 
 /* nine stretches of the molecule: frozen ones to line up, variable ones to count */
@@ -487,11 +485,11 @@ const CONSERVED = ['GTGCCAGC', 'GTGCCAGC', 'GTGCCAGC'];
 const ROW3 = [['You', 'var(--org)'], ['Mushroom', 'var(--vio)'], ['Gut bacterium', 'var(--grn)']];
 
 const WOESE = {
-  ask: 'Carl Woese read this one molecule in hundreds of species - and found something nobody had seen. What?',
+  ask: 'Carl Woese read this one molecule in hundreds of species and found something nobody expected. What?',
   opts: [['A whole third domain of life: the archaea', true],
          ['That bacteria are really tiny plants', false],
          ['That viruses belong at the root', false]],
-  why: 'Some "bacteria" turned out to be no closer to bacteria than you are. By body shape nobody could tell. The molecule could. Three domains: Bacteria, Archaea, Eukarya.',
+  why: 'Some things we called bacteria turned out to be as far from bacteria as you are. All the bodies looked the same. The molecule told them apart. Three big groups: bacteria, archaea, and everything with a nucleus - like you.',
 };
 
 function pickMolecule(id) {
@@ -508,8 +506,8 @@ function lookBlock(i) {
   S.s2.look = i;
   const seg = S16[i];
   S.s2.msg = 'good:' + (seg.c
-    ? 'Frozen stretch - identical in all three. This is what lets you line the molecules up at all.'
-    : seg.n + ' - the letters differ. This is what you count.');
+    ? 'Frozen part - the same in all three. This is what lets you line the molecules up.'
+    : seg.n + ' - the letters are different here. This is what you count.');
   if (Object.keys(S.s2.blocks).length === S16.length) S.s2.done16 = true;
   render();
 }
@@ -532,7 +530,7 @@ function renderScene2pick() {
 
 function renderScene2strip() {
   const svg = h('svg', { id: 'scene', viewBox: '0 0 660 268', role: 'img', 'aria-label': 'The ribosome RNA molecule, stretch by stretch' });
-  svg.append(h('text', { x: 30, y: 22, class: 'lab big' }, 'ribosome RNA, end to end · tap every stretch'));
+  svg.append(h('text', { x: 30, y: 22, class: 'lab big' }, 'ribosome RNA, start to end · tap every part'));
   const x0 = 30, w = 600 / S16.length;
   S16.forEach((seg, i) => {
     const shown = S.s2.blocks[i];
@@ -554,13 +552,13 @@ function renderScene2strip() {
   const look = S.s2.look;
   if (look === null || look === undefined) {
     svg.append(h('text', { x: 330, y: 150, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--dim)' },
-      'tap a stretch to read it in all three'));
+      'tap a part to read it in all three'));
     return svg;
   }
   const seg = S16[look];
   const rows = seg.c ? CONSERVED : seg.seq;
   svg.append(h('text', { x: 30, y: 116, class: 'lab', fill: seg.c ? 'var(--grn)' : 'var(--org)' },
-    seg.c ? 'frozen stretch · same in all three' : seg.n + ' · variable stretch'));
+    seg.c ? 'frozen part · same in all three' : seg.n + ' · changing part'));
   rows.forEach((sq, r) => {
     const y = 146 + r * 34;
     svg.append(h('text', { x: 30, y, class: 'lab big', fill: ROW3[r][1] }, ROW3[r][0]));
@@ -584,18 +582,18 @@ function renderStage2() {
   const picking = S.s2.phase === 'pick';
   const seen = Object.keys(S.s2.blocks).length;
   const doneBar = S.done[2] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Frozen stretches to line them up, variable stretches to count. That is the whole trick behind every tree in this lesson - and behind every gut-microbiome test in a lab today.'),
+    h('span', {}, 'Frozen parts to line them up, changing parts to count. That is the trick behind every tree in this lesson - and behind every gut test in a lab today.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: the copying machine →')) : null;
 
   const controls = picking
     ? h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, h('b', {}, 'Which molecule could you compare across all four?')),
+        h('span', { class: 'meter' }, h('b', {}, 'Which one could you compare in all four?')),
         ...MOLECULES.map(m => h('button', {
           class: 'act' + (S.s2.tried[m.id] ? '' : ' alt'), type: 'button',
           disabled: S.s2.tried[m.id] ? 'disabled' : null,
           onclick: () => pickMolecule(m.id) }, S.s2.tried[m.id] ? m.name + ' ✗' : m.name)))
     : h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, 'stretches read: ', h('b', {}, seen + ' / ' + S16.length)),
+        h('span', { class: 'meter' }, 'parts read: ', h('b', {}, seen + ' / ' + S16.length)),
         S.s2.done16 && !S.done[2] ? h('span', { class: 'meter' }, h('b', {}, WOESE.ask)) : null,
         ...(S.s2.done16 && !S.done[2]
           ? WOESE.opts.map(([txt, ok]) => h('button', { class: 'act alt', type: 'button', onclick: () => answerWoese(ok) }, txt))
@@ -608,16 +606,16 @@ function renderStage2() {
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'Why this molecule and not another'),
-      h('div', { class: 'eq' }, 'in every cell · same job everywhere · frozen + variable in one'),
+      h('h3', {}, 'Why this one and not another'),
+      h('div', { class: 'eq' }, 'in every cell · same job · frozen + changing'),
       h('table', {},
         h('tr', {}, h('th', {}, 'Needed'), h('th', {}, 'Ribosome RNA')),
-        h('tr', {}, h('td', {}, 'Everyone has it'), h('td', {}, 'no ribosome = no life. 16S in bacteria and archaea, 18S in you')),
-        h('tr', {}, h('td', {}, 'Same job always'), h('td', {}, 'it never changed career, so changes are drift, not redesign')),
-        h('tr', {}, h('td', {}, 'Right speed'), h('td', {}, 'frozen stretches to line up, nine variable ones (V1–V9) to count'))),
-      h('p', { class: 'sub' }, 'Did you notice? The mushroom’s letters sit closer to yours than the bacterium’s do. Fungi are closer relatives of yours than any bacterium is. The molecule says so before anyone looks at a body.'),
+        h('tr', {}, h('td', {}, 'Everyone has it'), h('td', {}, 'no ribosome, no life. 16S in bacteria, 18S in you')),
+        h('tr', {}, h('td', {}, 'Same job always'), h('td', {}, 'it always did the same job, so changes are random, not a redesign')),
+        h('tr', {}, h('td', {}, 'Right speed'), h('td', {}, 'frozen parts to line up, nine changing parts (V1–V9) to count'))),
+      h('p', { class: 'sub' }, 'Notice: the mushroom’s letters are closer to yours than the bacterium’s. Mushrooms really are closer family to you than any bacterium. The molecule says so before anyone looks at a body.'),
       h('details', { class: 'fine' }, h('summary', {}, 'And the virus?'),
-        h('p', {}, 'No ribosome at all - it borrows yours. So it carries no 16S, nothing to line up, no place on this tree. Where viruses come from is still an open argument.'))
+        h('p', {}, 'A virus has no ribosome at all - it borrows yours. So it has no 16S, nothing to line up, and no place on this tree. Where viruses came from is still an open question.'))
     ));
 }
 
@@ -648,10 +646,10 @@ function passGenerations() {
 }
 function diffCount(a, b) { let n = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; }
 function answerDrift(ok) {
-  if (!ok) { S.s3.msg = 'bad:Nope - no virus and no diet changes letters. Only the copying machine itself slips.'; render(); return; }
+  if (!ok) { S.s3.msg = 'bad:No. Only the copying machine itself slips.'; render(); return; }
   S.s3.answered = true;
   S.done[3] = true; logIdea('clock');
-  S.s3.msg = 'good:Exactly. Every copy risks a tiny typo; separated lineages collect different typos; the count only grows.';
+  S.s3.msg = 'good:Right. Every copy can slip. Two separated groups collect different slips, and the count only grows.';
   render();
 }
 
@@ -674,13 +672,13 @@ function pairBase(b) {
   const i = S.s3.built.length;
   const want = PAIR[TEMPLATE[i]];
   if (b !== want) {
-    S.s3.msg = 'bad:' + TEMPLATE[i] + ' never pairs with ' + b + '. A–T and G–C. Always, in everything alive.';
+    S.s3.msg = 'bad:' + TEMPLATE[i] + ' never pairs with ' + b + '. A goes with T, G goes with C. Always.';
     render(); return;
   }
   S.s3.built += b;
   if (S.s3.built.length === TEMPLATE.length) {
     S.s3.phase = 'clock';
-    S.s3.msg = 'good:✓ A perfect copy. The real machine also proofreads and catches almost every slip — and "almost" is the whole story of this lesson.';
+    S.s3.msg = 'good:✓ A perfect copy. The real machine checks its own work too, and catches almost every mistake. Almost.';
   } else {
     S.s3.msg = 'good:✓ ' + TEMPLATE[i] + '–' + b;
   }
@@ -723,8 +721,8 @@ function renderStage3pair() {
     h('aside', { class: 'card rx' },
       h('h3', {}, 'One rule, no exceptions'),
       h('div', { class: 'eq' }, 'A ↔ T        G ↔ C'),
-      h('p', {}, 'Each letter has exactly one partner, so one strand is enough to rebuild the other. That is why DNA can be copied at all — and why a 220-year-old dried drop still held a readable text.'),
-      h('p', { class: 'sub' }, 'The full factory — unzipping, pairing, proofreading — is the Copy the Code trainer, linked under the page. Here you only need the rule.')
+      h('p', {}, 'Each letter has one partner only. So one side is enough to rebuild the other. That is why DNA can be copied - and why a 220-year-old dried drop still held a readable text.'),
+      h('p', { class: 'sub' }, 'The whole factory is in the Copy the Code trainer, linked under the page. Here you only need the rule.')
     ));
 }
 
@@ -736,13 +734,13 @@ function renderStage3clock() {
   const started = !!S.s3.seqA;
   const d = started ? diffCount(S.s3.seqA, S.s3.seqB) : 0;
   const doneBar = S.done[3] ? h('div', { class: 'donebar' },
-    h('span', {}, `After ${S.s3.gen * 100} generations your two lineages are ${d} letters apart. Count the differences → read the time. That is the molecular clock, and it is the engine behind the next station.`),
+    h('span', {}, `After ${S.s3.gen * 100} generations the two islands are ${d} letters apart. Count the differences, read the time. That is the molecular clock.`),
     h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: build the tree →')) : null;
   const [kind, msg] = S.s3.msg ? S.s3.msg.split(/:(.*)/s) : ['', ''];
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card' },
       h('h2', {}, 'Round 2 · one ancestor, two islands'),
-      h('p', { class: 'sub', style: 'margin-top:0' }, 'A single microbe population splits onto two islands. Same starting DNA. The copying machine is excellent — but not perfect.'),
+      h('p', { class: 'sub', style: 'margin-top:0' }, 'One group of microbes splits onto two islands. Same DNA at the start. The copying machine is very good, but not perfect.'),
       h('div', { style: 'background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:12px' },
         h('div', { class: 'seqrow', style: 'margin:4px 0' },
           h('span', { style: 'color:var(--dim);display:inline-block;width:110px' }, 'ancestor '), ANCESTOR),
@@ -755,19 +753,19 @@ function renderStage3clock() {
           S.s3.gen === 0 ? '⏳ Let 100 generations pass' : S.s3.gen < 3 ? '⏳ Another 100 generations' : 'Clock has ticked 3×'),
         h('span', { class: 'meter' }, 'generations: ', h('b', {}, String(S.s3.gen * 100)))),
       S.s3.gen >= 3 && !S.s3.answered ? h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, h('b', {}, 'So what makes the letters drift apart?')),
+        h('span', { class: 'meter' }, h('b', {}, 'So what pushes the letters apart?')),
         h('button', { class: 'act alt', type: 'button', onclick: () => answerDrift(false) }, 'Viruses rewrite them'),
         h('button', { class: 'act alt', type: 'button', onclick: () => answerDrift(true) }, 'Copying typos pile up'),
         h('button', { class: 'act alt', type: 'button', onclick: () => answerDrift(false) }, 'Different food')) : null,
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'The clock inside the copier'),
-      h('div', { class: 'eq' }, 'more time apart → more typos → more differences'),
-      h('p', {}, 'DNA copying comes with a proofreader that catches almost every mistake — but “almost” is the key word. The rare typos that slip through get inherited, and separated lineages collect DIFFERENT ones. The count between them can only grow.'),
-      h('p', { class: 'sub' }, 'Flip it around and you get a superpower: count the differences today and you can estimate how long ago two creatures parted ways. Letters become a clock.'),
+      h('h3', {}, 'The clock inside the machine'),
+      h('div', { class: 'eq' }, 'more time apart → more mistakes → more differences'),
+      h('p', {}, 'The copying machine checks its own work and catches almost every mistake. Almost. The rare ones that get through are passed on, and two separated groups collect different ones. The count can only grow.'),
+      h('p', { class: 'sub' }, 'Turn it around and you get a superpower: count the differences today and you can tell how long ago two creatures split.'),
       h('details', { class: 'fine' }, h('summary', {}, 'Want the full copying machine?'),
-        h('p', {}, 'The Copy the Code trainer (link below the page) walks the whole factory: unzipping, pairing, proofreading — and uses cytochrome c as a real molecular clock between species. This station is its movie trailer.'))
+        h('p', {}, 'The Copy the Code trainer walks through the whole factory, and uses a real protein as a clock between species. This station is the trailer.'))
     ));
 }
 
@@ -790,19 +788,19 @@ function answerDist(v) {
     S.s4.msg = 'good:✓ ' + key.replace('-', ' vs ') + ': ' + v + ' differences.';
     S.s4.pair = null;
   } else {
-    S.s4.msg = 'bad:Count the glowing letters again - every orange position is one difference.';
+    S.s4.msg = 'bad:Count the orange letters again. Each one is one difference.';
   }
   render();
 }
 function answerClosest(pair) {
-  if (pair === '1-2') { S.s4.closest = pair; S.s4.msg = 'good:✓ Cholera and its seawater cousin: only 2 letters apart - the most recent split.'; }
+  if (pair === '1-2') { S.s4.closest = pair; S.s4.msg = 'good:✓ Only 2 letters apart. That is the newest split.'; }
   else S.s4.msg = 'bad:Look for the SMALLEST number in the matrix.';
   render();
 }
 function answerOdd(n) {
   if (n === 4) {
     S.s4.odd = 4;
-    S.s4.msg = 'good:✓ Malaria: 12 away from everyone at once - so its branch leaves first. Now pick the shape.';
+    S.s4.msg = 'good:✓ Malaria is 12 away from all three at once, so its branch leaves first. Now pick the shape.';
   } else S.s4.msg = 'bad:Who is far from EVERYBODY at once?';
   render();
 }
@@ -848,9 +846,9 @@ function renderTree4() {
 const TOPOS = {
   A: { label: '((1, 2), 3), 4', order: ['4', '3', '1', '2'], ok: true },
   B: { label: '((1, 4), 2), 3', order: ['3', '2', '1', '4'], ok: false,
-       why: 'That hangs malaria next to cholera. The matrix says they are 12 apart — the biggest gap on the board.' },
+       why: 'That puts malaria next to cholera. The table says they are 12 apart - the biggest gap on the board.' },
   C: { label: '(1, 2) + (3, 4)', pairs: true, ok: false,
-       why: 'That makes two equal couples. But 3 sits 6 from 1 and 2, and 12 from 4 — it is nobody’s partner.' },
+       why: 'That makes two equal pairs. But 3 is 6 away from 1 and 2, and 12 from 4. It is nobody’s partner.' },
 };
 const TIPCOL = { '1': 'var(--grn)', '2': 'var(--cyn)', '3': 'var(--vio)', '4': 'var(--pnk)' };
 
@@ -884,14 +882,14 @@ function answerTopo(kind) {
   if (!t.ok) { S.s4.msg = 'bad:' + t.why; render(); return; }
   S.s4.topo = kind;
   S.done[4] = true; logIdea('tree');
-  S.s4.msg = 'good:✓ ((1, 2), 3), 4. Smallest distance joins first, the odd one hangs deepest. You just built a tree from nothing but counted letters.';
+  S.s4.msg = 'good:✓ ((1, 2), 3), 4. The smallest number joins first, the odd one hangs deepest. You built a tree out of counted letters.';
   render();
 }
 
 function renderStage4() {
   const filledN = Object.keys(S.s4.filled).length;
   const doneBar = S.done[4] ? h('div', { class: 'donebar' },
-    h('span', {}, 'The tree: ((1, 2), 3), 4 - exactly what your deck promised. Three bacteria huddle together; malaria stands apart with its nucleus. You just did real phylogenetics with a pencil.'),
+    h('span', {}, 'Your tree: ((1, 2), 3), 4 - exactly what your slides promised. The three bacteria stay together; malaria stands apart. That was real science, done with a pencil.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Final station →')) : null;
   const [kind, msg] = S.s4.msg ? S.s4.msg.split(/:(.*)/s) : ['', ''];
   const pair = S.s4.pair;
@@ -899,7 +897,7 @@ function renderStage4() {
   const pb = pair ? ORGS4.find(o => o.n === pair[1]) : null;
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card' },
-      h('h2', {}, 'Six pairs, one matrix ', h('span', { class: 'count' }, `filled ${filledN} / 6`)),
+      h('h2', {}, 'Six pairs, one table ', h('span', { class: 'count' }, `filled ${filledN} / 6`)),
       h('div', { style: 'background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto' },
         ...ORGS4.map(o => h('div', { class: 'seqrow', style: 'margin:3px 0' },
           h('span', { style: 'color:' + o.color + ';display:inline-block;width:118px' }, o.n + ' · ' + o.name + ' '),
@@ -923,7 +921,7 @@ function renderStage4() {
         h('span', { class: 'meter' }, h('b', {}, 'And the odd one out?')),
         ...[2, 3, 4].map(n => h('button', { class: 'act alt', type: 'button', onclick: () => answerOdd(n) }, String(n)))) : null,
       S.s4.odd && !S.done[4] ? h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, h('b', {}, 'Which tree do the numbers demand?')),
+        h('span', { class: 'meter' }, h('b', {}, 'Which tree do the numbers allow?')),
         ...['A', 'B', 'C'].map(k => h('button', {
           class: 'act alt', type: 'button', style: 'padding:10px 12px',
           'aria-label': 'Tree ' + TOPOS[k].label, onclick: () => answerTopo(k) },
@@ -932,30 +930,30 @@ function renderStage4() {
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'The distance matrix'),
+      h('h3', {}, 'The table of differences'),
       renderMatrix(),
       S.done[4] ? renderTree4() : h('p', { class: 'sub' }, 'Fill all six cells and the tree will draw itself here.'),
-      h('p', { class: 'sub' }, 'Smallest number = most recent split. Biggest-to-everyone = earliest branch. That is the whole algorithm - the Build a Tree trainer (link below) turns it into a full game with more species.'),
+      h('p', { class: 'sub' }, 'Smallest number = newest split. Biggest to everyone = oldest branch. That is the whole method. Build a Tree turns it into a full game.'),
       h('details', { class: 'fine' }, h('summary', {}, 'Why is malaria exactly 12 from all three?'),
-        h('p', {}, 'Because all three bacteria sit on the far side of the SAME ancient split. The distance to malaria was mostly collected before the bacteria started splitting among themselves - so each of them is the same distance across the old divide.'))
+        h('p', {}, 'All three bacteria sit on the far side of the same old split. Most of the distance to malaria was built up before the bacteria split from each other. So each one is the same distance across that old gap.'))
     ));
 }
 
 /* ================= station 5 · you're on it ================= */
 
 const Q5 = [
-  { ask: '\u201CCholera and malaria must be close relatives - both are tiny and both cause disease.\u201D',
-    opts: [['False - that\u2019s a job description, not a family', true], ['True - similar lifestyle, similar family', false]],
-    why: 'Causing disease is a JOB. Cholera is a bacterium; malaria is a eukaryote with a nucleus, like you. Their last common ancestor sits at the very root.' },
-  { ask: 'So where does LUCA - the ancestor of every living thing - sit on your tree?',
+  { ask: '“Cholera and malaria must be close family - both are tiny and both make you sick.”',
+    opts: [['False - that is a job, not a family', true], ['True - same way of living, same family', false]],
+    why: 'Making people sick is a JOB. Cholera is a bacterium. Malaria has a nucleus, like you. Their shared ancestor sits at the very root.' },
+  { ask: 'Where does LUCA - the ancestor of everything alive - sit on your tree?',
     opts: [['At the root, before the first split', true], ['Next to the bacteria', false], ['Between you and the tapeworm', false]],
-    why: 'LUCA is the trunk itself: the one cell population whose machine - ribosome, code, ATP - every living thing still runs today.' },
+    why: 'LUCA is the trunk: the one group of cells whose machine - ribosome, code, ATP - everything alive still runs on.' },
 ];
 
 const SOCKETS = [
-  { id: 'worm', x: 424, y: 212, ok: true,  why: 'Right. You and the tapeworm are both ANIMALS - many cells, nerves, muscles. You split roughly 600 million years ago, long after malaria\u2019s line left.' },
+  { id: 'worm', x: 424, y: 212, ok: true,  why: 'Right. You and the tapeworm are both ANIMALS - many cells, nerves, muscles. You split about 600 million years ago, long after malaria’s line left.' },
   { id: 'mal',  x: 300, y: 160, ok: false, why: 'Malaria has a nucleus like you, but its line left more than a billion years ago. Look for something with nerves and muscles.' },
-  { id: 'bact', x: 300, y: 42,  ok: false, why: 'That is the bacterial side of the deepest split there is. You are nowhere near it.' },
+  { id: 'bact', x: 300, y: 42,  ok: false, why: 'That is the bacteria side of the oldest split there is. You are nowhere near it.' },
 ];
 
 function hangSelf(id) {
@@ -1017,14 +1015,14 @@ function renderScene5() {
 function renderStage5() {
   const q = Q5[Math.min(S.s5.q, Q5.length - 1)];
   const doneBar = S.done[5] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Read the top line again - out loud. That sentence sounds insane and is completely true, and now you can PROVE it with twenty letters and a pencil. Quiz time.'),
+    h('span', {}, 'Read the green line out loud. It sounds crazy and it is true - and you can now prove it with twenty letters.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(6) }, 'Take the quiz →')) : null;
   const [kind, msg] = S.s5.msg ? S.s5.msg.split(/:(.*)/s) : ['', ''];
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card scene' },
       renderScene5(),
       !S.s5.hung ? h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, h('b', {}, 'One more jar arrives: YOU. Tap the spot on the tree where your branch belongs.'))) : null,
+        h('span', { class: 'meter' }, h('b', {}, 'One more jar: YOU. Tap the spot on the tree where your branch goes.'))) : null,
       S.s5.hung && !S.done[5] ? h('div', { class: 'scenebtns' },
         h('span', { class: 'meter' }, h('b', {}, q.ask))) : null,
       S.s5.hung && !S.done[5] ? h('div', { class: 'scenebtns' },
@@ -1033,36 +1031,36 @@ function renderStage5() {
       doneBar),
     h('aside', { class: 'card rx' },
       h('h3', {}, 'One tree, no exceptions'),
-      h('p', {}, 'Every living thing ever found - from gut bacteria to blue whales to you - plugs into this one tree. Not two trees, not five. One. That is the single most tested claim in biology, and the letters agree with it every time anyone counts.'),
-      h('p', { class: 'sub' }, 'The virus jar is still on the bench, outside the picture - no ribosome, no seat. It haunts the tree instead of sitting on it.'),
+      h('p', {}, 'Every living thing ever found plugs into this one tree. Not two trees. One. It is the most tested idea in biology, and the letters agree every time anyone counts.'),
+      h('p', { class: 'sub' }, 'The virus jar is still on the bench, outside the picture. No ribosome, no seat.'),
       h('details', { class: 'fine' }, h('summary', {}, 'How deep does YOUR branch go?'),
-        h('p', {}, 'You-and-tapeworm split: roughly 600 million years ago. Your line and malaria’s: well over a billion. The bacteria-eukaryote split at the bottom: older still. The twenty letters you counted today are echoes of those dates.'))
+        h('p', {}, 'You and the tapeworm split about 600 million years ago. You and malaria: over a billion. The split at the bottom is older still. The twenty letters you counted today are echoes of those dates.'))
     ));
 }
 
 /* ================= station 6 · quiz ================= */
 
 const QUIZ = [
-  { q: 'Why did scientists decide the gourd blood was probably NOT Louis XVI\u2019s?',
-    opts: ['DNA cannot survive 220 years', 'The genetic portrait - brown eyes, ordinary height, north-Italian roots - contradicted the real king on every count', 'The gourd was the wrong shape'],
-    a: 1, why: 'Blue-eyed, ~190 cm, German-Polish ancestry - the genome matched none of it. The relic failed, not the method.' },
+  { q: 'Why did scientists decide the blood in the jar was probably NOT the king’s?',
+    opts: ['DNA cannot survive 220 years', 'The DNA said brown eyes, normal height, Italian roots - the king was none of those', 'The gourd was the wrong shape'],
+    a: 1, why: 'The king had blue eyes, was about 190 cm, and had German-Polish family. The DNA matched none of it.' },
   { q: '“Parasite is a job, not a family” means…',
-    opts: ['Parasites cannot be classified', 'Same lifestyle doesn’t mean same ancestors', 'All parasites are related'],
-    a: 1, why: 'Malaria (eukaryote) and tapeworm (animal) both freeload - from totally different branches of the tree.' },
-  { q: 'Why is ribosome RNA the molecule used to compare a human with a gut bacterium?',
+    opts: ['Parasites cannot be classified', 'Living the same way does not mean being related', 'All parasites are related'],
+    a: 1, why: 'Malaria and the tapeworm both freeload, from completely different branches.' },
+  { q: 'Why do scientists use ribosome RNA to compare a human with a gut bacterium?',
     opts: ['It mutates faster than anything else in the cell',
-           'Every living cell has it, and it carries frozen stretches to line up plus variable ones to count',
+           'Every living cell has it, with frozen parts to line up and changing parts to count',
            'It is the longest molecule in the cell'],
-    a: 1, why: 'No ribosome, no life. The frozen stretches let you align the sequences at all; the variable ones (V1\u2013V9) carry the differences you count.' },
-  { q: 'Two lineages split 400 generations ago. Compared with lineages split 100 generations ago, their DNA will show…',
+    a: 1, why: 'No ribosome, no life. The frozen parts let you line the sequences up; the changing parts hold the differences you count.' },
+  { q: 'Two groups split 400 generations ago. Next to groups that split 100 generations ago, their DNA will show…',
     opts: ['More letter differences', 'Fewer letter differences', 'The same number'],
-    a: 0, why: 'Typos pile up with time. More time apart = more differences = the molecular clock.' },
-  { q: 'In your matrix, cholera-to-cousin was 2 and malaria was 12 from everyone. So…',
-    opts: ['Malaria is the closest relative of cholera', 'Cholera & cousin split recently; malaria branched off long before', 'The numbers are random'],
-    a: 1, why: 'Smallest distance = newest split; biggest-to-all = earliest branch. ((1,2),3),4.' },
+    a: 0, why: 'Mistakes add up with time. More time apart = more differences. That is the clock.' },
+  { q: 'In your table, cholera to its cousin was 2, and malaria was 12 from everyone. So…',
+    opts: ['Malaria is the closest relative of cholera', 'Cholera and its cousin split recently; malaria split off long before', 'The numbers are random'],
+    a: 1, why: 'Smallest = newest split. Biggest to everyone = oldest branch. ((1,2),3),4.' },
   { q: 'Pick the TRUE sentence.',
     opts: ['Cholera and malaria are close relatives', 'You and the tapeworm share a more recent ancestor than cholera shares with malaria', 'Viruses sit at the root of the tree'],
-    a: 1, why: 'You + tapeworm = both animals, split ~600 Mya. Cholera vs malaria spans the deepest split there is.' },
+    a: 1, why: 'You and the tapeworm are both animals, split about 600 million years ago. Cholera and malaria sit across the oldest split there is.' },
 ];
 
 function renderStage6() {
@@ -1084,8 +1082,8 @@ function renderStage6() {
   if (q.submitted) {
     const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
     band = h('div', { class: 'scoreband' },
-      score === QUIZ.length ? `${score} / ${QUIZ.length} — certified tree-reader. The lab is yours.`
-        : `${score} / ${QUIZ.length}. Revisit the stations — the jars aren’t going anywhere.`);
+      score === QUIZ.length ? `${score} / ${QUIZ.length} - you can read trees now. The lab is yours.`
+        : `${score} / ${QUIZ.length}. Go back to the stations - the jars are not going anywhere.`);
   }
   return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
     h('div', { class: 'card' },
