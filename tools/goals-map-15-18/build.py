@@ -135,13 +135,12 @@ ASSIGN_PED  = L('Family genealogical chart - pedigree task', MAT + 'family-genea
 ASSIGN_PEDT = L('Pedigree answer sheet - template (.docx)', MAT + 'pedigree-answer-sheet.docx', 'assignment')
 
 NODE_LINKS = {
- 'U4.A2': [ASSIGN_PED, ASSIGN_PEDT],
  'U1.K2': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U5.K1': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U3.K1': [TRAINER_CC, SLIDES_DNA],
  'U3.K2': [TRAINER_CC, SLIDES_DNA],
- 'U6.A2': [TRAINER_BT, ASSIGN_BAT, SLIDES_TREE, READ_TREE],
- 'U6.K3': [TRAINER_BT, SLIDES_TREE, READ_TREE],
+ 'U6.A2': [TRAINER_BT, ASSIGN_BAT, ASSIGN_PED, ASSIGN_PEDT, SLIDES_TREE, READ_TREE],
+ 'U6.K3': [TRAINER_BT],
  'U6.K2': [SLIDES_MAL],
  'U7.K2': [SLIDES_RAB],
  'U7.K1': [SLIDES_COS],
