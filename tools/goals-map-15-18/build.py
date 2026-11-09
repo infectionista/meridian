@@ -114,6 +114,7 @@ def L(t, u, k):
 TRAINER_BT = L('Build a Tree - phylogenetics trainer', SITE, 'trainer')
 TRAINER_MB = L('Make and Break - reactions & ATP trainer', SITE + 'makebreak.html', 'trainer')
 TRAINER_CC = L('Copy the Code - DNA replication trainer', SITE + 'copycode.html', 'trainer')
+TRAINER_TTT = L('Trace the Trait - pedigrees & medical genetics trainer', SITE + 'tracethetrait.html', 'trainer')
 
 MAT = SITE + 'materials/'
 SLIDES_MR = L('Molecules & Reactions - lesson slides', MAT + 'molecules-reactions-slides.pdf', 'slides')
@@ -139,8 +140,8 @@ NODE_LINKS = {
  'U5.K1': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U3.K1': [TRAINER_CC, SLIDES_DNA],
  'U3.K2': [TRAINER_CC, SLIDES_DNA],
- 'U6.A2': [TRAINER_BT, ASSIGN_BAT, ASSIGN_PED, ASSIGN_PEDT, SLIDES_TREE, READ_TREE],
- 'U6.K3': [TRAINER_BT],
+ 'U6.A2': [TRAINER_TTT, ASSIGN_PED, ASSIGN_PEDT],
+ 'U6.K3': [TRAINER_BT, ASSIGN_BAT, SLIDES_TREE, READ_TREE],
  'U6.K2': [SLIDES_MAL],
  'U7.K2': [SLIDES_RAB],
  'U7.K1': [SLIDES_COS],
@@ -296,6 +297,6 @@ print('trails:', len(TRAILS))
 
 data = {'units': UNITS, 'nodes': nodes, 'edges': edges, 'trails': TRAILS}
 tpl = open(TEMPLATE, encoding='utf-8').read()
-html = tpl.replace('__DATA__', json.dumps(data, ensure_ascii=False)).replace('__AGES__', '15–18')
+html = tpl.replace('__DATA__', json.dumps(data, ensure_ascii=False)).replace('__AGES__', '15–18').replace('__CROSSLINK__', '<a class="ghost" style="text-decoration:none" href="goals-map-11-14.html">🧭 Need the basics? Science Map 11–14</a>')
 open(ROOT / 'goals-map-15-18.html', 'w', encoding='utf-8').write(html)
 print('written', ROOT / 'goals-map-15-18.html', ',', len(html), 'bytes')

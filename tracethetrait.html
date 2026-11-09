@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trace the Trait</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Trace the Trait — pedigree charts and medical genetics for 15-18.
+   Meridian series: scene left, idea card right, big-ideas log below. */
+:root {
+  color-scheme: light;
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --leaf:        #5B9E22;
+  --leaf-soft:   #E2FDC7;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--fg);
+  font-family: var(--ui); font-size: 15px; line-height: 1.55; margin: 0;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+}
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--violet); }
+h1 { font-size: clamp(27px, 5.4vw, 42px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0; text-wrap: balance; }
+h1 .hi { color: var(--pink-deep); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 68ch; }
+.lede a { color: var(--pink-deep); font-weight: 600; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--pink-deep);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.card > h2 { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--violet); margin: 0 0 12px; }
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .stagegrid { grid-template-columns: 1fr; } }
+.scene svg { width: 100%; height: auto; display: block; user-select: none; }
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+.act.rose { background: var(--pink-deep); }
+.act.rose:hover { background: #934669; }
+
+.meter { font: 500 13px/1.3 var(--ui); color: var(--fg-dim); background: var(--panel-2); border-radius: 8px; padding: 9px 12px; }
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+.toast.good { color: var(--mint-deep); }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+.rx h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.rx .eq {
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.rx td, .rx th { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.rx tr:first-child :is(td, th) { border-top: 0; }
+.rx th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--violet); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+.chip.rose { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.mint { background: var(--mint); color: var(--mint-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; }
+.logtable tr.off { opacity: .38; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--pink-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--violet-soft); color: var(--violet); font-weight: 700; }
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.foot a { color: var(--violet); font-weight: 600; }
+
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.big { font-size: 13px; fill: var(--fg); font-weight: 700; }
+.pickable { cursor: pointer; }
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--pink-deep);
+  transform-box: fill-box; animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-26px); } }
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+@keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences · Genetics &amp; heredity</div>
+    <h1>Trace the <span class="hi">Trait</span></h1>
+    <p class="lede">You are about to draw your own family&rsquo;s chart — so first learn to read one the way
+      a medical geneticist does. Five symbols, two detective rules, one square of probabilities,
+      a royal scandal, and the quiet work of genetic counselling. A trait is hiding in a family.
+      Your job: trace it.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stations"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Big ideas collected <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five ideas — enough to read a family chart, calculate a risk, and understand what a genetic counsellor actually does for a living.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U6.A2 · family trees</span>
+      <span class="chip vio">U4.K3 · inheritance patterns</span>
+      <span class="chip vio">U4.A2 · pedigree problems</span>
+    </div>
+    Your assignment:
+    <a href="https://meridian-one-jet.vercel.app/materials/family-genealogical-chart.pdf">Family genealogical chart (task)</a> ·
+    <a href="https://meridian-one-jet.vercel.app/materials/pedigree-answer-sheet.docx">answer sheet (.docx)</a><br>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-15-18.html">Science Map 15–18</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+/* ---------------- state ---------------- */
+
+const STAGE_META = [
+  { n: 1, label: 'The language' },
+  { n: 2, label: 'Dominant or recessive?' },
+  { n: 3, label: 'The 25% square' },
+  { n: 4, label: 'The royal disease' },
+  { n: 5, label: 'The counsellor' },
+  { n: 6, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: '<b>Station 1 · The language.</b> A pedigree chart is a sentence written in squares and circles. Before you can trace anything, you must read fluently. Four reading tasks — click the right person in the family below.',
+  2: '<b>Station 2 · Dominant or recessive?</b> Four families, four mystery traits. Use the two detective rules from the side card and classify each pattern. This is the exact reasoning a geneticist does first.',
+  3: '<b>Station 3 · The 25% square.</b> Two healthy parents, each silently carrying one broken copy. Fill the Punnett square and find out what the numbers really say about their next child.',
+  4: '<b>Station 4 · The royal disease.</b> Queen Victoria carried haemophilia without knowing it — and her daughters delivered it to the courts of Europe. X-linked inheritance has its own strange arithmetic. Answer the three questions.',
+  5: '<b>Station 5 · The counsellor.</b> A real couple, a real question: “my brother has a recessive condition — what is the risk for our child?” Put the five steps of medical genetics in the order they actually happen.',
+  6: '<b>Quiz.</b> Six questions. Pass them and your own family chart assignment will feel like a warm-up.',
+};
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+    logged: new Set(),
+    s1: { step: 0, msg: '' },
+    s2: { idx: 0, score: 0, answered: null },
+    s3: { cells: [], risk: null, msg: '' },
+    s4: { q: 0, msg: '', picked: [] },
+    s5: { order: [], msg: '' },
+    quiz: { picked: {}, submitted: false },
+  };
+}
+S = freshState();
+
+const LOG = [
+  { id: 'lang',  name: 'Squares and circles are a language', note: 'one chart carries four generations of medical history' },
+  { id: 'rules', name: 'Recessive hides in carriers', note: 'affected child + unaffected parents = both parents carry it' },
+  { id: 'coin',  name: 'The coin has no memory', note: 'two carriers: every child is a fresh 25% — not a quota' },
+  { id: 'xlink', name: 'X-linked: silent mothers, affected sons', note: 'one X means no backup copy — and father-to-son is impossible' },
+  { id: 'couns', name: 'A pedigree is a hypothesis', note: 'the DNA test confirms it; the family, not the doctor, decides' },
+];
+function logIdea(id) { S.logged.add(id); }
+
+/* ---------------- pedigree drawing helpers ---------------- */
+
+function person(svg, p, opts = {}) {
+  /* p: {id,x,y,sex:'m'|'f',aff,carrier,dead,label} */
+  const g = h('g', Object.assign({ class: opts.onclick ? 'pickable' : null, tabindex: opts.onclick ? '0' : null,
+    role: opts.onclick ? 'button' : null, 'aria-label': p.label || p.id },
+    opts.onclick ? { onclick: (ev) => { ev.stopPropagation(); opts.onclick(p.id); },
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onclick(p.id); } } } : {}));
+  const fill = p.aff ? 'var(--fg)' : (opts.hl === p.id ? 'var(--violet-soft)' : '#FDFEFB');
+  const stroke = opts.hl === p.id ? 'var(--violet)' : 'var(--fg)';
+  if (p.sex === 'm') g.append(h('rect', { x: p.x - 13, y: p.y - 13, width: 26, height: 26, fill, stroke, 'stroke-width': 2 }));
+  else g.append(h('circle', { cx: p.x, cy: p.y, r: 14, fill, stroke, 'stroke-width': 2 }));
+  if (p.carrier) g.append(h('circle', { cx: p.x, cy: p.y, r: 5, fill: 'var(--fg)' }));
+  if (p.dead) g.append(h('line', { x1: p.x - 18, y1: p.y + 18, x2: p.x + 18, y2: p.y - 18, stroke: 'var(--fg)', 'stroke-width': 2 }));
+  if (p.label) g.append(h('text', { x: p.x, y: p.y + 32, class: 'lab', 'text-anchor': 'middle' }, p.label));
+  svg.append(g);
+}
+function couple(svg, a, b) { svg.append(h('line', { x1: a.x + 14, y1: a.y, x2: b.x - 14, y2: b.y, stroke: 'var(--fg)', 'stroke-width': 1.8 })); }
+function childline(svg, a, b, kids) {
+  const mx = (a.x + b.x) / 2, my = a.y;
+  const ky = kids[0].y - 26;
+  svg.append(h('line', { x1: mx, y1: my, x2: mx, y2: ky, stroke: 'var(--fg)', 'stroke-width': 1.8 }));
+  const xs = kids.map(k => k.x);
+  svg.append(h('line', { x1: Math.min(...xs), y1: ky, x2: Math.max(...xs), y2: ky, stroke: 'var(--fg)', 'stroke-width': 1.8 }));
+  kids.forEach(k => svg.append(h('line', { x1: k.x, y1: ky, x2: k.x, y2: k.y - (k.sex === 'm' ? 13 : 14), stroke: 'var(--fg)', 'stroke-width': 1.8 })));
+}
+
+/* ================= station 1 · the language ================= */
+
+const FAM1 = {
+  gpa: { id: 'gpa', x: 250, y: 55, sex: 'm', dead: true, label: 'I-1' },
+  gma: { id: 'gma', x: 350, y: 55, sex: 'f', label: 'I-2' },
+  aunt: { id: 'aunt', x: 190, y: 150, sex: 'f', aff: true, label: 'II-1' },
+  dad: { id: 'dad', x: 300, y: 150, sex: 'm', label: 'II-2' },
+  mom: { id: 'mom', x: 410, y: 150, sex: 'f', label: 'II-3 (married in)' },
+  son: { id: 'son', x: 330, y: 245, sex: 'm', aff: true, label: 'III-1' },
+  dau: { id: 'dau', x: 420, y: 245, sex: 'f', label: 'III-2' },
+};
+const TASKS1 = [
+  { ask: 'Click the affected woman in generation II', id: 'aunt' },
+  { ask: 'Click the person who is deceased', id: 'gpa' },
+  { ask: 'Click the woman who married INTO this family', id: 'mom' },
+  { ask: 'Click the affected boy in generation III', id: 'son' },
+];
+
+function clickFam1(id) {
+  if (S.done[1]) return;
+  const t = TASKS1[S.s1.step];
+  if (id === t.id) {
+    S.s1.step++;
+    S.s1.msg = 'good:Correct.' + (S.s1.step < TASKS1.length ? ' Next one…' : '');
+    if (S.s1.step === TASKS1.length) { S.done[1] = true; logIdea('lang'); }
+  } else {
+    const hints = {
+      aunt: 'Affected = filled shape; woman = circle; generation II is the middle row.',
+      gpa: 'Deceased = a line struck through the symbol.',
+      mom: 'She has no parents drawn in this chart — she joined by marriage.',
+      son: 'Filled square, bottom row.',
+    };
+    S.s1.msg = 'bad:' + (hints[t.id] || 'Look again.');
+  }
+  render();
+}
+
+function renderScene1() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 300', role: 'img', 'aria-label': 'A three-generation pedigree chart' });
+  svg.append(h('text', { x: 40, y: 60, class: 'lab big' }, 'I'));
+  svg.append(h('text', { x: 40, y: 155, class: 'lab big' }, 'II'));
+  svg.append(h('text', { x: 40, y: 250, class: 'lab big' }, 'III'));
+  couple(svg, FAM1.gpa, FAM1.gma);
+  childline(svg, FAM1.gpa, FAM1.gma, [FAM1.aunt, FAM1.dad]);
+  couple(svg, FAM1.dad, FAM1.mom);
+  childline(svg, FAM1.dad, FAM1.mom, [FAM1.son, FAM1.dau]);
+  Object.values(FAM1).forEach(p => person(svg, p, { onclick: clickFam1 }));
+  svg.append(h('text', { x: 330, y: 292, class: 'lab', 'text-anchor': 'middle' }, 'generations are numbered with Roman numerals, people left to right'));
+  return svg;
+}
+
+function renderStage1() {
+  const doneBar = S.done[1] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Fluent. You can now read any chart in a clinic file — or the one you are about to draw for your own family.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: turn detective →')) : null;
+  const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene1(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'task: ', h('b', {}, S.done[1] ? 'all done' : TASKS1[S.s1.step].ask)),
+        h('span', { class: 'meter' }, h('b', {}, `${S.s1.step} / ${TASKS1.length}`))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The five symbols'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Symbol'), h('th', {}, 'Meaning')),
+        h('tr', {}, h('td', {}, '■ / ●'), h('td', {}, 'male / female — filled means the person SHOWS the trait')),
+        h('tr', {}, h('td', {}, '□ / ○'), h('td', {}, 'unaffected (but possibly carrying — that is the whole plot)')),
+        h('tr', {}, h('td', {}, '⊙'), h('td', {}, 'known carrier — a dot inside (used when proven)')),
+        h('tr', {}, h('td', {}, '⌀'), h('td', {}, 'struck through — deceased')),
+        h('tr', {}, h('td', {}, '—'), h('td', {}, 'horizontal line between two people: partnership; the line hanging below: their children'))),
+      h('p', { class: 'sub' }, 'Generations get Roman numerals (I, II, III), people get numbers left to right. “III-1” is a full address — any geneticist on Earth finds that person instantly.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Why do doctors still draw these?'),
+        h('p', {}, 'Because DNA sequencing tells you about ONE person — a pedigree shows how a variant travels. Family history remains the cheapest genetic test in medicine: three generations on one page, free of charge.'))
+    ));
+}
+
+/* ================= station 2 · dominant or recessive ================= */
+
+const CASES2 = [
+  { title: 'Family A: the trait appears in every generation, and every affected child has an affected parent.',
+    a: 'dom', why: 'Dominant traits cannot hide: one copy is enough to show. No skipped generations, no surprises.' },
+  { title: 'Family B: two unaffected parents have an affected daughter.',
+    a: 'rec', why: 'The giveaway clue. The allele was hiding — BOTH parents are carriers (Aa). Only recessive traits can do this.' },
+  { title: 'Family C: the trait vanishes for a whole generation, then reappears in a grandchild.',
+    a: 'rec', why: 'Skipping a generation means hiding in carriers — the signature move of a recessive allele.' },
+  { title: 'Family D: an affected father and unaffected mother have children — about half are affected, sons and daughters equally.',
+    a: 'dom', why: 'A heterozygous (Aa) parent passes the allele to half the children on average, and one copy shows: autosomal dominant.' },
+];
+
+function answerCase2(ans) {
+  if (S.s2.answered !== null) return;
+  S.s2.answered = ans;
+  if (ans === CASES2[S.s2.idx].a) S.s2.score++;
+  render();
+}
+function nextCase2() {
+  if (S.s2.idx < CASES2.length - 1) { S.s2.idx++; S.s2.answered = null; }
+  else { S.done[2] = true; logIdea('rules'); }
+  render();
+}
+
+function renderStage2() {
+  const c = CASES2[S.s2.idx];
+  const answered = S.s2.answered !== null;
+  const right = answered && S.s2.answered === c.a;
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, `Four families solved — ${S.s2.score} / 4 first try. The two rules in the side card do most of a geneticist’s first hour of work.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: do the math →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Mystery family ', h('span', { class: 'count' }, `${S.s2.idx + 1} / ${CASES2.length} · score ${S.s2.score}`)),
+      h('p', { style: 'font-weight:600;margin:4px 0 14px' }, c.title),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act' + (answered ? (c.a === 'dom' ? '' : ' alt') : ' alt'), type: 'button',
+          disabled: answered ? 'disabled' : null, onclick: () => answerCase2('dom') }, 'Dominant'),
+        h('button', { class: 'act' + (answered ? (c.a === 'rec' ? '' : ' alt') : ' alt'), type: 'button',
+          disabled: answered ? 'disabled' : null, onclick: () => answerCase2('rec') }, 'Recessive')),
+      h('p', { class: 'toast' + (right ? ' good' : '') },
+        answered ? ((right ? '✓ Correct. ' : '✗ Not this time. ') + c.why) : ''),
+      answered && !S.done[2] ? h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', onclick: nextCase2 }, S.s2.idx === CASES2.length - 1 ? 'Finish →' : 'Next family →')) : null,
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The two detective rules'),
+      h('div', { class: 'eq' }, 'RULE 1 · unaffected parents + affected child → RECESSIVE'),
+      h('div', { class: 'eq' }, 'RULE 2 · dominant traits never skip a generation'),
+      h('p', {}, 'Rule 1 is the stronger one: it does not just classify the trait, it convicts both parents of being carriers — each holds exactly one hidden copy.'),
+      h('p', { class: 'sub' }, 'Real examples: Huntington disease behaves like family A (dominant). Cystic fibrosis behaves like family B (recessive) — most affected children are born to two perfectly healthy carrier parents.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Can you ever be 100% sure from a chart alone?'),
+        h('p', {}, 'No — a pedigree gives you the best hypothesis, not a verdict. Small families can mislead by pure luck. That is exactly why the chart comes first and the DNA test second: hypothesis, then confirmation. Station 5 is about that.'))
+    ));
+}
+
+/* ================= station 3 · the 25% square ================= */
+
+const COMBOS = ['AA', 'Aa', 'Aa', 'aa'];  /* cells: [mom A + dad A, mom A + dad a, mom a + dad A, mom a + dad a] — displayed per position */
+const CELLS = [
+  { id: 0, combo: 'AA', verdict: 'healthy, not a carrier' },
+  { id: 1, combo: 'Aa', verdict: 'healthy carrier' },
+  { id: 2, combo: 'Aa', verdict: 'healthy carrier' },
+  { id: 3, combo: 'aa', verdict: 'affected' },
+];
+
+function fillCell(i) {
+  if (S.s3.cells.includes(i)) { S.s3.msg = 'good:Already filled.'; render(); return; }
+  S.s3.cells.push(i);
+  S.s3.msg = 'good:' + CELLS[i].combo + ' — ' + CELLS[i].verdict + '.';
+  render();
+  const pos = [[330, 130], [450, 130], [330, 230], [450, 230]][i];
+  fx(pos[0], pos[1] - 30, CELLS[i].combo);
+}
+function answerRisk(v) {
+  if (S.s3.cells.length < 4) { S.s3.msg = 'bad:Fill the square first.'; render(); return; }
+  S.s3.risk = v;
+  if (v === 25) { S.done[3] = true; logIdea('coin'); }
+  render();
+}
+
+function renderScene3() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 300', role: 'img', 'aria-label': 'Punnett square for two carrier parents' });
+  svg.append(h('text', { x: 160, y: 40, class: 'lab big', 'text-anchor': 'middle' }, 'Mother  Aa ⊙'));
+  svg.append(h('text', { x: 160, y: 60, class: 'lab', 'text-anchor': 'middle' }, 'healthy carrier'));
+  svg.append(h('text', { x: 520, y: 40, class: 'lab big', 'text-anchor': 'middle' }, 'Father  Aa ⊙'));
+  svg.append(h('text', { x: 520, y: 60, class: 'lab', 'text-anchor': 'middle' }, 'healthy carrier'));
+  /* gamete labels */
+  svg.append(h('text', { x: 330, y: 92, class: 'lab big', 'text-anchor': 'middle' }, 'A'));
+  svg.append(h('text', { x: 450, y: 92, class: 'lab big', 'text-anchor': 'middle' }, 'a'));
+  svg.append(h('text', { x: 252, y: 135, class: 'lab big' }, 'A'));
+  svg.append(h('text', { x: 252, y: 235, class: 'lab big' }, 'a'));
+  CELLS.forEach((c, i) => {
+    const x = 270 + (i % 2) * 120, y = 100 + Math.floor(i / 2) * 100;
+    const filled = S.s3.cells.includes(i);
+    const g = h('g', { class: 'pickable', tabindex: '0', role: 'button', 'aria-label': 'Punnett cell ' + (i + 1),
+      onclick: () => fillCell(i),
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); fillCell(i); } } });
+    g.append(h('rect', { x, y, width: 120, height: 100,
+      fill: filled ? (c.combo === 'aa' ? 'var(--pink-soft)' : c.combo === 'AA' ? 'var(--mint)' : 'var(--violet-soft)') : 'var(--panel-2)',
+      stroke: 'var(--fg)', 'stroke-width': 1.5, class: filled ? 'pop' : null }));
+    g.append(h('text', { x: x + 60, y: y + 48, class: 'lab big', 'text-anchor': 'middle', 'font-size': '20px' },
+      filled ? c.combo : '?'));
+    if (filled) g.append(h('text', { x: x + 60, y: y + 72, class: 'lab', 'text-anchor': 'middle' }, c.verdict));
+    svg.append(g);
+  });
+  svg.append(h('text', { x: 330, y: 292, class: 'lab', 'text-anchor': 'middle' },
+    S.s3.cells.length < 4 ? 'click each cell to combine the gametes' : '25% affected · 50% carriers · 25% clear — every single time'));
+  return svg;
+}
+
+function renderStage3() {
+  const full = S.s3.cells.length === 4;
+  const doneBar = S.done[3] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Exactly. 25% — for this child, for the next one, for every one. Probability has no memory and issues no quotas.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: the royal disease →')) : null;
+  const [kind, msg] = S.s3.msg ? S.s3.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene3(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'cells: ', h('b', {}, `${S.s3.cells.length} / 4`)),
+        full && !S.done[3] ? h('span', { class: 'meter' }, h('b', {}, 'Their first child is healthy. Risk for the NEXT child?')) : null,
+        full && !S.done[3] ? [25, 0, 50].map(v =>
+          h('button', { class: 'act alt', type: 'button', onclick: () => answerRisk(v) }, v + '%')) : null),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') },
+        S.s3.risk !== null && S.s3.risk !== 25 ? '✗ Tempting — but each conception is an independent coin toss. Try again.' : msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Two carriers, four futures'),
+      h('div', { class: 'eq' }, 'Aa × Aa → 1 AA : 2 Aa : 1 aa'),
+      h('p', {}, 'The parents are healthy because one working copy (A) is enough. The risk sits in the combination: both hidden copies meeting in one child — 1 chance in 4.'),
+      h('p', { class: 'sub' }, 'Note the quiet number: half the children are expected to be carriers like their parents. The allele does not disappear — it travels.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'A subtle one for the brave'),
+        h('p', {}, 'Among the UNAFFECTED children of two carriers, the carrier chance is not 1/2 but 2/3 — because “affected” has been ruled out, three equally likely outcomes remain: AA, Aa, Aa. Geneticists use this trick constantly.'))
+    ));
+}
+
+/* ================= station 4 · the royal disease ================= */
+
+const ROYAL = {
+  vic: { id: 'vic', x: 250, y: 55, sex: 'f', carrier: true, label: 'Victoria ⊙' },
+  alb: { id: 'alb', x: 370, y: 55, sex: 'm', label: 'Albert' },
+  leo: { id: 'leo', x: 180, y: 160, sex: 'm', aff: true, label: 'Leopold' },
+  alice: { id: 'alice', x: 310, y: 160, sex: 'f', carrier: true, label: 'Alice ⊙' },
+  beat: { id: 'beat', x: 440, y: 160, sex: 'f', carrier: true, label: 'Beatrice ⊙' },
+  alix: { id: 'alix', x: 310, y: 232, sex: 'f', carrier: true, label: 'Alix ⊙' },
+  alexei: { id: 'alexei', x: 310, y: 316, sex: 'm', aff: true, label: 'Alexei' },
+};
+const Q4 = [
+  { ask: 'Why are the AFFECTED royals almost all male? Pick the reason.',
+    opts: [['One X chromosome means no backup copy', true], ['Boys inherited more royal blood', false], ['The gene sits on the Y chromosome', false]],
+    why: 'The gene sits on the X. A woman has a second X to cover a broken copy; a man’s single X stands alone.' },
+  { ask: 'Click every woman who carried the gene without being ill.',
+    click: ['vic', 'alice', 'beat', 'alix'],
+    why: 'Four silent carriers — the dot inside the circle. The gene crossed Europe inside perfectly healthy women.' },
+  { ask: 'Can an affected father pass haemophilia to his SON?',
+    opts: [['No - a son gets the father’s Y, not his X', true], ['Yes - half of his sons', false], ['Yes - all of his sons', false]],
+    why: 'Father → son travels only the Y. His X — with the variant — goes to every DAUGHTER, who becomes a carrier.' },
+];
+
+function clickRoyal(id) {
+  const q = Q4[S.s4.q];
+  if (!q || !q.click || S.done[4]) return;
+  if (!q.click.includes(id)) { S.s4.msg = 'bad:' + (ROYAL[id].aff ? 'He was ill, not silent — look for the healthy carriers.' : 'Not this one — look for the dot-in-circle women.'); render(); return; }
+  if (S.s4.picked.includes(id)) { S.s4.msg = 'good:Already counted.'; render(); return; }
+  S.s4.picked.push(id);
+  S.s4.msg = 'good:' + ROYAL[id].label.replace(' ⊙', '') + ' — carrier. ' + (q.click.length - S.s4.picked.length) + ' to find.';
+  if (S.s4.picked.length === q.click.length) { S.s4.q++; S.s4.msg = 'good:All four found. One question left.'; }
+  render();
+}
+function answerRoyal(ok) {
+  const q = Q4[S.s4.q];
+  if (!q || !q.opts) return;
+  if (!ok) { S.s4.msg = 'bad:' + q.why; render(); return; }
+  S.s4.msg = 'good:' + q.why;
+  S.s4.q++;
+  if (S.s4.q >= Q4.length) { S.done[4] = true; logIdea('xlink'); }
+  render();
+}
+
+function renderScene4() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 368', role: 'img', 'aria-label': 'Simplified pedigree of haemophilia in the royal family' });
+  couple(svg, ROYAL.vic, ROYAL.alb);
+  childline(svg, ROYAL.vic, ROYAL.alb, [ROYAL.leo, ROYAL.alice, ROYAL.beat]);
+  svg.append(h('line', { x1: ROYAL.alice.x, y1: ROYAL.alice.y + 14, x2: ROYAL.alix.x, y2: ROYAL.alix.y - 14, stroke: 'var(--fg)', 'stroke-width': 1.8, 'stroke-dasharray': '5 4' }));
+  svg.append(h('line', { x1: ROYAL.alix.x, y1: ROYAL.alix.y + 14, x2: ROYAL.alexei.x, y2: ROYAL.alexei.y - 13, stroke: 'var(--fg)', 'stroke-width': 1.8, 'stroke-dasharray': '5 4' }));
+  const clickable = Q4[S.s4.q] && Q4[S.s4.q].click;
+  Object.values(ROYAL).forEach(p => person(svg, p, clickable ? { onclick: clickRoyal } : {}));
+  S.s4.picked.forEach(id => {
+    const p = ROYAL[id];
+    svg.append(h('circle', { cx: p.x, cy: p.y, r: 20, fill: 'none', stroke: 'var(--mint-deep)', 'stroke-width': 2.5, class: 'pop' }));
+  });
+  svg.append(h('text', { x: 330, y: 360, class: 'lab', 'text-anchor': 'middle' }, 'dashed lines mean descent drawn in shorthand · Alix married Nicholas II of Russia; Alexei was their son'));
+  return svg;
+}
+
+function renderStage4() {
+  const q = Q4[S.s4.q];
+  const doneBar = S.done[4] ? h('div', { class: 'donebar' },
+    h('span', {}, 'X-linked solved: the gene rode silently in daughters and struck in sons — all the way from London to the Russian court.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Next: the counsellor →')) : null;
+  const [kind, msg] = S.s4.msg ? S.s4.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene4(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, S.done[4] ? 'all three answered' : q.ask)),
+        !S.done[4] && q.opts ? q.opts.map(([txt, ok]) =>
+          h('button', { class: 'act alt', type: 'button', onclick: () => answerRoyal(ok) }, txt)) : null),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'X-linked recessive, in three lines'),
+      h('div', { class: 'eq' }, 'carrier mother → ½ of sons affected, ½ of daughters carriers'),
+      h('div', { class: 'eq' }, 'affected father → ALL daughters carriers, NO sons affected'),
+      h('p', {}, 'Haemophilia, red-green colour blindness, Duchenne muscular dystrophy — same arithmetic, because the gene rides the X and a man has exactly one.'),
+      h('p', { class: 'sub' }, 'Victoria had no family history — her variant most likely arose as a NEW mutation. Even a perfect pedigree starts somewhere.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'How history turned on one allele'),
+        h('p', {}, 'Alexei’s haemophilia pulled his desperate parents toward anyone promising help — including Rasputin. Genetics does not decide history, but it sometimes holds the pen for a line or two.'))
+    ));
+}
+
+/* ================= station 5 · the counsellor ================= */
+
+const STEPS5 = [
+  { id: 'hist', n: 1, name: 'Take the family history', note: 'who, what, when — three generations of it' },
+  { id: 'chart', n: 2, name: 'Draw the pedigree', note: 'the story becomes squares and circles' },
+  { id: 'hypo', n: 3, name: 'Name the pattern', note: 'recessive? dominant? X-linked? — the hypothesis' },
+  { id: 'test', n: 4, name: 'Offer a DNA test', note: 'carrier testing turns “probably” into “yes” or “no”' },
+  { id: 'couns', n: 5, name: 'Counsel - don’t decide', note: 'give numbers and options; the family chooses' },
+];
+
+function pickStep(id) {
+  if (S.done[5]) return;
+  const next = STEPS5[S.s5.order.length];
+  if (id === next.id) {
+    S.s5.order.push(id);
+    S.s5.msg = 'good:Step ' + S.s5.order.length + ': ' + next.name + '.';
+    if (S.s5.order.length === STEPS5.length) { S.done[5] = true; logIdea('couns'); }
+  } else if (S.s5.order.includes(id)) {
+    S.s5.msg = 'good:Already placed.';
+  } else {
+    const hints = {
+      hist: 'Everything starts with listening.',
+      chart: 'You cannot chart what you have not heard yet.',
+      hypo: 'A pattern needs a chart to be seen in.',
+      test: 'Test for WHAT? First name the suspect.',
+      couns: 'Counselling comes once the facts are in.',
+    };
+    S.s5.msg = 'bad:Not yet - ' + (hints[next.id] || 'think about what must come first.');
+  }
+  render();
+}
+
+function renderStage5() {
+  const doneBar = S.done[5] ? h('div', { class: 'donebar' },
+    h('span', {}, 'That is medical genetics end to end: listen → chart → hypothesise → test → counsel. Notice what is NOT on the list: deciding for the family.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(6) }, 'Take the quiz →')) : null;
+  const [kind, msg] = S.s5.msg ? S.s5.msg.split(/:(.*)/s) : ['', ''];
+  const placed = S.s5.order.length;
+  /* shuffled display order, stable */
+  const DISPLAY = [STEPS5[3], STEPS5[0], STEPS5[4], STEPS5[1], STEPS5[2]];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'The case ', h('span', { class: 'count' }, `steps placed: ${placed} / 5`)),
+      h('p', { style: 'font-weight:600;margin:4px 0 12px' },
+        '“My brother has cystic fibrosis. My partner and I are planning a child — what is our risk?” Put the five steps of the geneticist’s work in the order they really happen.'),
+      h('div', { class: 'scenebtns', style: 'flex-direction:column;align-items:stretch' },
+        ...DISPLAY.map(s => {
+          const idx = S.s5.order.indexOf(s.id);
+          const isPlaced = idx >= 0;
+          return h('button', {
+            class: 'act' + (isPlaced ? '' : ' alt'), type: 'button', style: 'justify-content:flex-start;text-align:left',
+            disabled: isPlaced ? 'disabled' : null, onclick: () => pickStep(s.id) },
+            (isPlaced ? (idx + 1) + '. ' : '• ') + s.name + ' — ' + s.note);
+        })),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'What the numbers look like here'),
+      h('p', {}, 'The brother is affected (aa), so both HIS parents are carriers. The asking sister is healthy — her carrier chance is 2/3 (station 3’s subtle trick). Her partner’s chance is his population rate. Multiply the chain, or skip the guessing: one carrier test each turns the whole question into arithmetic.'),
+      h('div', { class: 'eq' }, 'risk = P(she carries) × P(partner carries) × ¼'),
+      h('p', { class: 'sub' }, 'If both test positive, options exist at every step — from prenatal testing to embryo screening (PGT) — and all of them are the family’s call, never the counsellor’s.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'The profession behind this station'),
+        h('p', {}, 'Genetic counsellor is a real job: part detective, part statistician, part translator of hard news into human language. If this station felt natural to you — remember the title exists.'))
+    ));
+}
+
+/* ================= station 6 · quiz ================= */
+
+const QUIZ = [
+  { q: 'A filled square on a pedigree chart means…',
+    opts: ['An affected male', 'A deceased female', 'A carrier male'],
+    a: 0, why: 'Square = male, filled = shows the trait. Carriers get a dot, the deceased get a strike-through.' },
+  { q: 'Two unaffected parents have an affected child. The trait is…',
+    opts: ['Dominant', 'Recessive - and both parents are carriers', 'Impossible to say'],
+    a: 1, why: 'Rule 1: only a recessive allele can hide in two healthy parents and surface in their child.' },
+  { q: 'Two carriers (Aa × Aa) already have one healthy child. The risk for the next child is…',
+    opts: ['Lower - the odds are being used up', '25% - the same as always', '50%'],
+    a: 1, why: 'Every conception is an independent toss. The coin has no memory.' },
+  { q: 'X-linked recessive conditions strike mostly males because…',
+    opts: ['The Y chromosome carries the variant', 'Males have one X - no backup copy', 'Males inherit more from their mothers'],
+    a: 1, why: 'One X means a single broken copy is enough. A female usually has a working copy on her other X.' },
+  { q: 'An affected father with haemophilia passes it directly to…',
+    opts: ['Half of his sons', 'None of his sons - but all his daughters become carriers', 'All of his children'],
+    a: 1, why: 'Sons get his Y. His X — with the variant — goes to every daughter.' },
+  { q: 'In medical genetics, the pedigree chart is…',
+    opts: ['The final diagnosis', 'A hypothesis that a DNA test then confirms', 'A formality for the archive'],
+    a: 1, why: 'Chart first, test second, counselling third — and the decisions belong to the family.' },
+];
+
+function renderStage6() {
+  const q = S.quiz;
+  const items = QUIZ.map((it, qi) => {
+    const picked = q.picked[qi];
+    const cls = q.submitted ? (picked === it.a ? 'q right' : 'q wrong') : 'q';
+    return h('div', { class: cls },
+      h('p', { class: 'qt' }, `${qi + 1}. ${it.q}`),
+      ...it.opts.map((op, oi) => h('label', {},
+        h('input', { type: 'radio', name: 'q' + qi, checked: picked === oi ? 'checked' : null,
+          disabled: q.submitted ? 'disabled' : null,
+          onchange: () => { S.quiz.picked[qi] = oi; render(); } }),
+        h('span', {}, op))),
+      q.submitted ? h('p', { class: 'why' }, (picked === it.a ? '✓ ' : `✗ Correct: “${it.opts[it.a]}”. `) + it.why) : null);
+  });
+  const allPicked = Object.keys(q.picked).length === QUIZ.length;
+  let band = null;
+  if (q.submitted) {
+    const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
+    band = h('div', { class: 'scoreband' },
+      (score === QUIZ.length ? `${score} / ${QUIZ.length} — certified pedigree detective. Now go chart your own family.`
+        : `${score} / ${QUIZ.length}. Walk the stations again — the families will wait.`)
+      + (kidSignedIn() ? (score === QUIZ.length ? ' 🏅 Saved to your Science Map!' : ' ⚡ lands on your map only at 6 / 6.') : ' Sign in on the Science Map, then try again to collect ⚡.'));
+  }
+  return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Quiz · charts, odds and counsel'),
+      ...items,
+      h('div', { class: 'scenebtns' },
+        q.submitted
+          ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
+          : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => {
+              S.quiz.submitted = true;
+              const wrongQs = QUIZ.map((it, qi) => S.quiz.picked[qi] === it.a ? null : qi + 1).filter(Boolean);
+              reportQuiz(QUIZ.length - wrongQs.length, QUIZ.length, wrongQs);
+              if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) { S.done[6] = true; awardTrainer(); }
+              render();
+            } }, 'Check my answers'),
+        h('span', { class: 'meter' }, 'Covers ', h('b', {}, 'U6.A2 · U4.K3 · U4.A2'))),
+      band));
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 6 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5, 6: renderStage6 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'tracethetrait' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'tracethetrait:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+</script>
+</body>
+</html>
