@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Four Jars, One Tree</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Four Jars, One Tree — a 45-minute cosmic-lab session for one curious
+   13-year-old. Bridges the Tree-of-Life deck with the Build a Tree and
+   Copy the Code trainers. Dark cosmic style to match the slide deck. */
+:root {
+  color-scheme: dark;
+  --bg:    #0B0D1C;
+  --bg-2:  #10132A;
+  --panel: #151935;
+  --panel-2: #1C2147;
+  --line:  #2B3160;
+  --fg:    #EDEFFF;
+  --dim:   #9BA3D0;
+  --vio:   #A78BFA;
+  --grn:   #A3E635;
+  --pnk:   #F472B6;
+  --cyn:   #22D3EE;
+  --org:   #FB923C;
+  --red:   #FB7185;
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --hand: 'Comic Neue', 'Comic Sans MS', cursive;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--ui); font-size: 15px; line-height: 1.55; margin: 0;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(167,139,250,.08), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(34,211,238,.06), transparent 45%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(167,139,250,.05) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(167,139,250,.05) 39px 40px);
+}
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+}
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--cyn); text-shadow: 0 0 14px rgba(34,211,238,.5); }
+h1 { font-family: var(--hand); font-size: clamp(30px, 6vw, 48px); font-weight: 700; letter-spacing: .01em; line-height: 1.05; margin: 8px 0 0; text-wrap: balance; }
+h1 .hi { color: var(--grn); text-shadow: 0 0 18px rgba(163,230,53,.55); }
+.lede { margin: 10px 0 0; color: var(--dim); max-width: 66ch; }
+.lede b { color: var(--fg); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg-2); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--dim);
+  background: transparent; border: 0; padding: 10px 13px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--vio); color: #0B0D1C; font-weight: 700; }
+.seg button:hover:not([aria-pressed="true"]) { color: var(--fg); background: var(--panel-2); }
+.seg .tick { color: var(--grn); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #0B0D1C; }
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--dim);
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--cyn); border-color: var(--cyn); }
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--cyn); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--grn);
+  background: var(--bg-2); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; min-width: 0;
+  box-shadow: 0 0 0 1px rgba(167,139,250,.06), 0 14px 40px rgba(0,0,0,.45); }
+.card > h2 { font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--vio); margin: 0 0 12px; }
+.card > h2 .count { color: var(--dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .stagegrid { grid-template-columns: 1fr; } }
+.scene svg { width: 100%; height: auto; display: block; user-select: none; }
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 700 14px/1.2 var(--ui); color: #0B0D1C;
+  background: var(--grn); border: 0; border-radius: 10px;
+  padding: 11px 16px; cursor: pointer;
+  box-shadow: 0 0 16px rgba(163,230,53,.25);
+}
+.act:hover { filter: brightness(1.1); }
+.act:disabled { background: #3A3F6B; color: #8187B6; cursor: default; box-shadow: none; }
+.act.alt { background: transparent; color: var(--vio); border: 1.5px solid var(--vio); box-shadow: none; }
+.act.alt:hover { background: rgba(167,139,250,.12); filter: none; }
+.act.cy { background: var(--cyn); box-shadow: 0 0 16px rgba(34,211,238,.25); }
+
+.meter { font: 500 13px/1.3 var(--ui); color: var(--dim); background: var(--bg-2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; }
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pnk); min-height: 1.3em; }
+.toast.good { color: var(--grn); }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(163,230,53,.1); border: 1px solid rgba(163,230,53,.45);
+  color: var(--grn); font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+  text-shadow: 0 0 10px rgba(163,230,53,.25);
+}
+
+.rx h3 { font-family: var(--hand); margin: 0 0 8px; font-size: 19px; font-weight: 700; text-wrap: balance; }
+.rx .eq {
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap; color: var(--cyn);
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--dim); font-size: 13.5px; }
+.rx table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.rx td, .rx th { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.rx tr:first-child :is(td, th) { border-top: 0; }
+.rx th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--vio); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; white-space: nowrap; border: 1px solid; }
+.chip.grn { color: var(--grn); border-color: rgba(163,230,53,.5); background: rgba(163,230,53,.08); }
+.chip.vio { color: var(--vio); border-color: rgba(167,139,250,.5); background: rgba(167,139,250,.08); }
+.chip.cyn { color: var(--cyn); border-color: rgba(34,211,238,.5); background: rgba(34,211,238,.08); }
+.chip.pnk { color: var(--pnk); border-color: rgba(244,114,182,.5); background: rgba(244,114,182,.08); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--cyn); }
+details.fine p { margin: 8px 0 2px; }
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; }
+.logtable tr.off { opacity: .35; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #3A3F6B; margin-right: 8px; }
+tr.on .dot { background: var(--grn); box-shadow: 0 0 8px rgba(163,230,53,.7); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--grn); }
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--grn); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--grn); }
+.q.wrong .why { color: var(--pnk); }
+.scoreband { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.5); color: var(--vio); font-weight: 700; }
+
+.foot { color: var(--dim); font-size: 12.5px; line-height: 1.7; }
+.foot a { color: var(--cyn); font-weight: 600; }
+
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--dim); font-weight: 600; }
+.lab.big { font-size: 13px; fill: var(--fg); font-weight: 700; }
+.lab.hand { font-family: var(--hand); font-size: 15px; fill: var(--fg); font-weight: 700; }
+.pickable { cursor: pointer; }
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--grn);
+  transform-box: fill-box; animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-26px); } }
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+@keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.seqrow { font-family: var(--mono); font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
+.seqrow .m { color: var(--org); text-shadow: 0 0 10px rgba(251,146,60,.6); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences · Cosmic Lab Session</div>
+    <h1>Four Jars, One <span class="hi">Tree</span></h1>
+    <p class="lede">Four mystery organisms are glowing in jars on the lab bench: a bacterium, a virus
+      and two parasites. By the end of this session you will decide <b>who is actually alive</b>,
+      catch your own eyes lying to you, watch DNA typos tick like a clock, count your way to a real
+      family tree — and find out which of these creatures is <b>your</b> relative.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stations"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Lab log <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five entries. You now own the single best idea in biology: everything alive is one family, and the family tree is written in letters you can count.</p>
+  </section>
+
+  <footer class="foot">
+    Companion trainers:
+    <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a> — the copying machine and its typos ·
+    <a href="https://meridian-one-jet.vercel.app/">Build a Tree</a> — the full tree-building game
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+/* seeded RNG so the typo clock is reproducible */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------------- state ---------------- */
+
+const STAGE_META = [
+  { n: 1, label: 'The jars' },
+  { n: 2, label: 'Bodies lie' },
+  { n: 3, label: 'The typo clock' },
+  { n: 4, label: 'Count the letters' },
+  { n: 5, label: 'You’re on it' },
+  { n: 6, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: '<b>Station 1 · The jars.</b> Four specimens, four tags. For each jar decide: is this thing ALIVE? Use the machine test from the side card — and don’t let the creepy ones fool you.',
+  2: '<b>Station 2 · Bodies lie.</b> Looks are terrible evidence. Sort six features into “invented many times” vs “built once, inherited forever” — then decide who even gets a seat on the tree of life.',
+  3: '<b>Station 3 · The typo clock.</b> One ancestor, two separated lineages, and a copying machine that makes about one tiny mistake per round. Let generations pass and watch the sequences drift apart. Distance IS time.',
+  4: '<b>Station 4 · Count the letters.</b> The real exercise from your deck: four organisms, twenty letters each, six pairs. No software — just count, fill the matrix, and let the tree draw itself.',
+  5: '<b>Station 5 · You’re on it too.</b> Last jar: you. Attach yourself to the tree and collect the punchline of the whole lesson.',
+  6: '<b>Quiz.</b> Six questions. All six right = certified tree-reader.',
+};
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+    logged: new Set(),
+    s1: { verdicts: {}, msg: '' },
+    s2: { sorted: {}, picked: null, seats: [], phase: 'sort', msg: '' },
+    s3: { gen: 0, seqA: '', seqB: '', answered: false, msg: '' },
+    s4: { pair: null, filled: {}, closest: null, odd: null, msg: '' },
+    s5: { q: 0, msg: '' },
+    quiz: { picked: {}, submitted: false },
+  };
+}
+S = freshState();
+
+const LOG = [
+  { id: 'alive', name: 'Alive = has its own machine', note: 'a cell that feeds itself and copies itself; a virus just rents yours' },
+  { id: 'job',   name: 'Parasite is a job, not a family', note: 'malaria and the tapeworm share a lifestyle — not an ancestor' },
+  { id: 'body',  name: 'Bodies lie - read the machine', note: 'wings evolved many times; the ribosome was built exactly once' },
+  { id: 'clock', name: 'Typos tick like a clock', note: 'copying mistakes pile up — more differences means a longer time apart' },
+  { id: 'tree',  name: 'Fewest differences = closest cousins', note: 'count letters, draw the tree — and yes, you are on it' },
+];
+function logIdea(id) { S.logged.add(id); }
+
+/* ---------------- the cast ---------------- */
+
+const JARS = [
+  { id: 'bact', name: 'Cholera bacterium', emoji: '🦠', glow: '#A3E635', alive: true,
+    why: 'A full cell: its own membrane, its own ribosomes, feeds itself, copies itself. Alive — no debate.' },
+  { id: 'virus', name: 'Virus', emoji: '🧬', glow: '#F472B6', alive: false,
+    why: 'A protein box with instructions inside — no ribosome, no metabolism, no copying of its own. It must hijack a living cell to do anything. By the machine test: not alive.' },
+  { id: 'malaria', name: 'Malaria parasite', emoji: '🩸', glow: '#A78BFA', alive: true,
+    why: 'Looks like a blob in a blood cell, but it is a full eukaryotic cell — it even has a nucleus, which the bacterium doesn’t. Very much alive.' },
+  { id: 'worm', name: 'Tapeworm', emoji: '🪱', glow: '#22D3EE', alive: true,
+    why: 'A whole animal: millions of cells, muscles, nerves. Gross? Yes. Alive? Absolutely.' },
+];
+
+/* ================= station 1 · the jars ================= */
+
+function judgeJar(id, verdict) {
+  if (S.s1.verdicts[id] !== undefined) { S.s1.msg = 'good:Already judged - pick another jar.'; render(); return; }
+  const jar = JARS.find(j => j.id === id);
+  S.s1.verdicts[id] = verdict;
+  const right = verdict === jar.alive;
+  S.s1.msg = (right ? 'good:✓ ' : 'bad:✗ ') + jar.why;
+  if (Object.keys(S.s1.verdicts).length === JARS.length) { S.done[1] = true; logIdea('alive'); logIdea('job'); }
+  render();
+}
+
+function drawJar(svg, jar, x, y, opts = {}) {
+  const g = h('g', Object.assign({ class: opts.onclick ? 'pickable' : null, tabindex: opts.onclick ? '0' : null,
+    role: opts.onclick ? 'button' : null, 'aria-label': jar.name },
+    opts.onclick ? { onclick: (ev) => { ev.stopPropagation(); opts.onclick(jar.id); },
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onclick(jar.id); } } } : {}));
+  const dim = opts.dim;
+  g.append(h('rect', { x: x - 34, y: y - 48, width: 68, height: 96, rx: 14,
+    fill: dim ? 'rgba(42,47,85,.4)' : jar.glow + '22', stroke: opts.hl ? '#fff' : jar.glow,
+    'stroke-width': opts.hl ? 3 : 2, opacity: dim ? .45 : 1, class: opts.popped ? 'pop' : null }));
+  g.append(h('rect', { x: x - 20, y: y - 58, width: 40, height: 12, rx: 4, fill: dim ? '#3A3F6B' : jar.glow, opacity: dim ? .5 : .9 }));
+  g.append(h('text', { x, y: y + 10, 'text-anchor': 'middle', 'font-size': '30px', opacity: dim ? .4 : 1 }, jar.emoji));
+  g.append(h('text', { x, y: y + 70, class: 'lab', 'text-anchor': 'middle', fill: dim ? 'var(--dim)' : 'var(--fg)' }, jar.name));
+  if (opts.badge) g.append(h('text', { x: x + 26, y: y - 52, class: 'lab big', 'text-anchor': 'middle' }, opts.badge));
+  svg.append(g);
+}
+
+function renderScene1() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 220', role: 'img', 'aria-label': 'Four specimen jars' });
+  JARS.forEach((jar, i) => {
+    const x = 100 + i * 152;
+    const v = S.s1.verdicts[jar.id];
+    drawJar(svg, jar, x, 100, { badge: v === undefined ? '' : (v === jar.alive ? '✓' : '✗') });
+    if (v !== undefined) {
+      svg.append(h('text', { x, y: 196, class: 'lab big', 'text-anchor': 'middle',
+        fill: jar.alive ? 'var(--grn)' : 'var(--pnk)' }, jar.alive ? 'ALIVE' : 'NOT ALIVE'));
+    }
+  });
+  return svg;
+}
+
+function renderStage1() {
+  const remaining = JARS.filter(j => S.s1.verdicts[j.id] === undefined);
+  const next = remaining[0];
+  const doneBar = S.done[1] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Three alive, one impostor. And notice: malaria and the tapeworm are both “parasites” — but that’s a job description, not a family name. Hold that thought.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: bodies lie →')) : null;
+  const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene1(),
+      !S.done[1] && next ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'verdict for ', h('b', {}, next.name), ':'),
+        h('button', { class: 'act', type: 'button', onclick: () => judgeJar(next.id, true) }, 'Alive'),
+        h('button', { class: 'act alt', type: 'button', onclick: () => judgeJar(next.id, false) }, 'Not alive'),
+        h('span', { class: 'meter' }, h('b', {}, `${JARS.length - remaining.length} / 4`))) : null,
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The machine test'),
+      h('p', {}, 'Alive means: it is (or is made of) a cell with its own working machinery — it feeds itself, runs itself, and copies itself. Three checks, one verdict.'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Specimen'), h('th', {}, 'Own machine?')),
+        h('tr', {}, h('td', {}, '🦠 Bacterium'), h('td', {}, 'yes - one small but complete cell')),
+        h('tr', {}, h('td', {}, '🧬 Virus'), h('td', {}, 'no - instructions in a box, borrows everything')),
+        h('tr', {}, h('td', {}, '🩸 Malaria'), h('td', {}, 'yes - a eukaryotic cell with a nucleus')),
+        h('tr', {}, h('td', {}, '🪱 Tapeworm'), h('td', {}, 'yes - millions of cells, a whole animal'))),
+      h('p', { class: 'sub' }, '“Parasite” tells you how something earns lunch, not who its relatives are. Malaria is closer to YOU than to any bacterium — it has a nucleus, like your cells do.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Do all scientists agree about viruses?'),
+        h('p', {}, 'Not entirely — some argue viruses are “alive while inside a cell”. But everyone agrees on the practical part: no machinery of their own, so the machine test says no. You’ll see in station 2 why that also kicks them off the tree.'))
+    ));
+}
+
+/* ================= station 2 · bodies lie ================= */
+
+const FEATURES = [
+  { id: 'wings', name: 'Wings', many: true, why: 'Insects, pterosaurs, birds, bats — flight was invented at least four separate times, and the wings came out completely different inside.' },
+  { id: 'eyes', name: 'Camera eyes', many: true, why: 'Your eye and an octopus eye look similar but were built independently — the octopus doesn’t even have a blind spot.' },
+  { id: 'fins', name: 'Streamlined swimmer shape', many: true, why: 'Sharks, dolphins and extinct ichthyosaurs all converged on the same torpedo — fish, mammal, reptile.' },
+  { id: 'ribo', name: 'The ribosome', many: false, why: 'The protein-printing machine is the same design in every living cell. Built once, inherited forever.' },
+  { id: 'code', name: 'The genetic code', many: false, why: 'A→T, G→C and the same codon dictionary from bacteria to you. One invention, one family.' },
+  { id: 'atp', name: 'ATP as the energy coin', many: false, why: 'Every living cell pays its bills in the same currency. Nobody ever switched.' },
+];
+
+function sortFeature(id, many) {
+  if (S.s2.sorted[id] !== undefined) return;
+  const f = FEATURES.find(x => x.id === id);
+  S.s2.sorted[id] = many;
+  S.s2.msg = (many === f.many ? 'good:✓ ' : 'bad:✗ ') + f.why;
+  if (Object.keys(S.s2.sorted).length === FEATURES.length) S.s2.phase = 'seats';
+  render();
+}
+function pickSeat(id) {
+  if (S.s2.phase !== 'seats' || S.done[2]) return;
+  const jar = JARS.find(j => j.id === id);
+  if (S.s2.seats.includes(id)) { S.s2.msg = 'good:Already seated.'; render(); return; }
+  if (jar.alive) {
+    S.s2.seats.push(id);
+    S.s2.msg = 'good:' + jar.name + ' gets a seat - it has the machine.';
+    if (S.s2.seats.length === 3) { S.done[2] = true; logIdea('body'); }
+  } else {
+    S.s2.msg = 'bad:No machine, no place on the tree. The virus waits outside - it has no ribosome to compare.';
+  }
+  render();
+}
+
+function renderStage2() {
+  const unsorted = FEATURES.filter(f => S.s2.sorted[f.id] === undefined);
+  const cur = unsorted[0];
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Carl Woese, 1977: stop looking at bodies — read the machine. Every cell carries the same ancient text, and the differences in that text are the family record. Time to see where differences come from.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: the typo clock →')) : null;
+  const [kind, msg] = S.s2.msg ? S.s2.msg.split(/:(.*)/s) : ['', ''];
+
+  let sceneContent;
+  if (S.s2.phase === 'sort') {
+    sceneContent = [
+      h('p', { style: 'font-weight:600;margin:2px 0 10px' }, cur ? 'Sort this feature: ' : '',
+        cur ? h('span', { style: 'color:var(--grn);font-family:var(--hand);font-size:18px' }, cur.name) : ''),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', onclick: () => sortFeature(cur.id, true) }, 'Invented many times'),
+        h('button', { class: 'act cy', type: 'button', onclick: () => sortFeature(cur.id, false) }, 'Built once, inherited'),
+        h('span', { class: 'meter' }, h('b', {}, `${FEATURES.length - unsorted.length} / ${FEATURES.length}`))),
+    ];
+  } else {
+    const svg = h('svg', { id: 'scene', viewBox: '0 0 660 220', role: 'img', 'aria-label': 'Who gets a seat on the tree' });
+    JARS.forEach((jar, i) => {
+      const x = 100 + i * 152;
+      drawJar(svg, jar, x, 100, { onclick: pickSeat, dim: !jar.alive && S.s2.msg.startsWith('bad'), badge: S.s2.seats.includes(jar.id) ? '🌳' : '' });
+    });
+    sceneContent = [svg,
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'Click everyone who gets a SEAT on the tree of life · seated: ', h('b', {}, `${S.s2.seats.length} / 3`)))];
+  }
+
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      h('h2', {}, S.s2.phase === 'sort' ? 'Round 1 · six features' : 'Round 2 · seats on the tree'),
+      ...sceneContent,
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Why bodies make bad evidence'),
+      h('p', {}, 'When different families face the same problem - flying, swimming, seeing - evolution often lands on the same shape. Separate inventions never come out identical inside, but from the outside they fool everyone.'),
+      h('div', { class: 'eq' }, 'same job → similar body (convergence)'),
+      h('div', { class: 'eq' }, 'same ancestor → same machine (homology)'),
+      h('p', { class: 'sub' }, 'The ribosome, the genetic code and ATP were each built ONCE. That is why reading the machine beats measuring the body: the machine remembers the family; the body remembers the job.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'So where DO viruses come from?'),
+        h('p', {}, 'Great open question. Escaped genes? Stripped-down ex-cells? Something older? Because they carry no ribosome to compare, the usual tree methods go blind - viruses are studied by other tricks, and the answer is still being argued about. Real science has open tabs.'))
+    ));
+}
+
+/* ================= station 3 · the typo clock ================= */
+
+const ANCESTOR = 'GCTAACGAGCAG';
+const BASES = 'ACGT';
+
+function passGenerations() {
+  if (S.s3.gen >= 3) return;
+  if (!S.s3.seqA) { S.s3.seqA = ANCESTOR; S.s3.seqB = ANCESTOR; }
+  const rng = mulberry32(42 + S.s3.gen * 7);
+  const mutate = (seq) => {
+    const arr = seq.split('');
+    const hits = 1 + Math.floor(rng() * 2);   /* 1-2 typos per 100 generations */
+    for (let k = 0; k < hits; k++) {
+      const i = Math.floor(rng() * arr.length);
+      const alt = BASES.replace(arr[i], '');
+      arr[i] = alt[Math.floor(rng() * alt.length)];
+    }
+    return arr.join('');
+  };
+  S.s3.seqA = mutate(S.s3.seqA);
+  S.s3.seqB = mutate(S.s3.seqB);
+  S.s3.gen++;
+  render();
+  fx(330, 60, '⏳ +100 generations');
+}
+function diffCount(a, b) { let n = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; }
+function answerDrift(ok) {
+  if (!ok) { S.s3.msg = 'bad:Nope - no virus and no diet changes letters. Only the copying machine itself slips.'; render(); return; }
+  S.s3.answered = true;
+  S.done[3] = true; logIdea('clock');
+  S.s3.msg = 'good:Exactly. Every copy risks a tiny typo; separated lineages collect different typos; the count only grows.';
+  render();
+}
+
+function seqRow(label, seq, ref, color) {
+  const kids = [];
+  for (let i = 0; i < seq.length; i++) {
+    kids.push(h('span', { class: seq[i] !== ref[i] ? 'm' : null }, seq[i]));
+  }
+  return h('div', { class: 'seqrow', style: 'margin:4px 0' },
+    h('span', { style: 'color:' + color + ';display:inline-block;width:110px' }, label + ' '), ...kids);
+}
+
+function renderStage3() {
+  const started = !!S.s3.seqA;
+  const d = started ? diffCount(S.s3.seqA, S.s3.seqB) : 0;
+  const doneBar = S.done[3] ? h('div', { class: 'donebar' },
+    h('span', {}, `After ${S.s3.gen * 100} generations your two lineages are ${d} letters apart. Count the differences → read the time. That is the molecular clock, and it is the engine behind the next station.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: count the letters →')) : null;
+  const [kind, msg] = S.s3.msg ? S.s3.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'One ancestor, two islands'),
+      h('p', { class: 'sub', style: 'margin-top:0' }, 'A single microbe population splits onto two islands. Same starting DNA. The copying machine is excellent — but not perfect.'),
+      h('div', { style: 'background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:12px' },
+        h('div', { class: 'seqrow', style: 'margin:4px 0' },
+          h('span', { style: 'color:var(--dim);display:inline-block;width:110px' }, 'ancestor '), ANCESTOR),
+        started ? seqRow('island A', S.s3.seqA, S.s3.seqB, 'var(--grn)') : null,
+        started ? seqRow('island B', S.s3.seqB, S.s3.seqA, 'var(--cyn)') : null,
+        started ? h('p', { style: 'margin:8px 0 0;font-size:13px;color:var(--org)' },
+          `differences between islands right now: ${d}`) : h('p', { style: 'margin:8px 0 0;font-size:13px;color:var(--dim)' }, 'press the button to let time run')),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', disabled: S.s3.gen >= 3, onclick: passGenerations },
+          S.s3.gen === 0 ? '⏳ Let 100 generations pass' : S.s3.gen < 3 ? '⏳ Another 100 generations' : 'Clock has ticked 3×'),
+        h('span', { class: 'meter' }, 'generations: ', h('b', {}, String(S.s3.gen * 100)))),
+      S.s3.gen >= 3 && !S.s3.answered ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'So what makes the letters drift apart?')),
+        h('button', { class: 'act alt', type: 'button', onclick: () => answerDrift(false) }, 'Viruses rewrite them'),
+        h('button', { class: 'act alt', type: 'button', onclick: () => answerDrift(true) }, 'Copying typos pile up'),
+        h('button', { class: 'act alt', type: 'button', onclick: () => answerDrift(false) }, 'Different food')) : null,
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The clock inside the copier'),
+      h('div', { class: 'eq' }, 'more time apart → more typos → more differences'),
+      h('p', {}, 'DNA copying comes with a proofreader that catches almost every mistake — but “almost” is the key word. The rare typos that slip through get inherited, and separated lineages collect DIFFERENT ones. The count between them can only grow.'),
+      h('p', { class: 'sub' }, 'Flip it around and you get a superpower: count the differences today and you can estimate how long ago two creatures parted ways. Letters become a clock.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Want the full copying machine?'),
+        h('p', {}, 'The Copy the Code trainer (link below the page) walks the whole factory: unzipping, pairing, proofreading — and uses cytochrome c as a real molecular clock between species. This station is its movie trailer.'))
+    ));
+}
+
+/* ================= station 4 · count the letters ================= */
+
+const ORGS4 = [
+  { n: 1, name: 'Cholera', seq: 'GCTAACGAGCAGTGCAATCG', color: 'var(--grn)' },
+  { n: 2, name: 'Sea cousin', seq: 'GCTAACGAGCAGTGTGATCG', color: 'var(--cyn)' },
+  { n: 3, name: 'Gut microbe', seq: 'GCTAACGAGTCAGCTAATCG', color: 'var(--vio)' },
+  { n: 4, name: 'Malaria', seq: 'TACGTGATTCAGGCTAATCG', color: 'var(--pnk)' },
+];
+const PAIRS = [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]];
+const DIST = { '1-2': 2, '1-3': 6, '1-4': 12, '2-3': 6, '2-4': 12, '3-4': 12 };
+
+function pickPair(a, b) { S.s4.pair = [a, b]; S.s4.msg = ''; render(); }
+function answerDist(v) {
+  const key = S.s4.pair.join('-');
+  if (v === DIST[key]) {
+    S.s4.filled[key] = v;
+    S.s4.msg = 'good:✓ ' + key.replace('-', ' vs ') + ': ' + v + ' differences.';
+    S.s4.pair = null;
+  } else {
+    S.s4.msg = 'bad:Count the glowing letters again - every orange position is one difference.';
+  }
+  render();
+}
+function answerClosest(pair) {
+  if (pair === '1-2') { S.s4.closest = pair; S.s4.msg = 'good:✓ Cholera and its seawater cousin: only 2 letters apart - the most recent split.'; }
+  else S.s4.msg = 'bad:Look for the SMALLEST number in the matrix.';
+  render();
+}
+function answerOdd(n) {
+  if (n === 4) {
+    S.s4.odd = 4; S.done[4] = true; logIdea('tree');
+    S.s4.msg = 'good:✓ Malaria: 12 away from everyone - it split from the bacteria long before they split from each other.';
+  } else S.s4.msg = 'bad:Who is far from EVERYBODY at once?';
+  render();
+}
+
+function renderMatrix() {
+  const rows = [h('tr', {}, h('th', {}), ...[1,2,3,4].map(n => h('th', { style: 'text-align:center' }, String(n))))];
+  for (let r = 1; r <= 4; r++) {
+    rows.push(h('tr', {}, h('th', {}, String(r)), ...[1,2,3,4].map(c => {
+      if (c === r) return h('td', { style: 'text-align:center;color:var(--dim)' }, '—');
+      const key = [Math.min(r,c), Math.max(r,c)].join('-');
+      const v = S.s4.filled[key];
+      return h('td', { style: 'text-align:center;font-family:var(--mono);font-weight:700;color:' +
+        (v === undefined ? 'var(--dim)' : v === 2 ? 'var(--grn)' : v === 12 ? 'var(--org)' : 'var(--cyn)') },
+        v === undefined ? '·' : String(v));
+    })));
+  }
+  return h('table', {}, ...rows);
+}
+
+function renderTree4() {
+  /* ladder ((1,2),3),4 */
+  const svg = h('svg', { viewBox: '0 0 320 160', role: 'img', 'aria-label': 'The finished tree: ((1,2),3),4' });
+  const L = (x1, y1, x2, y2, c) => svg.append(h('path', { d: `M ${x1} ${y1} L ${x2} ${y2}`, stroke: c, 'stroke-width': 2.5, fill: 'none' }));
+  L(15, 60, 50, 60, '#8187B6');                       /* root stub */
+  L(50, 30, 50, 90, '#8187B6');                       /* split: 4 vs rest */
+  L(50, 30, 265, 30, 'var(--pnk)');                   /* 4 malaria */
+  L(50, 90, 140, 90, '#8187B6');
+  L(140, 65, 140, 115, '#8187B6');                    /* split: 3 vs (1,2) */
+  L(140, 65, 265, 65, 'var(--vio)');                  /* 3 */
+  L(140, 115, 220, 115, '#8187B6');
+  L(220, 100, 220, 130, '#8187B6');                   /* split: 1 vs 2 */
+  L(220, 100, 265, 100, 'var(--grn)');                /* 1 */
+  L(220, 130, 265, 130, 'var(--cyn)');                /* 2 */
+  const tip = (y, t, c) => svg.append(h('text', { x: 272, y: y + 4, class: 'lab big', fill: c }, t));
+  tip(30, '4', 'var(--pnk)'); tip(65, '3', 'var(--vio)'); tip(100, '1', 'var(--grn)'); tip(130, '2', 'var(--cyn)');
+  svg.append(h('text', { x: 15, y: 50, class: 'lab' }, 'root'));
+  svg.append(h('text', { x: 160, y: 152, class: 'lab hand', fill: 'var(--grn)' }, '((1, 2), 3), 4'));
+  return svg;
+}
+
+function renderStage4() {
+  const filledN = Object.keys(S.s4.filled).length;
+  const doneBar = S.done[4] ? h('div', { class: 'donebar' },
+    h('span', {}, 'The tree: ((1, 2), 3), 4 - exactly what your deck promised. Three bacteria huddle together; malaria stands apart with its nucleus. You just did real phylogenetics with a pencil.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Final station →')) : null;
+  const [kind, msg] = S.s4.msg ? S.s4.msg.split(/:(.*)/s) : ['', ''];
+  const pair = S.s4.pair;
+  const pa = pair ? ORGS4.find(o => o.n === pair[0]) : null;
+  const pb = pair ? ORGS4.find(o => o.n === pair[1]) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Six pairs, one matrix ', h('span', { class: 'count' }, `filled ${filledN} / 6`)),
+      h('div', { style: 'background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto' },
+        ...ORGS4.map(o => h('div', { class: 'seqrow', style: 'margin:3px 0' },
+          h('span', { style: 'color:' + o.color + ';display:inline-block;width:118px' }, o.n + ' · ' + o.name + ' '),
+          ...(pair && (o.n === pair[0] || o.n === pair[1])
+            ? o.seq.split('').map((ch, i) => h('span', { class: pa.seq[i] !== pb.seq[i] ? 'm' : null }, ch))
+            : [h('span', { style: pair ? 'opacity:.35' : '' }, o.seq)])))),
+      h('div', { class: 'scenebtns' },
+        ...PAIRS.map(([a, b]) => {
+          const key = a + '-' + b;
+          const done = S.s4.filled[key] !== undefined;
+          return h('button', { class: 'act' + (done ? '' : ' alt'), type: 'button', disabled: done ? 'disabled' : null,
+            onclick: () => pickPair(a, b) }, done ? `${a}·${b} ✓` : `${a} vs ${b}`);
+        })),
+      pair ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, `How many orange letters between ${pair[0]} and ${pair[1]}?`)),
+        ...[2, 6, 12].map(v => h('button', { class: 'act cy', type: 'button', onclick: () => answerDist(v) }, String(v)))) : null,
+      filledN === 6 && !S.s4.closest ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'Closest pair?')),
+        ...['1-2', '2-3', '3-4'].map(p => h('button', { class: 'act alt', type: 'button', onclick: () => answerClosest(p) }, p.replace('-', ' & ')))) : null,
+      S.s4.closest && !S.done[4] ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'And the odd one out?')),
+        ...[2, 3, 4].map(n => h('button', { class: 'act alt', type: 'button', onclick: () => answerOdd(n) }, String(n)))) : null,
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The distance matrix'),
+      renderMatrix(),
+      S.done[4] ? renderTree4() : h('p', { class: 'sub' }, 'Fill all six cells and the tree will draw itself here.'),
+      h('p', { class: 'sub' }, 'Smallest number = most recent split. Biggest-to-everyone = earliest branch. That is the whole algorithm - the Build a Tree trainer (link below) turns it into a full game with more species.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Why is malaria exactly 12 from all three?'),
+        h('p', {}, 'Because all three bacteria sit on the far side of the SAME ancient split. The distance to malaria was mostly collected before the bacteria started splitting among themselves - so each of them is the same distance across the old divide.'))
+    ));
+}
+
+/* ================= station 5 · you're on it ================= */
+
+const Q5 = [
+  { ask: 'One more jar arrives: YOU. Which of the four is your closest relative?',
+    opts: [['The tapeworm', true], ['The malaria parasite', false], ['The cholera bacterium', false]],
+    why: 'You and the tapeworm are both ANIMALS - many cells, nerves, muscles. You two shared an ancestor long after malaria’s line split off, and eons after the bacteria.' },
+  { ask: '“Cholera and malaria must be close relatives - both are tiny and both cause disease.”',
+    opts: [['False - that’s a job description, not a family', true], ['True - similar lifestyle, similar family', false]],
+    why: 'Causing disease is a JOB. Cholera is a bacterium; malaria is a eukaryote with a nucleus, like you. Their last common ancestor sits at the very root of the tree.' },
+  { ask: 'So where does LUCA - the ancestor of every living thing - sit on your tree?',
+    opts: [['At the root, before the first split', true], ['Next to the bacteria', false], ['Between you and the tapeworm', false]],
+    why: 'LUCA is the trunk itself: the one cell population whose machine - ribosome, code, ATP - every living thing still runs today.' },
+];
+
+function answer5(ok) {
+  const q = Q5[S.s5.q];
+  if (!ok) { S.s5.msg = 'bad:' + q.why; render(); return; }
+  S.s5.msg = 'good:✓ ' + q.why;
+  S.s5.q++;
+  if (S.s5.q >= Q5.length) { S.done[5] = true; }
+  render();
+}
+
+function renderScene5() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 240', role: 'img', 'aria-label': 'The tree with you on it' });
+  const L = (x1,y1,x2,y2,c,w) => svg.append(h('path', { d: `M ${x1} ${y1} L ${x2} ${y2}`, stroke: c, 'stroke-width': w || 2.5, fill: 'none' }));
+  /* root → deep split: bacteria side vs eukaryote side */
+  L(40,200, 120,200,'#8187B6',3.5);
+  L(120,200, 120,80,'var(--grn)'); L(120,80, 240,80,'var(--grn)');      /* bacteria trunk */
+  L(120,200, 260,200,'var(--vio)',3);                                    /* eukaryote trunk */
+  /* bacteria fan */
+  L(240,80, 240,40,'var(--grn)'); L(240,40, 330,40,'var(--grn)');
+  L(240,80, 330,80,'var(--cyn)');
+  L(190,80, 190,120,'var(--vio)'); L(190,120, 330,120,'var(--vio)');
+  /* eukaryotes: malaria vs animals */
+  L(260,200, 260,160,'var(--pnk)'); L(260,160, 330,160,'var(--pnk)');
+  L(260,200, 380,200,'var(--org)',3);
+  L(380,200, 380,185,'var(--cyn)'); L(380,185, 450,185,'var(--cyn)');
+  L(380,200, 450,220,'var(--org)');
+  const tip = (x, y, t, c) => svg.append(h('text', { x, y: y + 4, class: 'lab big', fill: c }, t));
+  tip(336, 40, '1 · cholera', 'var(--grn)');
+  tip(336, 80, '2 · seawater cousin', 'var(--cyn)');
+  tip(336, 120, '3 · gut bacterium', 'var(--vio)');
+  tip(336, 160, '4 · malaria', 'var(--pnk)');
+  tip(456, 185, '🪱 tapeworm', 'var(--cyn)');
+  tip(456, 222, '🧑 YOU', 'var(--org)');
+  svg.append(h('text', { x: 40, y: 222, class: 'lab hand', fill: 'var(--grn)' }, 'LUCA'));
+  if (S.done[5]) svg.append(h('text', { x: 330, y: 18, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--grn)', class2: null },
+    'A tapeworm is a closer relative of yours than cholera is of malaria.'));
+  return svg;
+}
+
+function renderStage5() {
+  const q = Q5[S.s5.q];
+  const doneBar = S.done[5] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Read the top line again - out loud. That sentence sounds insane and is completely true, and now you can PROVE it with twenty letters and a pencil. Quiz time.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(6) }, 'Take the quiz →')) : null;
+  const [kind, msg] = S.s5.msg ? S.s5.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene5(),
+      !S.done[5] ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, q.ask))) : null,
+      !S.done[5] ? h('div', { class: 'scenebtns' },
+        ...q.opts.map(([txt, ok]) => h('button', { class: 'act alt', type: 'button', onclick: () => answer5(ok) }, txt))) : null,
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'One tree, no exceptions'),
+      h('p', {}, 'Every living thing ever found - from gut bacteria to blue whales to you - plugs into this one tree. Not two trees, not five. One. That is the single most tested claim in biology, and the letters agree with it every time anyone counts.'),
+      h('p', { class: 'sub' }, 'The virus jar is still on the bench, outside the picture - no ribosome, no seat. It haunts the tree instead of sitting on it.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'How deep does YOUR branch go?'),
+        h('p', {}, 'You-and-tapeworm split: roughly 600 million years ago. Your line and malaria’s: well over a billion. The bacteria-eukaryote split at the bottom: older still. The twenty letters you counted today are echoes of those dates.'))
+    ));
+}
+
+/* ================= station 6 · quiz ================= */
+
+const QUIZ = [
+  { q: 'Which jar fails the machine test for being alive?',
+    opts: ['The malaria parasite', 'The virus', 'The tapeworm'],
+    a: 1, why: 'No ribosome, no metabolism, no self-copying - a virus borrows a living cell for all three.' },
+  { q: '“Parasite is a job, not a family” means…',
+    opts: ['Parasites cannot be classified', 'Same lifestyle doesn’t mean same ancestors', 'All parasites are related'],
+    a: 1, why: 'Malaria (eukaryote) and tapeworm (animal) both freeload - from totally different branches of the tree.' },
+  { q: 'Why do biologists trust the ribosome more than wings for building family trees?',
+    opts: ['Wings are too small to study', 'The ribosome was built once and inherited; wings were invented many times', 'Ribosomes mutate faster'],
+    a: 1, why: 'Convergence fakes body similarity. The machine was built once - its text records the real family.' },
+  { q: 'Two lineages split 400 generations ago. Compared with lineages split 100 generations ago, their DNA will show…',
+    opts: ['More letter differences', 'Fewer letter differences', 'The same number'],
+    a: 0, why: 'Typos pile up with time. More time apart = more differences = the molecular clock.' },
+  { q: 'In your matrix, cholera-to-cousin was 2 and malaria was 12 from everyone. So…',
+    opts: ['Malaria is the closest relative of cholera', 'Cholera & cousin split recently; malaria branched off long before', 'The numbers are random'],
+    a: 1, why: 'Smallest distance = newest split; biggest-to-all = earliest branch. ((1,2),3),4.' },
+  { q: 'Pick the TRUE sentence.',
+    opts: ['Cholera and malaria are close relatives', 'You and the tapeworm share a more recent ancestor than cholera shares with malaria', 'Viruses sit at the root of the tree'],
+    a: 1, why: 'You + tapeworm = both animals, split ~600 Mya. Cholera vs malaria spans the deepest split there is.' },
+];
+
+function renderStage6() {
+  const q = S.quiz;
+  const items = QUIZ.map((it, qi) => {
+    const picked = q.picked[qi];
+    const cls = q.submitted ? (picked === it.a ? 'q right' : 'q wrong') : 'q';
+    return h('div', { class: cls },
+      h('p', { class: 'qt' }, `${qi + 1}. ${it.q}`),
+      ...it.opts.map((op, oi) => h('label', {},
+        h('input', { type: 'radio', name: 'q' + qi, checked: picked === oi ? 'checked' : null,
+          disabled: q.submitted ? 'disabled' : null,
+          onchange: () => { S.quiz.picked[qi] = oi; render(); } }),
+        h('span', {}, op))),
+      q.submitted ? h('p', { class: 'why' }, (picked === it.a ? '✓ ' : `✗ Correct: “${it.opts[it.a]}”. `) + it.why) : null);
+  });
+  const allPicked = Object.keys(q.picked).length === QUIZ.length;
+  let band = null;
+  if (q.submitted) {
+    const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
+    band = h('div', { class: 'scoreband' },
+      score === QUIZ.length ? `${score} / ${QUIZ.length} — certified tree-reader. The lab is yours.`
+        : `${score} / ${QUIZ.length}. Revisit the stations — the jars aren’t going anywhere.`);
+  }
+  return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Quiz · jars, clocks and one tree'),
+      ...items,
+      h('div', { class: 'scenebtns' },
+        q.submitted
+          ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
+          : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => {
+              S.quiz.submitted = true;
+              const wrongQs = QUIZ.map((it, qi) => S.quiz.picked[qi] === it.a ? null : qi + 1).filter(Boolean);
+              reportQuiz(QUIZ.length - wrongQs.length, QUIZ.length, wrongQs);
+              if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) { S.done[6] = true; awardTrainer(); }
+              render();
+            } }, 'Check my answers'),
+        h('span', { class: 'meter' }, 'Next steps: ', h('b', {}, 'Copy the Code · Build a Tree'))),
+      band));
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 6 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5, 6: renderStage6 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies; script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'fourjars' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'fourjars:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+</script>
+</body>
+</html>
