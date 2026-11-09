@@ -131,7 +131,11 @@ ASSIGN_BAT  = L('Build a Tree - student assignment', MAT + 'build-a-tree-assignm
 ASSIGN_CER  = L('Medical Detective - CER workbook (.docx)', MAT + 'medical-detective-workbook.docx', 'assignment')
 READ_CER    = L('Medical Detective - how to solve the workbook', MAT + 'medical-detective-instructions.pdf', 'reading')
 
+ASSIGN_PED  = L('Family genealogical chart - pedigree task', MAT + 'family-genealogical-chart.pdf', 'assignment')
+ASSIGN_PEDT = L('Pedigree answer sheet - template (.docx)', MAT + 'pedigree-answer-sheet.docx', 'assignment')
+
 NODE_LINKS = {
+ 'U4.A2': [ASSIGN_PED, ASSIGN_PEDT],
  'U1.K2': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U5.K1': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U3.K1': [TRAINER_CC, SLIDES_DNA],
