@@ -119,13 +119,30 @@ MAT = SITE + 'materials/'
 SLIDES_MR = L('Molecules & Reactions - lesson slides', MAT + 'molecules-reactions-slides.pdf', 'slides')
 READ_4M = L('The Same Four Moves - background reading', MAT + 'same-four-moves-reading.pdf', 'reading')
 
+SLIDES_DNA  = L('The Code of Life - DNA slides', MAT + 'dna-slides.pdf', 'slides')
+SLIDES_MAL  = L('Inner Space: Malaria - lesson slides', MAT + 'malaria-slides.pdf', 'slides')
+SLIDES_SOHO = L('Epidemic Forensics: Soho 1854 - lesson slides', MAT + 'soho-1854-slides.pdf', 'slides')
+SLIDES_RAB  = L('Rabies 1885 - lesson slides', MAT + 'rabies-slides.pdf', 'slides')
+SLIDES_COS  = L('Cosmic Epidemics: Is It Real? - lesson slides', MAT + 'cosmic-epidemics-slides.pdf', 'slides')
+SLIDES_TREE = L('Tree of Life - lesson slides (senior)', MAT + 'tree-of-life-senior-slides.pdf', 'slides')
+READ_TREE   = L('Tree of Life - background reading', MAT + 'tree-of-life-reading.pdf', 'reading')
+READ_PLAGUE = L('Plague 1910, Manchuria - student reading', MAT + 'plague-1910-reading.pdf', 'reading')
+ASSIGN_BAT  = L('Build a Tree - student assignment', MAT + 'build-a-tree-assignment.pdf', 'assignment')
+ASSIGN_CER  = L('Medical Detective - CER workbook (.docx)', MAT + 'medical-detective-workbook.docx', 'assignment')
+READ_CER    = L('Medical Detective - how to solve the workbook', MAT + 'medical-detective-instructions.pdf', 'reading')
+
 NODE_LINKS = {
  'U1.K2': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U5.K1': [TRAINER_MB, SLIDES_MR, READ_4M],
- 'U3.K1': [TRAINER_CC],
- 'U3.K2': [TRAINER_CC],
- 'U6.A2': [TRAINER_BT],
- 'U6.K3': [TRAINER_BT],
+ 'U3.K1': [TRAINER_CC, SLIDES_DNA],
+ 'U3.K2': [TRAINER_CC, SLIDES_DNA],
+ 'U6.A2': [TRAINER_BT, ASSIGN_BAT, SLIDES_TREE, READ_TREE],
+ 'U6.K3': [TRAINER_BT, SLIDES_TREE, READ_TREE],
+ 'U6.K2': [SLIDES_MAL],
+ 'U7.K2': [SLIDES_RAB],
+ 'U7.K1': [SLIDES_COS],
+ 'U10.K1': [SLIDES_SOHO, READ_PLAGUE],
+ 'U10.A3': [ASSIGN_CER, READ_CER, SLIDES_COS],
 }
 
 nodes = []
