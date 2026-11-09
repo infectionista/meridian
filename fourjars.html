@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Four Jars, One Tree</title>
+<title>Life Sciences with Daniel</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Four Jars, One Tree — a 45-minute cosmic-lab session for one curious
@@ -191,11 +191,11 @@ tr.on .dot { background: var(--grn); box-shadow: 0 0 8px rgba(163,230,53,.7); }
 
   <header>
     <div class="eyebrow">Meridian Life Sciences · Cosmic Lab Session</div>
-    <h1>Four Jars, One <span class="hi">Tree</span></h1>
-    <p class="lede">Four mystery organisms are glowing in jars on the lab bench: a bacterium, a virus
-      and two parasites. By the end of this session you will decide <b>who is actually alive</b>,
-      catch your own eyes lying to you, watch DNA typos tick like a clock, count your way to a real
-      family tree — and find out which of these creatures is <b>your</b> relative.</p>
+    <h1>Life Sciences with <span class="hi">Daniel</span></h1>
+    <p class="lede">On the bench: a jar with a <b>king&rsquo;s blood</b>, four glowing specimens you already know,
+      and one family tree with room for you on it. Today&rsquo;s lab: read a genetic portrait from a
+      220-year-old drop, catch your own eyes lying to you, watch DNA typos tick like a clock —
+      and count your way to the tree of life.</p>
     <div class="controls">
       <div class="seg" id="segStages" aria-label="Stations"></div>
       <button class="ghost" id="btnReset" type="button">Start over</button>
@@ -262,7 +262,7 @@ function mulberry32(a) {
 /* ---------------- state ---------------- */
 
 const STAGE_META = [
-  { n: 1, label: 'The jars' },
+  { n: 1, label: 'The king in the jar' },
   { n: 2, label: 'Bodies lie' },
   { n: 3, label: 'The typo clock' },
   { n: 4, label: 'Count the letters' },
@@ -271,7 +271,7 @@ const STAGE_META = [
 ];
 
 const NOTES = {
-  1: '<b>Station 1 · The jars.</b> Four specimens, four tags. For each jar decide: is this thing ALIVE? Use the machine test from the side card — and don’t let the creepy ones fool you.',
+  1: '<b>Station 1 \u00b7 The king in the jar.</b> Paris, 21 January 1793: the king is beheaded, and a witness dips his handkerchief in the blood. The cloth ends up sealed in a decorated gourd. 220 years later, scientists open it. Three questions - make the calls they had to make.',
   2: '<b>Station 2 · Bodies lie.</b> Looks are terrible evidence. Sort six features into “invented many times” vs “built once, inherited forever” — then decide who even gets a seat on the tree of life.',
   3: '<b>Station 3 · The typo clock.</b> One ancestor, two separated lineages, and a copying machine that makes about one tiny mistake per round. Let generations pass and watch the sequences drift apart. Distance IS time.',
   4: '<b>Station 4 · Count the letters.</b> The real exercise from your deck: four organisms, twenty letters each, six pairs. No software — just count, fill the matrix, and let the tree draw itself.',
@@ -285,7 +285,7 @@ function freshState() {
     stage: 1,
     done: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
     logged: new Set(),
-    s1: { verdicts: {}, msg: '' },
+    s1: { q: 0, msg: '' },
     s2: { sorted: {}, picked: null, seats: [], phase: 'sort', msg: '' },
     s3: { gen: 0, seqA: '', seqB: '', answered: false, msg: '' },
     s4: { pair: null, filled: {}, closest: null, odd: null, msg: '' },
@@ -296,7 +296,7 @@ function freshState() {
 S = freshState();
 
 const LOG = [
-  { id: 'alive', name: 'Alive = has its own machine', note: 'a cell that feeds itself and copies itself; a virus just rents yours' },
+  { id: 'capsule', name: 'DNA is a time capsule', note: 'letters survive centuries - a dried drop can describe a face' },
   { id: 'job',   name: 'Parasite is a job, not a family', note: 'malaria and the tapeworm share a lifestyle — not an ancestor' },
   { id: 'body',  name: 'Bodies lie - read the machine', note: 'wings evolved many times; the ribosome was built exactly once' },
   { id: 'clock', name: 'Typos tick like a clock', note: 'copying mistakes pile up — more differences means a longer time apart' },
@@ -317,17 +317,6 @@ const JARS = [
     why: 'A whole animal: millions of cells, muscles, nerves. Gross? Yes. Alive? Absolutely.' },
 ];
 
-/* ================= station 1 · the jars ================= */
-
-function judgeJar(id, verdict) {
-  if (S.s1.verdicts[id] !== undefined) { S.s1.msg = 'good:Already judged - pick another jar.'; render(); return; }
-  const jar = JARS.find(j => j.id === id);
-  S.s1.verdicts[id] = verdict;
-  const right = verdict === jar.alive;
-  S.s1.msg = (right ? 'good:✓ ' : 'bad:✗ ') + jar.why;
-  if (Object.keys(S.s1.verdicts).length === JARS.length) { S.done[1] = true; logIdea('alive'); logIdea('job'); }
-  render();
-}
 
 function drawJar(svg, jar, x, y, opts = {}) {
   const g = h('g', Object.assign({ class: opts.onclick ? 'pickable' : null, tabindex: opts.onclick ? '0' : null,
@@ -336,8 +325,8 @@ function drawJar(svg, jar, x, y, opts = {}) {
       onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onclick(jar.id); } } } : {}));
   const dim = opts.dim;
   g.append(h('rect', { x: x - 34, y: y - 48, width: 68, height: 96, rx: 14,
-    fill: dim ? 'rgba(42,47,85,.4)' : jar.glow + '22', stroke: opts.hl ? '#fff' : jar.glow,
-    'stroke-width': opts.hl ? 3 : 2, opacity: dim ? .45 : 1, class: opts.popped ? 'pop' : null }));
+    fill: dim ? 'rgba(42,47,85,.4)' : jar.glow + '22', stroke: jar.glow,
+    'stroke-width': 2, opacity: dim ? .45 : 1 }));
   g.append(h('rect', { x: x - 20, y: y - 58, width: 40, height: 12, rx: 4, fill: dim ? '#3A3F6B' : jar.glow, opacity: dim ? .5 : .9 }));
   g.append(h('text', { x, y: y + 10, 'text-anchor': 'middle', 'font-size': '30px', opacity: dim ? .4 : 1 }, jar.emoji));
   g.append(h('text', { x, y: y + 70, class: 'lab', 'text-anchor': 'middle', fill: dim ? 'var(--dim)' : 'var(--fg)' }, jar.name));
@@ -345,49 +334,86 @@ function drawJar(svg, jar, x, y, opts = {}) {
   svg.append(g);
 }
 
+/* ================= station 1 \u00b7 the king in the jar ================= */
+
+const KINGQ = [
+  { ask: 'Can scientists still read DNA from dried blood after 220 years?',
+    opts: [['Yes - DNA is tough; labs read far older samples', true],
+           ['No - DNA falls apart within a year', false],
+           ['Only if the cells are still alive', false]],
+    why: 'DNA is a remarkably sturdy molecule. Labs routinely read genomes tens of thousands of years old - mammoths, Neanderthals. A 220-year-old drop is easy mode.' },
+  { ask: 'The genome said: brown eyes, ordinary height, family roots near northern Italy. The real Louis XVI: blue eyes, about 190 cm - the tallest man at Court - and German-Polish royal ancestry. Your verdict?',
+    opts: [['The blood is probably not the king\u2019s', true],
+           ['All the old portraits must be wrong', false],
+           ['DNA cannot predict eye colour', false]],
+    why: 'When the genetic portrait contradicts everything known about a person - eyes, height AND ancestry - it is the relic that fails the test, not the king. Scientific Reports, 2014.' },
+  { ask: 'The final nail: the Y chromosome of living male-line relatives of the royal family did not match the gourd either. What did DNA just do?',
+    opts: [['Busted a 220-year-old fake relic', true],
+           ['Proved the king was never executed', false],
+           ['Found the real king\u2019s blood', false]],
+    why: 'The letters do not flatter and do not lie. The same letters that unmasked a souvenir are the ones you will use today to build a real family tree.' },
+];
+
+function answerKing(ok) {
+  const q = KINGQ[S.s1.q];
+  if (!ok) { S.s1.msg = 'bad:' + q.why; render(); return; }
+  S.s1.msg = 'good:\u2713 ' + q.why;
+  S.s1.q++;
+  if (S.s1.q >= KINGQ.length) { S.done[1] = true; logIdea('capsule'); }
+  render();
+}
+
 function renderScene1() {
-  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 220', role: 'img', 'aria-label': 'Four specimen jars' });
-  JARS.forEach((jar, i) => {
-    const x = 100 + i * 152;
-    const v = S.s1.verdicts[jar.id];
-    drawJar(svg, jar, x, 100, { badge: v === undefined ? '' : (v === jar.alive ? '✓' : '✗') });
-    if (v !== undefined) {
-      svg.append(h('text', { x, y: 196, class: 'lab big', 'text-anchor': 'middle',
-        fill: jar.alive ? 'var(--grn)' : 'var(--pnk)' }, jar.alive ? 'ALIVE' : 'NOT ALIVE'));
-    }
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 230', role: 'img', 'aria-label': 'The decorated gourd with the royal blood' });
+  /* the gourd */
+  svg.append(h('path', { d: 'M 130 60 C 118 78 112 92 112 108 C 94 122 84 146 88 168 C 92 196 118 212 150 212 C 182 212 208 196 212 168 C 216 146 206 122 188 108 C 188 92 182 78 170 60 Z',
+    fill: 'rgba(251,146,60,.14)', stroke: 'var(--org)', 'stroke-width': 2.5 }));
+  svg.append(h('rect', { x: 138, y: 44, width: 24, height: 18, rx: 4, fill: 'var(--org)', opacity: .85 }));
+  svg.append(h('path', { d: 'M 104 150 q 46 -16 92 0 M 108 170 q 42 -14 84 0', fill: 'none', stroke: 'var(--org)', 'stroke-width': 1.2, opacity: .7 }));
+  svg.append(h('text', { x: 150, y: 142, 'text-anchor': 'middle', 'font-size': '22px' }, '\uD83E\uDE78'));
+  svg.append(h('text', { x: 150, y: 228, class: 'lab', 'text-anchor': 'middle' }, 'the pyrographed gourd'));
+  /* inscription card */
+  svg.append(h('rect', { x: 250, y: 50, width: 380, height: 78, rx: 10, fill: 'var(--bg-2)', stroke: 'var(--line)' }));
+  svg.append(h('text', { x: 265, y: 74, class: 'lab', fill: 'var(--dim)' }, 'Carved on the gourd: \u201COn 21 January, Maximilien Bourdaloue dipped'));
+  svg.append(h('text', { x: 265, y: 92, class: 'lab', fill: 'var(--dim)' }, 'his handkerchief in the blood of the king after his beheading.\u201D'));
+  svg.append(h('text', { x: 265, y: 116, class: 'lab big', fill: 'var(--pnk)' }, 'Paris, 1793 \u2192 a lab in Barcelona, 2010\u20132014'));
+  /* timeline */
+  svg.append(h('path', { d: 'M 260 170 L 620 170', stroke: 'var(--line)', 'stroke-width': 2 }));
+  [['1793', 'the drop', 270], ['2011', 'first DNA read', 400], ['2014', 'full genome \u2192 portrait', 520]].forEach(([yr, t, x]) => {
+    svg.append(h('circle', { cx: x, cy: 170, r: 5, fill: 'var(--cyn)' }));
+    svg.append(h('text', { x, y: 156, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--cyn)' }, yr));
+    svg.append(h('text', { x, y: 190, class: 'lab', 'text-anchor': 'middle' }, t));
   });
   return svg;
 }
 
 function renderStage1() {
-  const remaining = JARS.filter(j => S.s1.verdicts[j.id] === undefined);
-  const next = remaining[0];
+  const q = KINGQ[S.s1.q];
   const doneBar = S.done[1] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Three alive, one impostor. And notice: malaria and the tapeworm are both “parasites” — but that’s a job description, not a family name. Hold that thought.'),
-    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: bodies lie →')) : null;
+    h('span', {}, 'Case closed: the \u201Croyal relic\u201D was almost certainly a souvenir of someone else entirely. Remember the trick though - a genome can sketch a face. Now let\u2019s see why letters beat looks every time.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: bodies lie \u2192')) : null;
   const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card scene' },
       renderScene1(),
-      !S.done[1] && next ? h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, 'verdict for ', h('b', {}, next.name), ':'),
-        h('button', { class: 'act', type: 'button', onclick: () => judgeJar(next.id, true) }, 'Alive'),
-        h('button', { class: 'act alt', type: 'button', onclick: () => judgeJar(next.id, false) }, 'Not alive'),
-        h('span', { class: 'meter' }, h('b', {}, `${JARS.length - remaining.length} / 4`))) : null,
+      !S.done[1] ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, q.ask))) : null,
+      !S.done[1] ? h('div', { class: 'scenebtns' },
+        ...q.opts.map(([txt, ok]) => h('button', { class: 'act alt', type: 'button', onclick: () => answerKing(ok) }, txt)),
+        h('span', { class: 'meter' }, h('b', {}, `${S.s1.q} / ${KINGQ.length}`))) : null,
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'The machine test'),
-      h('p', {}, 'Alive means: it is (or is made of) a cell with its own working machinery — it feeds itself, runs itself, and copies itself. Three checks, one verdict.'),
+      h('h3', {}, 'A portrait drawn from letters'),
+      h('div', { class: 'eq' }, 'dried blood \u2192 DNA letters \u2192 a sketch of a face'),
       h('table', {},
-        h('tr', {}, h('th', {}, 'Specimen'), h('th', {}, 'Own machine?')),
-        h('tr', {}, h('td', {}, '🦠 Bacterium'), h('td', {}, 'yes - one small but complete cell')),
-        h('tr', {}, h('td', {}, '🧬 Virus'), h('td', {}, 'no - instructions in a box, borrows everything')),
-        h('tr', {}, h('td', {}, '🩸 Malaria'), h('td', {}, 'yes - a eukaryotic cell with a nucleus')),
-        h('tr', {}, h('td', {}, '🪱 Tapeworm'), h('td', {}, 'yes - millions of cells, a whole animal'))),
-      h('p', { class: 'sub' }, '“Parasite” tells you how something earns lunch, not who its relatives are. Malaria is closer to YOU than to any bacterium — it has a nucleus, like your cells do.'),
-      h('details', { class: 'fine' }, h('summary', {}, 'Do all scientists agree about viruses?'),
-        h('p', {}, 'Not entirely — some argue viruses are “alive while inside a cell”. But everyone agrees on the practical part: no machinery of their own, so the machine test says no. You’ll see in station 2 why that also kicks them off the tree.'))
+        h('tr', {}, h('th', {}, 'Read from the genome'), h('th', {}, 'How')),
+        h('tr', {}, h('td', {}, 'Eye colour'), h('td', {}, 'a famous switch near one gene (HERC2) decides blue vs brown')),
+        h('tr', {}, h('td', {}, 'Height'), h('td', {}, 'hundreds of tiny effects added up - a tall person shows an excess of \u201Ctall\u201D variants')),
+        h('tr', {}, h('td', {}, 'Ancestry'), h('td', {}, 'whole-genome patterns point to where the family lived'))),
+      h('p', { class: 'sub' }, 'The gourd genome was the first ever sequenced from a person of recent history - and its portrait (brown eyes, average height, north-Italian roots) matched the king on nothing. Same tools, by the way, that police use for DNA photofits today.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'The twin relic that fell with it'),
+        h('p', {}, 'A mummified head said to be king Henri IV \u201Cmatched\u201D the gourd at first - then living male-line relatives of the family showed a different Y chromosome from both relics. Two legends busted by one molecule. Science checks itself; that is the whole point of it.'))
     ));
 }
 
@@ -688,6 +714,7 @@ function answer5(ok) {
   const q = Q5[S.s5.q];
   if (!ok) { S.s5.msg = 'bad:' + q.why; render(); return; }
   S.s5.msg = 'good:✓ ' + q.why;
+  if (S.s5.q === 1) logIdea('job');
   S.s5.q++;
   if (S.s5.q >= Q5.length) { S.done[5] = true; }
   render();
@@ -749,9 +776,9 @@ function renderStage5() {
 /* ================= station 6 · quiz ================= */
 
 const QUIZ = [
-  { q: 'Which jar fails the machine test for being alive?',
-    opts: ['The malaria parasite', 'The virus', 'The tapeworm'],
-    a: 1, why: 'No ribosome, no metabolism, no self-copying - a virus borrows a living cell for all three.' },
+  { q: 'Why did scientists decide the gourd blood was probably NOT Louis XVI\u2019s?',
+    opts: ['DNA cannot survive 220 years', 'The genetic portrait - brown eyes, ordinary height, north-Italian roots - contradicted the real king on every count', 'The gourd was the wrong shape'],
+    a: 1, why: 'Blue-eyed, ~190 cm, German-Polish ancestry - the genome matched none of it. The relic failed, not the method.' },
   { q: '“Parasite is a job, not a family” means…',
     opts: ['Parasites cannot be classified', 'Same lifestyle doesn’t mean same ancestors', 'All parasites are related'],
     a: 1, why: 'Malaria (eukaryote) and tapeworm (animal) both freeload - from totally different branches of the tree.' },
