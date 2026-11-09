@@ -448,15 +448,24 @@ function renderStage1() {
       doneBar),
     h('aside', { class: 'card rx' },
       h('h3', {}, 'A face made of letters'),
-      h('div', { class: 'eq' }, 'dried blood \u2192 DNA letters \u2192 a sketch of a face'),
+      h('p', {}, h('b', {}, 'What was inside: '), 'a shrivelled handkerchief, stiff with dried blood. The DNA came from the white blood cells in it — red blood cells carry none.'),
+      h('div', { class: 'eq' }, 'dried blood → broken DNA → a face'),
       h('table', {},
-        h('tr', {}, h('th', {}, 'Read from the genome'), h('th', {}, 'How')),
-        h('tr', {}, h('td', {}, 'Eye colour'), h('td', {}, 'one switch in the DNA: blue or brown')),
-        h('tr', {}, h('td', {}, 'Height'), h('td', {}, 'many tiny DNA changes add up to tall or short')),
-        h('tr', {}, h('td', {}, 'Ancestry'), h('td', {}, 'patterns show where the family came from'))),
-      h('p', { class: 'sub' }, 'This was the first full genome ever read from a person of recent history. The face it drew matched the king on nothing. Police use the same trick today.'),
-      h('details', { class: 'fine' }, h('summary', {}, 'The other fake'),
-        h('p', {}, 'A mummified head was sold as king Henri IV. At first it seemed to match the jar. Then living men from the same family turned out to have a different Y chromosome from both. Two stories busted by one molecule.'))
+        h('tr', {}, h('th', {}, 'How they got there'), h('th', {}, '')),
+        h('tr', {}, h('td', {}, '2011'), h('td', {}, 'first DNA out of the gourd: the mother’s line (mitochondrial DNA)')),
+        h('tr', {}, h('td', {}, '2012'), h('td', {}, 'compared with the head sold as king Henri IV — they matched')),
+        h('tr', {}, h('td', {}, '2013'), h('td', {}, 'living Bourbon men: a different Y chromosome from both')),
+        h('tr', {}, h('td', {}, '2014'), h('td', {}, 'the whole genome read, roughly — about 2.5 times over'))),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Trait'), h('th', {}, 'What was read → answer')),
+        h('tr', {}, h('td', {}, 'Eye colour'), h('td', {}, 'one switch in the HERC2 gene, the same test police use → brown. The king: blue')),
+        h('tr', {}, h('td', {}, 'Height'), h('td', {}, 'hundreds of tiny variants added up → no extra “tall” ones. The king: tallest man at court')),
+        h('tr', {}, h('td', {}, 'Family'), h('td', {}, 'the pattern across the whole genome → not the Central European family the king really had')),
+        h('tr', {}, h('td', {}, 'Father’s line'), h('td', {}, 'markers on the Y chromosome → not the one living Bourbons carry'))),
+      h('p', { class: 'sub' }, 'The first full genome ever read from a person of recent history.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Two honest problems'),
+        h('p', {}, 'The DNA was in tiny broken pieces, and about a fifth of what the machine read came from people who had handled the gourd, not from the blood. So the team only trusted letters they saw several times over.'),
+        h('p', {}, 'The head sold as king Henri IV matched the gourd at first, so the two relics propped each other up. Then living men from the same family showed a different Y chromosome from both.'))
     ));
 }
 
