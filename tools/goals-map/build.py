@@ -255,6 +255,6 @@ print('trails:', len(TRAILS))
 
 data = {'units': UNITS, 'nodes': nodes, 'edges': edges, 'trails': TRAILS}
 tpl = open(HERE / 'template.html', encoding='utf-8').read()
-html = tpl.replace('__DATA__', json.dumps(data, ensure_ascii=False))
+html = tpl.replace('__DATA__', json.dumps(data, ensure_ascii=False)).replace('__AGES__', '11–14')
 open(ROOT / 'goals-map-11-14.html', 'w', encoding='utf-8').write(html)
 print('written', ROOT / 'goals-map-11-14.html', ',', len(html), 'bytes')
