@@ -6,25 +6,24 @@
 <title>Life Sciences with Daniel</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Life Sciences with Daniel - a 45-minute cosmic-lab session for one curious
-   13-year-old. Big visuals, few words: the explaining is the teacher's job
-   (see the crib sheet), and the ink layer lets both of them draw straight on
-   the slides from a tablet. */
+/* Four Jars, One Tree — a 45-minute cosmic-lab session for one curious
+   13-year-old. Bridges the Tree-of-Life deck with the Build a Tree and
+   Copy the Code trainers. Dark cosmic style to match the slide deck. */
 :root {
   color-scheme: dark;
-  --bg:    #070916;
-  --bg-2:  #0E1230;
-  --panel: #141A3C;
-  --panel-2: #1B2250;
-  --line:  #2E3878;
-  --fg:    #F2F4FF;
-  --dim:   #A6AEE0;
-  --vio:   #B794FF;
-  --grn:   #A8F043;
-  --pnk:   #FF5FC8;
-  --cyn:   #2BE8F5;
-  --org:   #FFA24A;
-  --red:   #FF6B8B;
+  --bg:    #0B0D1C;
+  --bg-2:  #10132A;
+  --panel: #151935;
+  --panel-2: #1C2147;
+  --line:  #2B3160;
+  --fg:    #EDEFFF;
+  --dim:   #9BA3D0;
+  --vio:   #A78BFA;
+  --grn:   #A3E635;
+  --pnk:   #F472B6;
+  --cyn:   #22D3EE;
+  --org:   #FB923C;
+  --red:   #FB7185;
   --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
   --hand: 'Comic Neue', 'Comic Sans MS', cursive;
   --mono: 'JetBrains Mono', 'Courier New', monospace;
@@ -33,212 +32,158 @@
 html, body { height: 100%; }
 body {
   background: var(--bg); color: var(--fg);
-  font-family: var(--ui); font-size: 16px; line-height: 1.5; margin: 0;
+  font-family: var(--ui); font-size: 15px; line-height: 1.55; margin: 0;
 }
-/* starfield + faint lab grid */
 body::before {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(1.6px 1.6px at 11% 17%, rgba(255,255,255,.95), transparent 60%),
-    radial-gradient(1.2px 1.2px at 27% 61%, rgba(255,255,255,.7), transparent 60%),
-    radial-gradient(1.8px 1.8px at 44% 12%, rgba(255,255,255,.85), transparent 60%),
-    radial-gradient(1.1px 1.1px at 58% 78%, rgba(255,255,255,.65), transparent 60%),
-    radial-gradient(1.5px 1.5px at 71% 33%, rgba(255,255,255,.9), transparent 60%),
-    radial-gradient(1.2px 1.2px at 83% 69%, rgba(255,255,255,.7), transparent 60%),
-    radial-gradient(1.7px 1.7px at 93% 23%, rgba(255,255,255,.85), transparent 60%),
-    radial-gradient(1.1px 1.1px at 6% 86%, rgba(255,255,255,.6), transparent 60%),
-    radial-gradient(1.3px 1.3px at 36% 93%, rgba(255,255,255,.7), transparent 60%),
-    radial-gradient(1.4px 1.4px at 64% 50%, rgba(255,255,255,.55), transparent 60%),
-    repeating-linear-gradient(0deg, transparent 0 47px, rgba(183,148,255,.045) 47px 48px),
-    repeating-linear-gradient(90deg, transparent 0 47px, rgba(183,148,255,.045) 47px 48px);
-}
-/* drifting aurora */
-body::after {
-  content: ''; position: fixed; inset: -20%; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(42% 26% at 18% 8%,  rgba(43,232,245,.18), transparent 70%),
-    radial-gradient(38% 30% at 86% 14%, rgba(183,148,255,.18), transparent 70%),
-    radial-gradient(45% 28% at 70% 92%, rgba(255,95,200,.13), transparent 70%),
-    radial-gradient(30% 34% at 8% 72%,  rgba(168,240,67,.10), transparent 70%);
-  filter: blur(28px);
-  animation: aurora 26s ease-in-out infinite alternate;
-}
-@keyframes aurora {
-  from { transform: translate3d(-1.5%, -1%, 0) scale(1); }
-  to   { transform: translate3d(2%, 2%, 0) scale(1.07); }
+    radial-gradient(circle at 20% 10%, rgba(167,139,250,.08), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(34,211,238,.06), transparent 45%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(167,139,250,.05) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(167,139,250,.05) 39px 40px);
 }
 .wrap {
   position: relative; z-index: 1;
-  max-width: 1240px; margin: 0 auto;
+  max-width: 1180px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-top: max(22px, env(safe-area-inset-top, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
   padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
-  display: flex; flex-direction: column; gap: 18px;
+  display: flex; flex-direction: column; gap: 20px;
 }
-.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--cyn); text-shadow: 0 0 16px rgba(43,232,245,.7); }
-h1 { font-family: var(--hand); font-size: clamp(32px, 6.4vw, 54px); font-weight: 700; line-height: 1.02; margin: 6px 0 0; text-wrap: balance;
-     text-shadow: 0 0 22px rgba(43,232,245,.35); }
-h1 .hi { color: var(--grn); text-shadow: 0 0 24px rgba(168,240,67,.7); }
-.lede { margin: 8px 0 0; color: var(--dim); max-width: 60ch; font-size: 16px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--cyn); text-shadow: 0 0 14px rgba(34,211,238,.5); }
+h1 { font-family: var(--hand); font-size: clamp(30px, 6vw, 48px); font-weight: 700; letter-spacing: .01em; line-height: 1.05; margin: 8px 0 0; text-wrap: balance; }
+h1 .hi { color: var(--grn); text-shadow: 0 0 18px rgba(163,230,53,.55); }
+.lede { margin: 10px 0 0; color: var(--dim); max-width: 66ch; }
 .lede b { color: var(--fg); }
 
-.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
-.seg { display: flex; flex-wrap: wrap; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; background: rgba(14,18,48,.8); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg-2); }
 .seg button {
-  font: 700 13.5px/1 var(--ui); color: var(--dim);
-  background: transparent; border: 0; padding: 11px 14px; cursor: pointer;
-  border-right: 1.5px solid var(--line);
+  font: 600 13px/1 var(--ui); color: var(--dim);
+  background: transparent; border: 0; padding: 10px 13px; cursor: pointer;
+  border-right: 1px solid var(--line);
 }
 .seg button:last-child { border-right: 0; }
-.seg button[aria-pressed="true"] { background: var(--vio); color: #070916; box-shadow: 0 0 18px rgba(183,148,255,.55); }
+.seg button[aria-pressed="true"] { background: var(--vio); color: #0B0D1C; font-weight: 700; }
 .seg button:hover:not([aria-pressed="true"]) { color: var(--fg); background: var(--panel-2); }
 .seg .tick { color: var(--grn); font-weight: 700; }
-.seg button[aria-pressed="true"] .tick { color: #070916; }
+.seg button[aria-pressed="true"] .tick { color: #0B0D1C; }
 .ghost {
-  font: 700 13.5px/1 var(--ui); color: var(--dim);
-  background: rgba(14,18,48,.8); border: 1.5px solid var(--line);
-  border-radius: 12px; padding: 11px 14px; cursor: pointer;
+  font: 600 13px/1 var(--ui); color: var(--dim);
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 14px; cursor: pointer;
 }
-.ghost:hover { color: var(--cyn); border-color: var(--cyn); box-shadow: 0 0 16px rgba(43,232,245,.3); }
-.ghost[aria-pressed="true"] { color: #070916; background: var(--grn); border-color: var(--grn); box-shadow: 0 0 20px rgba(168,240,67,.5); }
+.ghost:hover { color: var(--cyn); border-color: var(--cyn); }
 :is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--cyn); outline-offset: 2px; }
 
-/* ink toolbar */
-.inkbar { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
-.swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.22); cursor: pointer; padding: 0; }
-.swatch[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.16), 0 0 16px currentColor; }
-.swatch.er { background: rgba(14,18,48,.9); color: var(--dim); font-size: 15px; line-height: 1; }
-
 .stagenote {
-  margin: 14px 0 0; padding: 12px 18px;
-  border-left: 4px solid var(--grn);
-  background: rgba(14,18,48,.75); border-radius: 0 12px 12px 0;
-  border-top: 1.5px solid var(--line); border-right: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line);
-  color: var(--fg); font-size: 17px; font-weight: 500; max-width: 70ch;
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--grn);
+  background: var(--bg-2); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--dim); font-size: 14px; max-width: 78ch;
 }
-.stagenote b { color: var(--grn); font-weight: 700; }
+.stagenote b { color: var(--fg); font-weight: 600; }
 
-/* neon double-framed panels, like the deck */
-.card {
-  position: relative;
-  background: linear-gradient(162deg, #171D43 0%, #10142E 100%);
-  border: 2px solid rgba(43,232,245,.5);
-  border-radius: 18px; padding: 18px 20px; min-width: 0;
-  box-shadow:
-    inset 0 0 0 4px rgba(7,9,22,.92),
-    inset 0 0 0 5.5px rgba(183,148,255,.32),
-    0 0 28px rgba(43,232,245,.16),
-    0 18px 50px rgba(0,0,0,.55);
-}
-.card > h2 { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--cyn); margin: 0 0 12px; text-shadow: 0 0 14px rgba(43,232,245,.5); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; min-width: 0;
+  box-shadow: 0 0 0 1px rgba(167,139,250,.06), 0 14px 40px rgba(0,0,0,.45); }
+.card > h2 { font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--vio); margin: 0 0 12px; }
 .card > h2 .count { color: var(--dim); letter-spacing: .04em; font-weight: 500; }
 
-.stagewrap { position: relative; }
-#inkCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; touch-action: none; }
-body.drawing #inkCanvas { pointer-events: auto; cursor: crosshair; }
-body.drawing .stagewrap::after {
-  content: '\270E draw mode'; position: absolute; top: 10px; right: 14px; z-index: 6;
-  font: 700 11px/1 var(--ui); letter-spacing: .15em; text-transform: uppercase; color: var(--grn);
-  background: rgba(7,9,22,.85); border: 1.5px solid rgba(168,240,67,.55); border-radius: 999px;
-  padding: 7px 11px; pointer-events: none; box-shadow: 0 0 18px rgba(168,240,67,.25);
-}
-
-.stagegrid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-@media (max-width: 880px) { .stagegrid { grid-template-columns: 1fr; } }
-.scene svg, .rx svg { width: 100%; height: auto; display: block; user-select: none; }
+.stagegrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .stagegrid { grid-template-columns: 1fr; } }
+.scene svg { width: 100%; height: auto; display: block; user-select: none; }
 .scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
 
 .act {
-  font: 700 15px/1.2 var(--ui); color: #070916;
-  background: var(--grn); border: 0; border-radius: 12px;
-  padding: 12px 17px; cursor: pointer;
-  box-shadow: 0 0 20px rgba(168,240,67,.35);
+  font: 700 14px/1.2 var(--ui); color: #0B0D1C;
+  background: var(--grn); border: 0; border-radius: 10px;
+  padding: 11px 16px; cursor: pointer;
+  box-shadow: 0 0 16px rgba(163,230,53,.25);
 }
-.act:hover { filter: brightness(1.12); }
-.act:disabled { background: #343B74; color: #8E95C8; cursor: default; box-shadow: none; }
-.act.alt { background: rgba(183,148,255,.1); color: var(--vio); border: 2px solid var(--vio); box-shadow: 0 0 16px rgba(183,148,255,.2); }
-.act.alt:hover { background: rgba(183,148,255,.22); filter: none; }
-.act.cy { background: var(--cyn); box-shadow: 0 0 20px rgba(43,232,245,.35); }
+.act:hover { filter: brightness(1.1); }
+.act:disabled { background: #3A3F6B; color: #8187B6; cursor: default; box-shadow: none; }
+.act.alt { background: transparent; color: var(--vio); border: 1.5px solid var(--vio); box-shadow: none; }
+.act.alt:hover { background: rgba(167,139,250,.12); filter: none; }
+.act.cy { background: var(--cyn); box-shadow: 0 0 16px rgba(34,211,238,.25); }
 
-.meter { font: 600 15px/1.35 var(--ui); color: var(--fg); background: rgba(14,18,48,.85); border: 1.5px solid var(--line); border-radius: 11px; padding: 10px 13px; }
-.meter b { color: var(--grn); font-weight: 700; }
-.toast { margin-top: 12px; font-size: 15px; color: var(--pnk); min-height: 1.3em; font-weight: 500; }
+.meter { font: 500 13px/1.3 var(--ui); color: var(--dim); background: var(--bg-2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; }
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pnk); min-height: 1.3em; }
 .toast.good { color: var(--grn); }
 
 .donebar {
-  margin-top: 14px; padding: 13px 15px; border-radius: 13px;
-  background: rgba(168,240,67,.1); border: 2px solid rgba(168,240,67,.5);
-  color: var(--grn); font-size: 15.5px; font-weight: 600;
+  margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(163,230,53,.1); border: 1px solid rgba(163,230,53,.45);
+  color: var(--grn); font-size: 14px; font-weight: 500;
   display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
-  text-shadow: 0 0 12px rgba(168,240,67,.3);
+  text-shadow: 0 0 10px rgba(163,230,53,.25);
 }
 
-.rx h3 { font-family: var(--hand); margin: 0 0 10px; font-size: 21px; font-weight: 700; text-wrap: balance; color: var(--cyn); text-shadow: 0 0 16px rgba(43,232,245,.4); }
+.rx h3 { font-family: var(--hand); margin: 0 0 8px; font-size: 19px; font-weight: 700; text-wrap: balance; }
 .rx .eq {
-  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
-  background: rgba(7,9,22,.7); border: 1.5px solid var(--line); border-radius: 9px; padding: 10px 12px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
   margin: 10px 0; overflow-x: auto; white-space: nowrap; color: var(--cyn);
 }
-.rx p { margin: 8px 0; font-size: 15px; }
-.rx .sub { color: var(--dim); font-size: 14px; }
-.rx table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 10px 0; }
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--dim); font-size: 13.5px; }
+.rx table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
 .rx td, .rx th { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
 .rx tr:first-child :is(td, th) { border-top: 0; }
 .rx th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--vio); }
 
-.chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0 2px; }
-.chip { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 5px 11px; white-space: nowrap; border: 1.5px solid; }
-.chip.grn { color: var(--grn); border-color: rgba(168,240,67,.55); background: rgba(168,240,67,.1); }
-.chip.vio { color: var(--vio); border-color: rgba(183,148,255,.55); background: rgba(183,148,255,.1); }
-.chip.cyn { color: var(--cyn); border-color: rgba(43,232,245,.55); background: rgba(43,232,245,.1); }
-.chip.pnk { color: var(--pnk); border-color: rgba(255,95,200,.55); background: rgba(255,95,200,.1); }
-.chip.org { color: var(--org); border-color: rgba(255,162,74,.55); background: rgba(255,162,74,.1); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; white-space: nowrap; border: 1px solid; }
+.chip.grn { color: var(--grn); border-color: rgba(163,230,53,.5); background: rgba(163,230,53,.08); }
+.chip.vio { color: var(--vio); border-color: rgba(167,139,250,.5); background: rgba(167,139,250,.08); }
+.chip.cyn { color: var(--cyn); border-color: rgba(34,211,238,.5); background: rgba(34,211,238,.08); }
+.chip.pnk { color: var(--pnk); border-color: rgba(244,114,182,.5); background: rgba(244,114,182,.08); }
 
 details.fine {
-  margin-top: 12px; font-size: 14px; color: var(--dim);
-  border: 1.5px dashed var(--line); border-radius: 9px; padding: 8px 12px;
+  margin-top: 12px; font-size: 13.5px; color: var(--dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
 }
-details.fine summary { cursor: pointer; font-weight: 700; color: var(--cyn); }
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--cyn); }
 details.fine p { margin: 8px 0 2px; }
 
-.logtable { width: 100%; border-collapse: collapse; font-size: 15px; }
-.logtable td { padding: 9px 10px 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
 .logtable tr:first-child td { border-top: 0; }
-.logtable .nm { font-weight: 700; }
-.logtable tr.off { opacity: .32; }
-.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #343B74; margin-right: 9px; }
-tr.on .dot { background: var(--grn); box-shadow: 0 0 10px rgba(168,240,67,.85); }
-.logdone { margin: 12px 0 0; font-weight: 700; color: var(--grn); font-size: 16px; }
+.logtable .nm { font-weight: 600; }
+.logtable tr.off { opacity: .35; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #3A3F6B; margin-right: 8px; }
+tr.on .dot { background: var(--grn); box-shadow: 0 0 8px rgba(163,230,53,.7); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--grn); }
 
 .q { border-top: 1px solid var(--line); padding: 14px 0; }
 .q:first-of-type { border-top: 0; }
-.q .qt { font-weight: 700; margin: 0 0 8px; font-size: 16px; }
-.q label { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; cursor: pointer; font-size: 15.5px; }
-.q input[type="radio"] { accent-color: var(--grn); width: 18px; height: 18px; }
-.q .why { font-size: 14.5px; margin: 6px 0 0 28px; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--grn); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
 .q.right .why { color: var(--grn); }
 .q.wrong .why { color: var(--pnk); }
-.scoreband { margin-top: 14px; padding: 13px 15px; border-radius: 12px; background: rgba(183,148,255,.14); border: 2px solid rgba(183,148,255,.55); color: var(--vio); font-weight: 700; font-size: 16px; }
+.scoreband { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.5); color: var(--vio); font-weight: 700; }
 
-.foot { color: var(--dim); font-size: 13px; line-height: 1.7; }
-.foot a { color: var(--cyn); font-weight: 700; }
+.foot { color: var(--dim); font-size: 12.5px; line-height: 1.7; }
+.foot a { color: var(--cyn); font-weight: 600; }
 
-.lab { font-family: var(--ui); font-size: 12px; fill: var(--dim); font-weight: 600; }
-.lab.big { font-size: 14.5px; fill: var(--fg); font-weight: 700; }
-.lab.hand { font-family: var(--hand); font-size: 17px; fill: var(--fg); font-weight: 700; }
-.lab.huge { font-family: var(--hand); font-size: 26px; font-weight: 700; }
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--dim); font-weight: 600; }
+.lab.big { font-size: 13px; fill: var(--fg); font-weight: 700; }
+.lab.hand { font-family: var(--hand); font-size: 15px; fill: var(--fg); font-weight: 700; }
 .pickable { cursor: pointer; }
 .floater {
-  font-family: var(--mono); font-size: 14px; font-weight: 700; fill: var(--grn);
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--grn);
   transform-box: fill-box; animation: floatup 1s ease-out forwards;
 }
 @keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-26px); } }
 .pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
 @keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
-.seqrow { font-family: var(--mono); font-size: 15px; letter-spacing: 1.5px; white-space: nowrap; font-weight: 700; }
-.seqrow .m { color: var(--org); text-shadow: 0 0 12px rgba(255,162,74,.9); font-weight: 700; }
+.seqrow { font-family: var(--mono); font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
+.seqrow .m { color: var(--org); text-shadow: 0 0 10px rgba(251,146,60,.6); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -247,26 +192,23 @@ tr.on .dot { background: var(--grn); box-shadow: 0 0 10px rgba(168,240,67,.85); 
   <header>
     <div class="eyebrow">Meridian Life Sciences · Cosmic Lab Session</div>
     <h1>Life Sciences with <span class="hi">Daniel</span></h1>
-    <p class="lede">Five stations. A king in a jar, a liar&rsquo;s body, a ticking clock,
-      twenty letters &mdash; and <b>you on the tree</b>.</p>
+    <p class="lede">On the bench: a jar with a <b>king&rsquo;s blood</b>, one molecule that every living
+      thing carries, and a family tree with room for you on it. Today&rsquo;s lab: read a face out of a
+      220-year-old drop, find the barcode that compares a human with a bacterium, run the copying
+      machine yourself &mdash; and count your way to the tree of life.</p>
     <div class="controls">
       <div class="seg" id="segStages" aria-label="Stations"></div>
-      <button class="ghost" id="btnDraw" type="button" aria-pressed="false">&#9998; Draw</button>
-      <div class="inkbar" id="inkBar" hidden></div>
       <button class="ghost" id="btnReset" type="button">Start over</button>
     </div>
     <p class="stagenote" id="stageNote"></p>
   </header>
 
-  <div class="stagewrap">
-    <main id="stageHost"></main>
-    <canvas id="inkCanvas" aria-hidden="true"></canvas>
-  </div>
+  <main id="stageHost"></main>
 
   <section class="card" id="logCard">
     <h2>Lab log <span class="count" id="logCount">0 / 5</span></h2>
     <table class="logtable" id="logTable"></table>
-    <p class="logdone" id="logDone" hidden>Five for five. Everything alive is one family — and the tree is written in letters you can count.</p>
+    <p class="logdone" id="logDone" hidden>Five entries. You now own the single best idea in biology: everything alive is one family, and the family tree is written in letters you can count.</p>
   </section>
 
   <footer class="foot">
@@ -321,20 +263,20 @@ function mulberry32(a) {
 
 const STAGE_META = [
   { n: 1, label: 'The king in the jar' },
-  { n: 2, label: 'Bodies lie' },
-  { n: 3, label: 'The typo clock' },
-  { n: 4, label: 'Count the letters' },
+  { n: 2, label: 'The universal barcode' },
+  { n: 3, label: 'The copying machine' },
+  { n: 4, label: 'Build the tree' },
   { n: 5, label: 'You’re on it' },
   { n: 6, label: 'Quiz' },
 ];
 
 const NOTES = {
-  1: '<b>1793:</b> a witness soaks a handkerchief in the blood of a beheaded king. 220 years later a lab opens the jar. Your call \u2014 three questions.',
-  2: '<b>Bodies lie.</b> Sort six features: invented many times, or built once?',
-  3: '<b>The typo clock.</b> One ancestor, two islands. Let time run.',
-  4: '<b>Count the letters.</b> Four organisms, six pairs, one matrix.',
-  5: '<b>Last jar: you.</b> Find your spot on the tree.',
-  6: '<b>Quiz.</b> Six questions. All six = certified tree-reader.',
+  1: '<b>Station 1 \u00b7 The king in the jar.</b> Paris, 21 January 1793: the king is beheaded, and a witness dips his handkerchief in the blood. The cloth ends up sealed in a decorated gourd. 220 years later, scientists open it. Flip the evidence, then make the calls they had to make.',
+  2: '<b>Station 2 \u00b7 The universal barcode.</b> To compare a human with a mushroom with a gut bacterium you need one molecule they all carry. Find it, then read it stretch by stretch.',
+  3: '<b>Station 3 \u00b7 The copying machine.</b> First run the copier yourself, then let it run for centuries and watch the typos pile up. Distance IS time.',
+  4: '<b>Station 4 \u00b7 Build the tree.</b> Four organisms, twenty letters each, six pairs. Count, fill the matrix, then pick the tree the numbers demand.',
+  5: '<b>Station 5 \u00b7 You\u2019re on it too.</b> Last jar: you. Hang yourself on the tree and collect the punchline.',
+  6: '<b>Quiz.</b> Six questions. All six right = certified tree-reader.',
 };
 
 let S;
@@ -343,36 +285,32 @@ function freshState() {
     stage: 1,
     done: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
     logged: new Set(),
-    s1: { q: 0, msg: '' },
-    s2: { sorted: {}, picked: null, seats: [], phase: 'sort', msg: '' },
-    s3: { gen: 0, seqA: '', seqB: '', answered: false, msg: '' },
-    s4: { pair: null, filled: {}, closest: null, odd: null, msg: '' },
-    s5: { q: 0, msg: '' },
+    s1: { q: 0, cards: {}, msg: '' },
+    s2: { phase: 'pick', tried: {}, blocks: {}, look: null, done16: false, msg: '' },
+    s3: { phase: 'pair', built: '', gen: 0, seqA: '', seqB: '', answered: false, msg: '' },
+    s4: { pair: null, filled: {}, closest: null, odd: null, topo: null, msg: '' },
+    s5: { q: 0, hung: false, msg: '' },
     quiz: { picked: {}, submitted: false },
   };
 }
 S = freshState();
 
 const LOG = [
-  { id: 'capsule', name: 'DNA is a time capsule', note: 'a dried drop can still describe a face' },
-  { id: 'job',   name: 'Parasite is a job, not a family', note: 'same lifestyle \u2260 same ancestor' },
-  { id: 'body',  name: 'Bodies lie \u2014 read the machine', note: 'wings: many times. Ribosome: once' },
-  { id: 'clock', name: 'Typos tick like a clock', note: 'more differences = more time apart' },
-  { id: 'tree',  name: 'Fewest differences = closest cousins', note: 'count, draw, and yes \u2014 you are on it' },
+  { id: 'capsule', name: 'DNA is a time capsule', note: 'letters survive centuries - a dried drop can describe a face' },
+  { id: 'job',   name: 'Parasite is a job, not a family', note: 'malaria and the tapeworm share a lifestyle — not an ancestor' },
+  { id: 'barcode', name: 'One molecule everybody has', note: 'ribosome RNA: frozen stretches to line up, variable ones to count' },
+  { id: 'clock', name: 'Typos tick like a clock', note: 'copying mistakes pile up — more differences means a longer time apart' },
+  { id: 'tree',  name: 'Fewest differences = closest cousins', note: 'count letters, draw the tree — and yes, you are on it' },
 ];
 function logIdea(id) { S.logged.add(id); }
 
 /* ---------------- the cast ---------------- */
 
 const JARS = [
-  { id: 'bact', name: 'Cholera bacterium', emoji: '🦠', glow: '#A3E635', alive: true,
-    why: 'A full cell: its own membrane, its own ribosomes, feeds itself, copies itself. Alive — no debate.' },
-  { id: 'virus', name: 'Virus', emoji: '🧬', glow: '#F472B6', alive: false,
-    why: 'A protein box with instructions inside — no ribosome, no metabolism, no copying of its own. It must hijack a living cell to do anything. By the machine test: not alive.' },
-  { id: 'malaria', name: 'Malaria parasite', emoji: '🩸', glow: '#A78BFA', alive: true,
-    why: 'Looks like a blob in a blood cell, but it is a full eukaryotic cell — it even has a nucleus, which the bacterium doesn’t. Very much alive.' },
-  { id: 'worm', name: 'Tapeworm', emoji: '🪱', glow: '#22D3EE', alive: true,
-    why: 'A whole animal: millions of cells, muscles, nerves. Gross? Yes. Alive? Absolutely.' },
+  { id: 'human', name: 'You', emoji: '\uD83E\uDDD1', glow: '#FB923C', cell: true },
+  { id: 'shroom', name: 'Mushroom', emoji: '\uD83C\uDF44', glow: '#A78BFA', cell: true },
+  { id: 'gut', name: 'Gut bacterium', emoji: '\uD83E\uDDA0', glow: '#A3E635', cell: true },
+  { id: 'virus', name: 'Virus', emoji: '\uD83E\uDDEC', glow: '#F472B6', cell: false },
 ];
 
 
@@ -392,105 +330,6 @@ function drawJar(svg, jar, x, y, opts = {}) {
   svg.append(g);
 }
 
-/* ---------------- rx mini-schemes: pictures instead of paragraphs ---------------- */
-
-function rxBox(svg, x, y, w, c, glyph, label) {
-  svg.append(h('rect', { x, y, width: w, height: 52, rx: 11, fill: 'rgba(7,9,22,.55)', stroke: c, 'stroke-width': 1.6 }));
-  if (glyph) svg.append(glyph(x + 24, y + 26));
-  svg.append(h('text', { x: x + (glyph ? 46 : 14), y: y + 32, class: 'lab big', fill: c }, label));
-}
-
-function renderRx1() {
-  const svg = h('svg', { viewBox: '0 0 360 292', role: 'img', 'aria-label': 'The genetic photofit contradicts the king on all three counts' });
-  svg.append(h('text', { x: 88,  y: 16, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--cyn)' }, 'GENOME SAID'));
-  svg.append(h('text', { x: 272, y: 16, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'THE KING WAS'));
-  const eye = (col) => (cx, cy) => {
-    const g = h('g', {});
-    g.append(h('ellipse', { cx, cy, rx: 14, ry: 8.5, fill: 'none', stroke: 'var(--dim)', 'stroke-width': 1.5 }));
-    g.append(h('circle', { cx, cy, r: 5.5, fill: col }));
-    return g;
-  };
-  const person = (hgt) => (cx, cy) => {
-    const g = h('g', {});
-    const top = cy - hgt / 2;
-    const st = { stroke: 'var(--dim)', 'stroke-width': 2.3, 'stroke-linecap': 'round', fill: 'none' };
-    g.append(h('circle', { cx, cy: top - 5, r: 4.4, fill: 'var(--dim)' }));
-    g.append(h('path', Object.assign({ d: 'M ' + cx + ' ' + top + ' L ' + cx + ' ' + (top + hgt * 0.58) }, st)));
-    g.append(h('path', Object.assign({ d: 'M ' + (cx - 7) + ' ' + (top + hgt * 0.24) + ' L ' + (cx + 7) + ' ' + (top + hgt * 0.24) }, st)));
-    g.append(h('path', Object.assign({ d: 'M ' + cx + ' ' + (top + hgt * 0.58) + ' L ' + (cx - 6) + ' ' + (top + hgt) +
-      ' M ' + cx + ' ' + (top + hgt * 0.58) + ' L ' + (cx + 6) + ' ' + (top + hgt) }, st)));
-    return g;
-  };
-  const pin = () => (cx, cy) => h('text', { x: cx, y: cy + 7, 'text-anchor': 'middle', 'font-size': '18px' }, '📍');
-  [[32, eye('#7A4B22'), 'brown eyes', eye('#49B6FF'), 'blue eyes'],
-   [104, person(18), 'average', person(30), '190 cm'],
-   [176, pin(), 'N. Italy', pin(), 'German-Polish']
-  ].forEach(([y, gl, ll, gr, rl]) => {
-    rxBox(svg, 6, y, 158, 'var(--cyn)', gl, ll);
-    rxBox(svg, 196, y, 158, 'var(--pnk)', gr, rl);
-    svg.append(h('text', { x: 180, y: y + 36, class: 'lab huge', 'text-anchor': 'middle', fill: 'var(--red)' }, '✗'));
-  });
-  svg.append(h('rect', { x: 6, y: 246, width: 348, height: 40, rx: 13, fill: 'rgba(255,95,200,.12)', stroke: 'var(--pnk)', 'stroke-width': 2 }));
-  svg.append(h('text', { x: 180, y: 273, class: 'lab huge', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'NOT THE KING'));
-  return svg;
-}
-
-function renderRx2() {
-  const svg = h('svg', { viewBox: '0 0 360 252', role: 'img', 'aria-label': 'Wings were invented many times, the ribosome was built once' });
-  svg.append(h('rect', { x: 6, y: 24, width: 164, height: 124, rx: 13, fill: 'rgba(255,95,200,.07)', stroke: 'var(--pnk)', 'stroke-width': 1.8 }));
-  svg.append(h('text', { x: 88, y: 16, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'SAME JOB'));
-  ['🦋', '🦅', '🦇', '🐉'].forEach((e, i) => {
-    svg.append(h('text', { x: 52 + (i % 2) * 72, y: 74 + Math.floor(i / 2) * 54, 'text-anchor': 'middle', 'font-size': '32px' }, e));
-  });
-  svg.append(h('text', { x: 88, y: 172, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'wings × 4'));
-  svg.append(h('text', { x: 88, y: 190, class: 'lab', 'text-anchor': 'middle' }, 'invented again and again'));
-  svg.append(h('rect', { x: 190, y: 24, width: 164, height: 124, rx: 13, fill: 'rgba(168,240,67,.07)', stroke: 'var(--grn)', 'stroke-width': 1.8 }));
-  svg.append(h('text', { x: 272, y: 16, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--grn)' }, 'SAME FAMILY'));
-  svg.append(h('ellipse', { cx: 272, cy: 72, rx: 38, ry: 25, fill: 'rgba(168,240,67,.25)', stroke: 'var(--grn)', 'stroke-width': 2 }));
-  svg.append(h('ellipse', { cx: 272, cy: 108, rx: 29, ry: 18, fill: 'rgba(168,240,67,.14)', stroke: 'var(--grn)', 'stroke-width': 2 }));
-  svg.append(h('path', { d: 'M 226 90 L 318 90', stroke: 'var(--cyn)', 'stroke-width': 2, 'stroke-dasharray': '5 4' }));
-  svg.append(h('text', { x: 272, y: 172, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--grn)' }, 'ribosome × 1'));
-  svg.append(h('text', { x: 272, y: 190, class: 'lab', 'text-anchor': 'middle' }, 'built once, never replaced'));
-  svg.append(h('rect', { x: 6, y: 204, width: 348, height: 44, rx: 13, fill: 'rgba(43,232,245,.1)', stroke: 'var(--cyn)', 'stroke-width': 1.8 }));
-  svg.append(h('text', { x: 180, y: 224, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'body remembers the JOB'));
-  svg.append(h('text', { x: 180, y: 242, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--grn)' }, 'machine remembers the FAMILY'));
-  return svg;
-}
-
-function renderRx3() {
-  const svg = h('svg', { viewBox: '0 0 360 222', role: 'img', 'aria-label': 'More time apart means more typos and a bigger gap' });
-  svg.append(h('circle', { cx: 28, cy: 112, r: 8, fill: 'var(--vio)' }));
-  svg.append(h('text', { x: 28, y: 138, class: 'lab', 'text-anchor': 'middle' }, 'ancestor'));
-  svg.append(h('path', { d: 'M 36 108 C 110 82 180 64 312 50', fill: 'none', stroke: 'var(--grn)', 'stroke-width': 3.2 }));
-  svg.append(h('path', { d: 'M 36 116 C 110 142 180 160 312 174', fill: 'none', stroke: 'var(--cyn)', 'stroke-width': 3.2 }));
-  [[98, 88], [152, 76], [206, 67], [258, 59]].forEach(([x, y]) =>
-    svg.append(h('text', { x, y, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--org)' }, '✕')));
-  [[98, 140], [152, 152], [206, 161], [258, 169]].forEach(([x, y]) =>
-    svg.append(h('text', { x, y, class: 'lab big', 'text-anchor': 'middle', fill: 'var(--org)' }, '✕')));
-  svg.append(h('path', { d: 'M 330 50 L 330 174', stroke: 'var(--org)', 'stroke-width': 2 }));
-  svg.append(h('path', { d: 'M 324 56 L 330 48 L 336 56 M 324 168 L 330 176 L 336 168', fill: 'none', stroke: 'var(--org)', 'stroke-width': 2 }));
-  svg.append(h('text', { x: 330, y: 40, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--org)' }, 'gap'));
-  svg.append(h('text', { x: 180, y: 210, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--cyn)' }, 'more time → more ✕ → bigger gap'));
-  return svg;
-}
-
-function renderRx5() {
-  const svg = h('svg', { viewBox: '0 0 360 236', role: 'img', 'aria-label': 'One trunk, every living thing on it, the virus outside' });
-  svg.append(h('path', { d: 'M 34 206 L 148 206', stroke: 'var(--grn)', 'stroke-width': 5 }));
-  svg.append(h('text', { x: 34, y: 228, class: 'lab hand', fill: 'var(--grn)' }, 'LUCA'));
-  const cols = ['var(--grn)', 'var(--cyn)', 'var(--vio)', 'var(--pnk)', 'var(--org)'];
-  const names = ['bacteria', 'archaea', 'plants', 'fungi', 'animals 🧑'];
-  [44, 80, 116, 152, 190].forEach((y2, i) => {
-    svg.append(h('path', { d: 'M 148 206 C 192 206 202 ' + y2 + ' 244 ' + y2, fill: 'none', stroke: cols[i], 'stroke-width': 3.2 }));
-    svg.append(h('text', { x: 252, y: y2 + 5, class: 'lab big', fill: cols[i] }, names[i]));
-  });
-  svg.append(h('circle', { cx: 62, cy: 62, r: 24, fill: 'rgba(255,95,200,.1)', stroke: 'var(--pnk)', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
-  svg.append(h('text', { x: 62, y: 71, 'text-anchor': 'middle', 'font-size': '24px' }, '🧬'));
-  svg.append(h('text', { x: 62, y: 104, class: 'lab', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'virus: no ribosome,'));
-  svg.append(h('text', { x: 62, y: 120, class: 'lab', 'text-anchor': 'middle', fill: 'var(--pnk)' }, 'no seat'));
-  return svg;
-}
-
 /* ================= station 1 \u00b7 the king in the jar ================= */
 
 const KINGQ = [
@@ -498,17 +337,17 @@ const KINGQ = [
     opts: [['Yes - DNA is tough; labs read far older samples', true],
            ['No - DNA falls apart within a year', false],
            ['Only if the cells are still alive', false]],
-    why: 'Labs read mammoths and Neanderthals. 220 years is easy mode.' },
-  { ask: 'Compare the photofit with the real king. Your verdict?',
+    why: 'DNA is a remarkably sturdy molecule. Labs routinely read genomes tens of thousands of years old - mammoths, Neanderthals. A 220-year-old drop is easy mode.' },
+  { ask: 'Three cards, three mismatches. Your verdict?',
     opts: [['The blood is probably not the king\u2019s', true],
            ['All the old portraits must be wrong', false],
            ['DNA cannot predict eye colour', false]],
-    why: 'Eyes, height AND roots all miss. The relic fails the test, not the king. (Scientific Reports, 2014)' },
-  { ask: 'Living male-line Bourbons don’t match the jar either. So what did DNA just do?',
+    why: 'When the genetic portrait contradicts everything known about a person - eyes, height AND ancestry - it is the relic that fails the test, not the king. Scientific Reports, 2014.' },
+  { ask: 'The final nail: the Y chromosome of living male-line relatives of the royal family did not match the gourd either. What did DNA just do?',
     opts: [['Busted a 220-year-old fake relic', true],
            ['Proved the king was never executed', false],
            ['Found the real king\u2019s blood', false]],
-    why: 'Letters don’t flatter and don’t lie — and you use the same letters today.' },
+    why: 'The letters do not flatter and do not lie. The same letters that unmasked a souvenir are the ones you will use today to build a real family tree.' },
 ];
 
 function answerKing(ok) {
@@ -521,7 +360,7 @@ function answerKing(ok) {
 }
 
 function renderScene1() {
-  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 238', role: 'img', 'aria-label': 'The decorated gourd with the royal blood' });
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 230', role: 'img', 'aria-label': 'The decorated gourd with the royal blood' });
   /* the gourd */
   svg.append(h('path', { d: 'M 130 60 C 118 78 112 92 112 108 C 94 122 84 146 88 168 C 92 196 118 212 150 212 C 182 212 208 196 212 168 C 216 146 206 122 188 108 C 188 92 182 78 170 60 Z',
     fill: 'rgba(251,146,60,.14)', stroke: 'var(--org)', 'stroke-width': 2.5 }));
@@ -544,126 +383,241 @@ function renderScene1() {
   return svg;
 }
 
+const EVIDENCE = [
+  { id: 'eyes',   label: 'Eyes',         genome: 'brown',       king: 'blue',           note: 'one switch near the HERC2 gene decides blue vs brown' },
+  { id: 'height', label: 'Height',       genome: 'ordinary',    king: 'about 190 cm',   note: 'hundreds of tiny effects add up; the king was the tallest man at Court' },
+  { id: 'roots',  label: 'Family roots', genome: 'north Italy', king: 'German-Polish',  note: 'whole-genome patterns point to where a family lived' },
+];
+
+function flipCard(id) {
+  if (S.s1.cards[id] || S.s1.q !== 1) return;
+  S.s1.cards[id] = true;
+  const e = EVIDENCE.find(x => x.id === id);
+  S.s1.msg = 'good:' + e.label + ' — genome: ' + e.genome + ', the king: ' + e.king + '. ' + e.note + '.';
+  render();
+}
+
+function renderScene1board() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 238', role: 'img', 'aria-label': 'Evidence board: what the genome said against what is known about the king' });
+  svg.append(h('text', { x: 30, y: 92, class: 'lab big', fill: 'var(--cyn)' }, 'GENOME SAID'));
+  svg.append(h('text', { x: 30, y: 166, class: 'lab big', fill: 'var(--pnk)' }, 'THE KING WAS'));
+  EVIDENCE.forEach((e, i) => {
+    const x = 170 + i * 165, up = !!S.s1.cards[e.id];
+    const g = h('g', {
+      class: up ? null : 'pickable', tabindex: up ? null : '0', role: up ? null : 'button',
+      'aria-label': up ? e.label + ' revealed' : 'Flip the ' + e.label + ' card',
+      onclick: up ? null : () => flipCard(e.id),
+      onkeydown: up ? null : (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); flipCard(e.id); } },
+    });
+    g.append(h('rect', { x, y: 30, width: 150, height: 176, rx: 14,
+      fill: up ? 'rgba(42,47,85,.5)' : 'rgba(167,139,250,.14)',
+      stroke: up ? 'var(--line)' : 'var(--vio)', 'stroke-width': 2.5,
+      class: up ? 'pop' : null }));
+    svg.append(g);
+    if (!up) {
+      svg.append(h('text', { x: x + 75, y: 108, 'text-anchor': 'middle', class: 'lab hand', 'font-size': '34px', fill: 'var(--vio)' }, '?'));
+      svg.append(h('text', { x: x + 75, y: 140, 'text-anchor': 'middle', class: 'lab big' }, e.label));
+      return;
+    }
+    svg.append(h('text', { x: x + 75, y: 54, 'text-anchor': 'middle', class: 'lab' }, e.label));
+    svg.append(h('text', { x: x + 75, y: 86, 'text-anchor': 'middle', class: 'lab hand', fill: 'var(--cyn)' }, e.genome));
+    svg.append(h('text', { x: x + 75, y: 124, 'text-anchor': 'middle', class: 'lab hand', 'font-size': '24px', fill: 'var(--red)' }, '✗'));
+    svg.append(h('text', { x: x + 75, y: 160, 'text-anchor': 'middle', class: 'lab hand', fill: 'var(--pnk)' }, e.king));
+  });
+  return svg;
+}
+
 function renderStage1() {
-  const q = KINGQ[S.s1.q];
+  const q = KINGQ[Math.min(S.s1.q, KINGQ.length - 1)];
   const doneBar = S.done[1] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Case closed. A genome can sketch a face — and this one was not the king’s.'),
+    h('span', {}, 'Case closed: the \u201Croyal relic\u201D was almost certainly a souvenir of someone else entirely. Remember the trick though - a genome can sketch a face. Now let\u2019s see why letters beat looks every time.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: bodies lie \u2192')) : null;
   const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
+  const cardsUp = Object.keys(S.s1.cards).length === EVIDENCE.length;
+  const asking = !S.done[1] && (S.s1.q !== 1 || cardsUp);
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card scene' },
-      renderScene1(),
-      !S.done[1] ? h('div', { class: 'scenebtns' },
+      S.s1.q === 0 ? renderScene1() : renderScene1board(),
+      S.s1.q === 1 && !cardsUp ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'Tap all three cards: what the genome said vs what is known about Louis XVI.')),
+        h('span', { class: 'meter' }, 'flipped: ', h('b', {}, Object.keys(S.s1.cards).length + ' / 3'))) : null,
+      asking ? h('div', { class: 'scenebtns' },
         h('span', { class: 'meter' }, h('b', {}, q.ask))) : null,
-      !S.done[1] ? h('div', { class: 'scenebtns' },
+      asking ? h('div', { class: 'scenebtns' },
         ...q.opts.map(([txt, ok]) => h('button', { class: 'act alt', type: 'button', onclick: () => answerKing(ok) }, txt)),
         h('span', { class: 'meter' }, h('b', {}, `${S.s1.q} / ${KINGQ.length}`))) : null,
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'Photofit vs the king'),
-      renderRx1(),
-      h('div', { class: 'chips' },
-        h('span', { class: 'chip cyn' }, 'read from DNA'),
-        h('span', { class: 'chip pnk' }, 'known about Louis XVI'),
-        h('span', { class: 'chip org' }, '0 of 3 match'))
+      h('h3', {}, 'A portrait drawn from letters'),
+      h('div', { class: 'eq' }, 'dried blood \u2192 DNA letters \u2192 a sketch of a face'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Read from the genome'), h('th', {}, 'How')),
+        h('tr', {}, h('td', {}, 'Eye colour'), h('td', {}, 'a famous switch near one gene (HERC2) decides blue vs brown')),
+        h('tr', {}, h('td', {}, 'Height'), h('td', {}, 'hundreds of tiny effects added up - a tall person shows an excess of \u201Ctall\u201D variants')),
+        h('tr', {}, h('td', {}, 'Ancestry'), h('td', {}, 'whole-genome patterns point to where the family lived'))),
+      h('p', { class: 'sub' }, 'The gourd genome was the first ever sequenced from a person of recent history - and its portrait (brown eyes, average height, north-Italian roots) matched the king on nothing. Same tools, by the way, that police use for DNA photofits today.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'The twin relic that fell with it'),
+        h('p', {}, 'A mummified head said to be king Henri IV \u201Cmatched\u201D the gourd at first - then living male-line relatives of the family showed a different Y chromosome from both relics. Two legends busted by one molecule. Science checks itself; that is the whole point of it.'))
     ));
 }
 
-/* ================= station 2 · bodies lie ================= */
+/* ================= station 2 - the universal barcode (16S rRNA) ================= */
 
-const FEATURES = [
-  { id: 'wings', icon: '🦋', name: 'Wings', many: true, why: 'Flight was invented at least four separate times — totally different inside.' },
-  { id: 'eyes', icon: '👁', name: 'Camera eyes', many: true, why: 'Built independently — the octopus doesn’t even have a blind spot.' },
-  { id: 'fins', icon: '🐬', name: 'Streamlined swimmer shape', many: true, why: 'Fish, mammal, reptile — same torpedo, three families.' },
-  { id: 'ribo', icon: '⚙', name: 'The ribosome', many: false, why: 'The same protein printer in every living cell. Built once.' },
-  { id: 'code', icon: '🔤', name: 'The genetic code', many: false, why: 'Same codon dictionary from bacteria to you. One invention.' },
-  { id: 'atp', icon: '🔋', name: 'ATP as the energy coin', many: false, why: 'Every cell pays in the same currency. Nobody ever switched.' },
+const MOLECULES = [
+  { id: 'hb',  name: 'Haemoglobin', ok: false, why: 'Only animals with blood carry it. A mushroom has none.' },
+  { id: 'chl', name: 'Chlorophyll', ok: false, why: 'Plants and some bacteria only. You have none of it.' },
+  { id: 'col', name: 'Collagen',    ok: false, why: 'Animal glue. Bacteria never invented it.' },
+  { id: 'rna', name: 'Ribosome RNA', ok: true,  why: 'Every living cell builds proteins, so every living cell has a ribosome - and the RNA inside it. 16S in bacteria, 18S in you.' },
 ];
 
-function sortFeature(id, many) {
-  if (S.s2.sorted[id] !== undefined) return;
-  const f = FEATURES.find(x => x.id === id);
-  S.s2.sorted[id] = many;
-  S.s2.msg = (many === f.many ? 'good:✓ ' : 'bad:✗ ') + f.why;
-  if (Object.keys(S.s2.sorted).length === FEATURES.length) S.s2.phase = 'seats';
+/* nine stretches of the molecule: frozen ones to line up, variable ones to count */
+const S16 = [
+  { c: true },
+  { c: false, n: 'V1', seq: ['ATCGGATC', 'ATCGCATC', 'ATGGCTTC'] },
+  { c: true },
+  { c: false, n: 'V2', seq: ['GCTAACGA', 'GCTAGCGA', 'GGTTACGA'] },
+  { c: true },
+  { c: false, n: 'V3', seq: ['TTGACCGT', 'TTGACCTT', 'TAGTCCGT'] },
+  { c: true },
+  { c: false, n: 'V4', seq: ['CAGGTCTA', 'CAGGTCTG', 'CTGGACTA'] },
+  { c: true },
+];
+const CONSERVED = ['GTGCCAGC', 'GTGCCAGC', 'GTGCCAGC'];
+const ROW3 = [['You', 'var(--org)'], ['Mushroom', 'var(--vio)'], ['Gut bacterium', 'var(--grn)']];
+
+const WOESE = {
+  ask: 'Carl Woese read this one molecule in hundreds of species - and found something nobody had seen. What?',
+  opts: [['A whole third domain of life: the archaea', true],
+         ['That bacteria are really tiny plants', false],
+         ['That viruses belong at the root', false]],
+  why: 'Some "bacteria" turned out to be no closer to bacteria than you are. By body shape nobody could tell. The molecule could. Three domains: Bacteria, Archaea, Eukarya.',
+};
+
+function pickMolecule(id) {
+  if (S.s2.phase !== 'pick') return;
+  const m = MOLECULES.find(x => x.id === id);
+  if (!m.ok) { S.s2.tried[id] = true; S.s2.msg = 'bad:' + m.why; render(); return; }
+  S.s2.phase = 'regions';
+  S.s2.msg = 'good:✓ ' + m.why;
   render();
 }
-function pickSeat(id) {
-  if (S.s2.phase !== 'seats' || S.done[2]) return;
-  const jar = JARS.find(j => j.id === id);
-  if (S.s2.seats.includes(id)) { S.s2.msg = 'good:Already seated.'; render(); return; }
-  if (jar.alive) {
-    S.s2.seats.push(id);
-    S.s2.msg = 'good:' + jar.name + ' gets a seat - it has the machine.';
-    if (S.s2.seats.length === 3) { S.done[2] = true; logIdea('body'); }
-  } else {
-    S.s2.msg = 'bad:No ribosome, no seat. The virus waits outside.';
-  }
+function lookBlock(i) {
+  if (S.s2.phase !== 'regions') return;
+  S.s2.blocks[i] = true;
+  S.s2.look = i;
+  const seg = S16[i];
+  S.s2.msg = 'good:' + (seg.c
+    ? 'Frozen stretch - identical in all three. This is what lets you line the molecules up at all.'
+    : seg.n + ' - the letters differ. This is what you count.');
+  if (Object.keys(S.s2.blocks).length === S16.length) S.s2.done16 = true;
+  render();
+}
+function answerWoese(ok) {
+  if (!ok) { S.s2.msg = 'bad:Not that. Look at what a molecule can see that a microscope cannot.'; render(); return; }
+  S.s2.phase = 'done';
+  S.s2.msg = 'good:✓ ' + WOESE.why;
+  S.done[2] = true; logIdea('barcode');
   render();
 }
 
-function renderScene2(cur) {
-  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 248', role: 'img',
-    'aria-label': cur ? ('Specimen slide: ' + cur.name) : 'All six features sorted' });
-  svg.append(h('rect', { x: 180, y: 18, width: 300, height: 148, rx: 20, fill: 'rgba(183,148,255,.08)', stroke: 'var(--vio)', 'stroke-width': 2.5 }));
-  svg.append(h('rect', { x: 292, y: 6, width: 76, height: 16, rx: 6, fill: 'var(--vio)', opacity: .85 }));
-  if (cur) {
-    svg.append(h('text', { x: 330, y: 104, 'text-anchor': 'middle', 'font-size': '58px', class: 'pop' }, cur.icon));
-    svg.append(h('text', { x: 330, y: 148, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--grn)', 'font-size': '23px' }, cur.name));
+function renderScene2pick() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 200', role: 'img', 'aria-label': 'Four specimens: you, a mushroom, a gut bacterium and a virus' });
+  JARS.forEach((jar, i) => {
+    const out = S.s2.phase !== 'pick' && !jar.cell;
+    drawJar(svg, jar, 90 + i * 160, 92, { dim: out, badge: S.s2.phase !== 'pick' ? (jar.cell ? '✓' : '✗') : '' });
+  });
+  return svg;
+}
+
+function renderScene2strip() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 268', role: 'img', 'aria-label': 'The ribosome RNA molecule, stretch by stretch' });
+  svg.append(h('text', { x: 30, y: 22, class: 'lab big' }, 'ribosome RNA, end to end · tap every stretch'));
+  const x0 = 30, w = 600 / S16.length;
+  S16.forEach((seg, i) => {
+    const shown = S.s2.blocks[i];
+    const x = x0 + i * w;
+    const g = h('g', {
+      class: 'pickable', tabindex: '0', role: 'button',
+      'aria-label': shown ? (seg.c ? 'frozen stretch' : seg.n) : 'unread stretch ' + (i + 1),
+      onclick: () => lookBlock(i),
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); lookBlock(i); } },
+    });
+    g.append(h('rect', { x: x + 2, y: 36, width: w - 4, height: 48, rx: 9,
+      fill: !shown ? 'rgba(42,47,85,.55)' : seg.c ? 'rgba(163,230,53,.2)' : 'rgba(251,146,60,.2)',
+      stroke: !shown ? 'var(--line)' : seg.c ? 'var(--grn)' : 'var(--org)', 'stroke-width': 2,
+      class: S.s2.look === i ? 'pop' : null }));
+    g.append(h('text', { x: x + w / 2, y: 66, class: 'lab big', 'text-anchor': 'middle',
+      fill: !shown ? 'var(--dim)' : seg.c ? 'var(--grn)' : 'var(--org)' }, !shown ? '?' : seg.c ? '=' : seg.n));
+    svg.append(g);
+  });
+  const look = S.s2.look;
+  if (look === null || look === undefined) {
+    svg.append(h('text', { x: 330, y: 150, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--dim)' },
+      'tap a stretch to read it in all three'));
+    return svg;
   }
-  FEATURES.forEach((f, i) => {
-    const x = 120 + i * 84;
-    const v = S.s2.sorted[f.id];
-    const good = v !== undefined && v === f.many;
-    svg.append(h('rect', { x: x - 28, y: 196, width: 56, height: 42, rx: 12,
-      fill: v === undefined ? 'rgba(7,9,22,.5)' : good ? 'rgba(168,240,67,.18)' : 'rgba(255,95,200,.18)',
-      stroke: v === undefined ? 'var(--line)' : good ? 'var(--grn)' : 'var(--pnk)', 'stroke-width': 2 }));
-    svg.append(h('text', { x, y: 225, 'text-anchor': 'middle', 'font-size': '23px', opacity: v === undefined ? .28 : 1 }, f.icon));
+  const seg = S16[look];
+  const rows = seg.c ? CONSERVED : seg.seq;
+  svg.append(h('text', { x: 30, y: 116, class: 'lab', fill: seg.c ? 'var(--grn)' : 'var(--org)' },
+    seg.c ? 'frozen stretch · same in all three' : seg.n + ' · variable stretch'));
+  rows.forEach((sq, r) => {
+    const y = 146 + r * 34;
+    svg.append(h('text', { x: 30, y, class: 'lab big', fill: ROW3[r][1] }, ROW3[r][0]));
+    for (let k = 0; k < sq.length; k++) {
+      const diff = !seg.c && sq[k] !== rows[0][k];
+      svg.append(h('text', { x: 200 + k * 26, y, 'text-anchor': 'middle',
+        style: 'font-family:var(--mono);font-size:19px;font-weight:700',
+        fill: diff ? 'var(--org)' : 'var(--fg)' }, sq[k]));
+    }
+    if (!seg.c && r > 0) {
+      let d = 0;
+      for (let k = 0; k < sq.length; k++) if (sq[k] !== rows[0][k]) d++;
+      svg.append(h('text', { x: 450, y, class: 'lab big', fill: 'var(--org)' }, d + ' different'));
+    }
   });
   return svg;
 }
 
 function renderStage2() {
-  const unsorted = FEATURES.filter(f => S.s2.sorted[f.id] === undefined);
-  const cur = unsorted[0];
-  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
-    h('span', {}, 'New rule: read the machine, not the body.'),
-    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: the typo clock →')) : null;
   const [kind, msg] = S.s2.msg ? S.s2.msg.split(/:(.*)/s) : ['', ''];
+  const picking = S.s2.phase === 'pick';
+  const seen = Object.keys(S.s2.blocks).length;
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Frozen stretches to line them up, variable stretches to count. That is the whole trick behind every tree in this lesson - and behind every gut-microbiome test in a lab today.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: the copying machine →')) : null;
 
-  let sceneContent;
-  if (S.s2.phase === 'sort') {
-    sceneContent = [
-      renderScene2(cur),
-      h('div', { class: 'scenebtns' },
-        h('button', { class: 'act', type: 'button', onclick: () => sortFeature(cur.id, true) }, 'Invented many times'),
-        h('button', { class: 'act cy', type: 'button', onclick: () => sortFeature(cur.id, false) }, 'Built once, inherited'),
-        h('span', { class: 'meter' }, h('b', {}, (FEATURES.length - unsorted.length) + ' / ' + FEATURES.length))),
-    ];
-  } else {
-    const svg = h('svg', { id: 'scene', viewBox: '0 0 660 220', role: 'img', 'aria-label': 'Who gets a seat on the tree' });
-    JARS.forEach((jar, i) => {
-      const x = 100 + i * 152;
-      drawJar(svg, jar, x, 100, { onclick: pickSeat, dim: !jar.alive && S.s2.msg.startsWith('bad'), badge: S.s2.seats.includes(jar.id) ? '🌳' : '' });
-    });
-    sceneContent = [svg,
-      h('div', { class: 'scenebtns' },
-        h('span', { class: 'meter' }, 'Who gets a SEAT on the tree? · seated: ', h('b', {}, `${S.s2.seats.length} / 3`)))];
-  }
+  const controls = picking
+    ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'Which molecule could you compare across all four?')),
+        ...MOLECULES.map(m => h('button', {
+          class: 'act' + (S.s2.tried[m.id] ? '' : ' alt'), type: 'button',
+          disabled: S.s2.tried[m.id] ? 'disabled' : null,
+          onclick: () => pickMolecule(m.id) }, S.s2.tried[m.id] ? m.name + ' ✗' : m.name)))
+    : h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'stretches read: ', h('b', {}, seen + ' / ' + S16.length)),
+        S.s2.done16 && !S.done[2] ? h('span', { class: 'meter' }, h('b', {}, WOESE.ask)) : null,
+        ...(S.s2.done16 && !S.done[2]
+          ? WOESE.opts.map(([txt, ok]) => h('button', { class: 'act alt', type: 'button', onclick: () => answerWoese(ok) }, txt))
+          : []));
 
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card scene' },
-      h('h2', {}, S.s2.phase === 'sort' ? 'Round 1 · six features' : 'Round 2 · seats on the tree'),
-      ...sceneContent,
+      picking ? renderScene2pick() : renderScene2strip(),
+      controls,
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'Many times vs exactly once'),
-      renderRx2(),
-      h('div', { class: 'chips' },
-        h('span', { class: 'chip pnk' }, 'convergence'),
-        h('span', { class: 'chip grn' }, 'homology'))
+      h('h3', {}, 'Why this molecule and not another'),
+      h('div', { class: 'eq' }, 'in every cell · same job everywhere · frozen + variable in one'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Needed'), h('th', {}, 'Ribosome RNA')),
+        h('tr', {}, h('td', {}, 'Everyone has it'), h('td', {}, 'no ribosome = no life. 16S in bacteria and archaea, 18S in you')),
+        h('tr', {}, h('td', {}, 'Same job always'), h('td', {}, 'it never changed career, so changes are drift, not redesign')),
+        h('tr', {}, h('td', {}, 'Right speed'), h('td', {}, 'frozen stretches to line up, nine variable ones (V1–V9) to count'))),
+      h('p', { class: 'sub' }, 'Did you notice? The mushroom’s letters sit closer to yours than the bacterium’s do. Fungi are closer relatives of yours than any bacterium is. The molecule says so before anyone looks at a body.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'And the virus?'),
+        h('p', {}, 'No ribosome at all - it borrows yours. So it carries no 16S, nothing to line up, no place on this tree. Where viruses come from is still an open argument.'))
     ));
 }
 
@@ -694,10 +648,10 @@ function passGenerations() {
 }
 function diffCount(a, b) { let n = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; }
 function answerDrift(ok) {
-  if (!ok) { S.s3.msg = 'bad:Nope. Only the copying machine itself slips.'; render(); return; }
+  if (!ok) { S.s3.msg = 'bad:Nope - no virus and no diet changes letters. Only the copying machine itself slips.'; render(); return; }
   S.s3.answered = true;
   S.done[3] = true; logIdea('clock');
-  S.s3.msg = 'good:Exactly. Separated lineages collect different typos — the count only grows.';
+  S.s3.msg = 'good:Exactly. Every copy risks a tiny typo; separated lineages collect different typos; the count only grows.';
   render();
 }
 
@@ -710,17 +664,85 @@ function seqRow(label, seq, ref, color) {
     h('span', { style: 'color:' + color + ';display:inline-block;width:110px' }, label + ' '), ...kids);
 }
 
+/* --- round 1: run the copier yourself (the Copy the Code move) --- */
+
+const TEMPLATE = 'GCTAAC';
+const PAIR = { A: 'T', T: 'A', G: 'C', C: 'G' };
+
+function pairBase(b) {
+  if (S.s3.phase !== 'pair') return;
+  const i = S.s3.built.length;
+  const want = PAIR[TEMPLATE[i]];
+  if (b !== want) {
+    S.s3.msg = 'bad:' + TEMPLATE[i] + ' never pairs with ' + b + '. A–T and G–C. Always, in everything alive.';
+    render(); return;
+  }
+  S.s3.built += b;
+  if (S.s3.built.length === TEMPLATE.length) {
+    S.s3.phase = 'clock';
+    S.s3.msg = 'good:✓ A perfect copy. The real machine also proofreads and catches almost every slip — and "almost" is the whole story of this lesson.';
+  } else {
+    S.s3.msg = 'good:✓ ' + TEMPLATE[i] + '–' + b;
+  }
+  render();
+}
+
+function renderScene3pair() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 210', role: 'img', 'aria-label': 'Build the matching strand' });
+  svg.append(h('text', { x: 30, y: 24, class: 'lab big' }, 'the strand to copy'));
+  const x0 = 150, w = 62;
+  for (let i = 0; i < TEMPLATE.length; i++) {
+    const x = x0 + i * w;
+    svg.append(h('rect', { x, y: 38, width: 50, height: 44, rx: 9, fill: 'rgba(34,211,238,.14)', stroke: 'var(--cyn)', 'stroke-width': 2 }));
+    svg.append(h('text', { x: x + 25, y: 68, 'text-anchor': 'middle', style: 'font-family:var(--mono);font-size:22px;font-weight:700', fill: 'var(--cyn)' }, TEMPLATE[i]));
+    const got = S.s3.built[i];
+    const active = S.s3.built.length === i && S.s3.phase === 'pair';
+    svg.append(h('path', { d: 'M ' + (x + 25) + ' 84 L ' + (x + 25) + ' 116', stroke: got ? 'var(--grn)' : 'var(--line)', 'stroke-width': 2, 'stroke-dasharray': got ? null : '4 4' }));
+    svg.append(h('rect', { x, y: 118, width: 50, height: 44, rx: 9,
+      fill: got ? 'rgba(163,230,53,.16)' : 'rgba(42,47,85,.5)',
+      stroke: got ? 'var(--grn)' : active ? 'var(--org)' : 'var(--line)', 'stroke-width': active ? 3 : 2,
+      class: got && S.s3.built.length === i + 1 ? 'pop' : null }));
+    svg.append(h('text', { x: x + 25, y: 148, 'text-anchor': 'middle', style: 'font-family:var(--mono);font-size:22px;font-weight:700',
+      fill: got ? 'var(--grn)' : 'var(--dim)' }, got || (active ? '▼' : '?')));
+  }
+  svg.append(h('text', { x: 30, y: 148, class: 'lab big', fill: 'var(--grn)' }, 'your copy'));
+  svg.append(h('text', { x: 330, y: 194, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--dim)' }, 'A–T   ·   G–C'));
+  return svg;
+}
+
+function renderStage3pair() {
+  const [kind, msg] = S.s3.msg ? S.s3.msg.split(/:(.*)/s) : ['', ''];
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      h('h2', {}, 'Round 1 · be the copying machine'),
+      renderScene3pair(),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'pasted: ', h('b', {}, S.s3.built.length + ' / ' + TEMPLATE.length)),
+        ...['A', 'T', 'G', 'C'].map(b => h('button', { class: 'act cy', type: 'button', style: 'min-width:54px', onclick: () => pairBase(b) }, b))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg)),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'One rule, no exceptions'),
+      h('div', { class: 'eq' }, 'A ↔ T        G ↔ C'),
+      h('p', {}, 'Each letter has exactly one partner, so one strand is enough to rebuild the other. That is why DNA can be copied at all — and why a 220-year-old dried drop still held a readable text.'),
+      h('p', { class: 'sub' }, 'The full factory — unzipping, pairing, proofreading — is the Copy the Code trainer, linked under the page. Here you only need the rule.')
+    ));
+}
+
 function renderStage3() {
+  return S.s3.phase === 'pair' ? renderStage3pair() : renderStage3clock();
+}
+
+function renderStage3clock() {
   const started = !!S.s3.seqA;
   const d = started ? diffCount(S.s3.seqA, S.s3.seqB) : 0;
   const doneBar = S.done[3] ? h('div', { class: 'donebar' },
-    h('span', {}, `${S.s3.gen * 100} generations → ${d} letters apart. Count differences, read time.`),
-    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: count the letters →')) : null;
+    h('span', {}, `After ${S.s3.gen * 100} generations your two lineages are ${d} letters apart. Count the differences → read the time. That is the molecular clock, and it is the engine behind the next station.`),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: build the tree →')) : null;
   const [kind, msg] = S.s3.msg ? S.s3.msg.split(/:(.*)/s) : ['', ''];
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card' },
-      h('h2', {}, 'One ancestor, two islands'),
-      h('p', { class: 'sub', style: 'margin-top:0' }, 'Same starting DNA, two islands. The copier is excellent — not perfect.'),
+      h('h2', {}, 'Round 2 · one ancestor, two islands'),
+      h('p', { class: 'sub', style: 'margin-top:0' }, 'A single microbe population splits onto two islands. Same starting DNA. The copying machine is excellent — but not perfect.'),
       h('div', { style: 'background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:12px' },
         h('div', { class: 'seqrow', style: 'margin:4px 0' },
           h('span', { style: 'color:var(--dim);display:inline-block;width:110px' }, 'ancestor '), ANCESTOR),
@@ -740,11 +762,12 @@ function renderStage3() {
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'Distance IS time'),
-      renderRx3(),
-      h('div', { class: 'chips' },
-        h('span', { class: 'chip org' }, 'typos are inherited'),
-        h('span', { class: 'chip cyn' }, 'the gap only grows'))
+      h('h3', {}, 'The clock inside the copier'),
+      h('div', { class: 'eq' }, 'more time apart → more typos → more differences'),
+      h('p', {}, 'DNA copying comes with a proofreader that catches almost every mistake — but “almost” is the key word. The rare typos that slip through get inherited, and separated lineages collect DIFFERENT ones. The count between them can only grow.'),
+      h('p', { class: 'sub' }, 'Flip it around and you get a superpower: count the differences today and you can estimate how long ago two creatures parted ways. Letters become a clock.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Want the full copying machine?'),
+        h('p', {}, 'The Copy the Code trainer (link below the page) walks the whole factory: unzipping, pairing, proofreading — and uses cytochrome c as a real molecular clock between species. This station is its movie trailer.'))
     ));
 }
 
@@ -767,19 +790,19 @@ function answerDist(v) {
     S.s4.msg = 'good:✓ ' + key.replace('-', ' vs ') + ': ' + v + ' differences.';
     S.s4.pair = null;
   } else {
-    S.s4.msg = 'bad:Count again — every orange letter is one difference.';
+    S.s4.msg = 'bad:Count the glowing letters again - every orange position is one difference.';
   }
   render();
 }
 function answerClosest(pair) {
-  if (pair === '1-2') { S.s4.closest = pair; S.s4.msg = '✓ Only 2 letters apart — the most recent split.'; }
+  if (pair === '1-2') { S.s4.closest = pair; S.s4.msg = 'good:✓ Cholera and its seawater cousin: only 2 letters apart - the most recent split.'; }
   else S.s4.msg = 'bad:Look for the SMALLEST number in the matrix.';
   render();
 }
 function answerOdd(n) {
   if (n === 4) {
-    S.s4.odd = 4; S.done[4] = true; logIdea('tree');
-    S.s4.msg = '✓ Malaria is 12 from everyone — it branched off first.';
+    S.s4.odd = 4;
+    S.s4.msg = 'good:✓ Malaria: 12 away from everyone at once - so its branch leaves first. Now pick the shape.';
   } else S.s4.msg = 'bad:Who is far from EVERYBODY at once?';
   render();
 }
@@ -820,10 +843,55 @@ function renderTree4() {
   return svg;
 }
 
+/* --- the Build a Tree move: the numbers only allow one shape --- */
+
+const TOPOS = {
+  A: { label: '((1, 2), 3), 4', order: ['4', '3', '1', '2'], ok: true },
+  B: { label: '((1, 4), 2), 3', order: ['3', '2', '1', '4'], ok: false,
+       why: 'That hangs malaria next to cholera. The matrix says they are 12 apart — the biggest gap on the board.' },
+  C: { label: '(1, 2) + (3, 4)', pairs: true, ok: false,
+       why: 'That makes two equal couples. But 3 sits 6 from 1 and 2, and 12 from 4 — it is nobody’s partner.' },
+};
+const TIPCOL = { '1': 'var(--grn)', '2': 'var(--cyn)', '3': 'var(--vio)', '4': 'var(--pnk)' };
+
+function miniTree(kind) {
+  const t = TOPOS[kind];
+  const svg = h('svg', { viewBox: '0 0 175 124', 'aria-hidden': 'true', style: 'width:170px' });
+  const L = (x1, y1, x2, y2, c) => svg.append(h('path', { d: 'M ' + x1 + ' ' + y1 + ' L ' + x2 + ' ' + y2, stroke: c || '#8187B6', 'stroke-width': 2.5, fill: 'none' }));
+  const tip = (y, t2) => svg.append(h('text', { x: 154, y: y + 5, class: 'lab big', fill: TIPCOL[t2] }, t2));
+  if (t.pairs) {
+    L(8, 62, 30, 62); L(30, 34, 30, 90);
+    L(30, 34, 60, 34); L(60, 20, 60, 48);
+    L(60, 20, 148, 20, TIPCOL['1']); L(60, 48, 148, 48, TIPCOL['2']);
+    L(30, 90, 60, 90); L(60, 76, 60, 104);
+    L(60, 76, 148, 76, TIPCOL['3']); L(60, 104, 148, 104, TIPCOL['4']);
+    ['1', '2', '3', '4'].forEach((n, i) => tip(20 + i * 28, n));
+  } else {
+    const o = t.order;
+    L(8, 62, 26, 62); L(26, 20, 26, 76);
+    L(26, 20, 148, 20, TIPCOL[o[0]]);
+    L(26, 76, 56, 76); L(56, 48, 56, 90);
+    L(56, 48, 148, 48, TIPCOL[o[1]]);
+    L(56, 90, 86, 90); L(86, 76, 86, 104);
+    L(86, 76, 148, 76, TIPCOL[o[2]]); L(86, 104, 148, 104, TIPCOL[o[3]]);
+    o.forEach((n, i) => tip(20 + i * 28, n));
+  }
+  return svg;
+}
+
+function answerTopo(kind) {
+  const t = TOPOS[kind];
+  if (!t.ok) { S.s4.msg = 'bad:' + t.why; render(); return; }
+  S.s4.topo = kind;
+  S.done[4] = true; logIdea('tree');
+  S.s4.msg = 'good:✓ ((1, 2), 3), 4. Smallest distance joins first, the odd one hangs deepest. You just built a tree from nothing but counted letters.';
+  render();
+}
+
 function renderStage4() {
   const filledN = Object.keys(S.s4.filled).length;
   const doneBar = S.done[4] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Your tree: ((1, 2), 3), 4. Real phylogenetics, done with a pencil.'),
+    h('span', {}, 'The tree: ((1, 2), 3), 4 - exactly what your deck promised. Three bacteria huddle together; malaria stands apart with its nucleus. You just did real phylogenetics with a pencil.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Final station →')) : null;
   const [kind, msg] = S.s4.msg ? S.s4.msg.split(/:(.*)/s) : ['', ''];
   const pair = S.s4.pair;
@@ -851,40 +919,59 @@ function renderStage4() {
       filledN === 6 && !S.s4.closest ? h('div', { class: 'scenebtns' },
         h('span', { class: 'meter' }, h('b', {}, 'Closest pair?')),
         ...['1-2', '2-3', '3-4'].map(p => h('button', { class: 'act alt', type: 'button', onclick: () => answerClosest(p) }, p.replace('-', ' & ')))) : null,
-      S.s4.closest && !S.done[4] ? h('div', { class: 'scenebtns' },
+      S.s4.closest && !S.s4.odd ? h('div', { class: 'scenebtns' },
         h('span', { class: 'meter' }, h('b', {}, 'And the odd one out?')),
         ...[2, 3, 4].map(n => h('button', { class: 'act alt', type: 'button', onclick: () => answerOdd(n) }, String(n)))) : null,
+      S.s4.odd && !S.done[4] ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'Which tree do the numbers demand?')),
+        ...['A', 'B', 'C'].map(k => h('button', {
+          class: 'act alt', type: 'button', style: 'padding:10px 12px',
+          'aria-label': 'Tree ' + TOPOS[k].label, onclick: () => answerTopo(k) },
+          h('span', { style: 'display:block;font-family:var(--mono);font-size:12px;margin-bottom:4px' }, TOPOS[k].label),
+          miniTree(k)))) : null,
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
-      h('h3', {}, 'The matrix'),
+      h('h3', {}, 'The distance matrix'),
       renderMatrix(),
-      S.done[4] ? renderTree4() : null,
-      h('div', { class: 'chips' },
-        h('span', { class: 'chip grn' }, 'smallest = newest split'),
-        h('span', { class: 'chip org' }, 'biggest to all = oldest branch'))
+      S.done[4] ? renderTree4() : h('p', { class: 'sub' }, 'Fill all six cells and the tree will draw itself here.'),
+      h('p', { class: 'sub' }, 'Smallest number = most recent split. Biggest-to-everyone = earliest branch. That is the whole algorithm - the Build a Tree trainer (link below) turns it into a full game with more species.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'Why is malaria exactly 12 from all three?'),
+        h('p', {}, 'Because all three bacteria sit on the far side of the SAME ancient split. The distance to malaria was mostly collected before the bacteria started splitting among themselves - so each of them is the same distance across the old divide.'))
     ));
 }
 
 /* ================= station 5 · you're on it ================= */
 
 const Q5 = [
-  { ask: 'One more jar arrives: YOU. Which of the four is your closest relative?',
-    opts: [['The tapeworm', true], ['The malaria parasite', false], ['The cholera bacterium', false]],
-    why: 'Both animals. You two split long after malaria’s line left.' },
-  { ask: '“Cholera and malaria must be close relatives - both are tiny and both cause disease.”',
-    opts: [['False - that’s a job description, not a family', true], ['True - similar lifestyle, similar family', false]],
-    why: 'Disease is a JOB. Cholera: bacterium. Malaria: has a nucleus, like you.' },
+  { ask: '\u201CCholera and malaria must be close relatives - both are tiny and both cause disease.\u201D',
+    opts: [['False - that\u2019s a job description, not a family', true], ['True - similar lifestyle, similar family', false]],
+    why: 'Causing disease is a JOB. Cholera is a bacterium; malaria is a eukaryote with a nucleus, like you. Their last common ancestor sits at the very root.' },
   { ask: 'So where does LUCA - the ancestor of every living thing - sit on your tree?',
     opts: [['At the root, before the first split', true], ['Next to the bacteria', false], ['Between you and the tapeworm', false]],
-    why: 'LUCA is the trunk — the machine everything still runs on.' },
+    why: 'LUCA is the trunk itself: the one cell population whose machine - ribosome, code, ATP - every living thing still runs today.' },
 ];
+
+const SOCKETS = [
+  { id: 'worm', x: 424, y: 212, ok: true,  why: 'Right. You and the tapeworm are both ANIMALS - many cells, nerves, muscles. You split roughly 600 million years ago, long after malaria\u2019s line left.' },
+  { id: 'mal',  x: 300, y: 160, ok: false, why: 'Malaria has a nucleus like you, but its line left more than a billion years ago. Look for something with nerves and muscles.' },
+  { id: 'bact', x: 300, y: 42,  ok: false, why: 'That is the bacterial side of the deepest split there is. You are nowhere near it.' },
+];
+
+function hangSelf(id) {
+  if (S.s5.hung) return;
+  const sk = SOCKETS.find(x => x.id === id);
+  if (!sk.ok) { S.s5.msg = 'bad:' + sk.why; render(); return; }
+  S.s5.hung = true;
+  S.s5.msg = 'good:\u2713 ' + sk.why;
+  render();
+}
 
 function answer5(ok) {
   const q = Q5[S.s5.q];
   if (!ok) { S.s5.msg = 'bad:' + q.why; render(); return; }
   S.s5.msg = 'good:✓ ' + q.why;
-  if (S.s5.q === 1) logIdea('job');
+  if (S.s5.q === 0) logIdea('job');
   S.s5.q++;
   if (S.s5.q >= Q5.length) { S.done[5] = true; }
   render();
@@ -905,41 +992,51 @@ function renderScene5() {
   L(260,200, 260,160,'var(--pnk)'); L(260,160, 330,160,'var(--pnk)');
   L(260,200, 380,200,'var(--org)',3);
   L(380,200, 380,185,'var(--cyn)'); L(380,185, 450,185,'var(--cyn)');
-  L(380,200, 450,220,'var(--org)');
+  if (S.s5.hung) L(380,200, 450,220,'var(--org)');
   const tip = (x, y, t, c) => svg.append(h('text', { x, y: y + 4, class: 'lab big', fill: c }, t));
   tip(336, 40, '1 · cholera', 'var(--grn)');
   tip(336, 80, '2 · seawater cousin', 'var(--cyn)');
   tip(336, 120, '3 · gut bacterium', 'var(--vio)');
   tip(336, 160, '4 · malaria', 'var(--pnk)');
   tip(456, 185, '🪱 tapeworm', 'var(--cyn)');
-  tip(456, 222, '🧑 YOU', 'var(--org)');
+  if (S.s5.hung) tip(456, 222, '🧑 YOU', 'var(--org)');
   svg.append(h('text', { x: 40, y: 222, class: 'lab hand', fill: 'var(--grn)' }, 'LUCA'));
-  if (S.done[5]) svg.append(h('text', { x: 330, y: 18, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--grn)', class2: null },
+  if (!S.s5.hung) SOCKETS.forEach(sk => {
+    const g = h('g', { class: 'pickable', tabindex: '0', role: 'button', 'aria-label': 'Hang your branch here',
+      onclick: () => hangSelf(sk.id),
+      onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); hangSelf(sk.id); } } });
+    g.append(h('circle', { cx: sk.x, cy: sk.y, r: 16, fill: 'rgba(251,146,60,.16)', stroke: 'var(--org)', 'stroke-width': 2.5, 'stroke-dasharray': '5 4' }));
+    g.append(h('text', { x: sk.x, y: sk.y + 7, 'text-anchor': 'middle', class: 'lab hand', fill: 'var(--org)' }, '?'));
+    svg.append(g);
+  });
+  if (S.done[5]) svg.append(h('text', { x: 330, y: 18, class: 'lab hand', 'text-anchor': 'middle', fill: 'var(--grn)' },
     'A tapeworm is a closer relative of yours than cholera is of malaria.'));
   return svg;
 }
 
 function renderStage5() {
-  const q = Q5[S.s5.q];
+  const q = Q5[Math.min(S.s5.q, Q5.length - 1)];
   const doneBar = S.done[5] ? h('div', { class: 'donebar' },
-    h('span', {}, 'Read the green line out loud. It sounds insane. You can prove it.'),
+    h('span', {}, 'Read the top line again - out loud. That sentence sounds insane and is completely true, and now you can PROVE it with twenty letters and a pencil. Quiz time.'),
     h('button', { class: 'act', type: 'button', onclick: () => go(6) }, 'Take the quiz →')) : null;
   const [kind, msg] = S.s5.msg ? S.s5.msg.split(/:(.*)/s) : ['', ''];
   return h('section', { class: 'stagegrid' },
     h('div', { class: 'card scene' },
       renderScene5(),
-      !S.done[5] ? h('div', { class: 'scenebtns' },
+      !S.s5.hung ? h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, 'One more jar arrives: YOU. Tap the spot on the tree where your branch belongs.'))) : null,
+      S.s5.hung && !S.done[5] ? h('div', { class: 'scenebtns' },
         h('span', { class: 'meter' }, h('b', {}, q.ask))) : null,
-      !S.done[5] ? h('div', { class: 'scenebtns' },
+      S.s5.hung && !S.done[5] ? h('div', { class: 'scenebtns' },
         ...q.opts.map(([txt, ok]) => h('button', { class: 'act alt', type: 'button', onclick: () => answer5(ok) }, txt))) : null,
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
       h('h3', {}, 'One tree, no exceptions'),
-      renderRx5(),
-      h('div', { class: 'chips' },
-        h('span', { class: 'chip grn' }, 'one trunk'),
-        h('span', { class: 'chip pnk' }, 'virus stays outside'))
+      h('p', {}, 'Every living thing ever found - from gut bacteria to blue whales to you - plugs into this one tree. Not two trees, not five. One. That is the single most tested claim in biology, and the letters agree with it every time anyone counts.'),
+      h('p', { class: 'sub' }, 'The virus jar is still on the bench, outside the picture - no ribosome, no seat. It haunts the tree instead of sitting on it.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'How deep does YOUR branch go?'),
+        h('p', {}, 'You-and-tapeworm split: roughly 600 million years ago. Your line and malaria’s: well over a billion. The bacteria-eukaryote split at the bottom: older still. The twenty letters you counted today are echoes of those dates.'))
     ));
 }
 
@@ -948,22 +1045,24 @@ function renderStage5() {
 const QUIZ = [
   { q: 'Why did scientists decide the gourd blood was probably NOT Louis XVI\u2019s?',
     opts: ['DNA cannot survive 220 years', 'The genetic portrait - brown eyes, ordinary height, north-Italian roots - contradicted the real king on every count', 'The gourd was the wrong shape'],
-    a: 1, why: 'Blue eyes, ~190 cm, German-Polish roots. The genome matched none of it.' },
+    a: 1, why: 'Blue-eyed, ~190 cm, German-Polish ancestry - the genome matched none of it. The relic failed, not the method.' },
   { q: '“Parasite is a job, not a family” means…',
     opts: ['Parasites cannot be classified', 'Same lifestyle doesn’t mean same ancestors', 'All parasites are related'],
-    a: 1, why: 'Both freeload — from totally different branches of the tree.' },
-  { q: 'Why do biologists trust the ribosome more than wings for building family trees?',
-    opts: ['Wings are too small to study', 'The ribosome was built once and inherited; wings were invented many times', 'Ribosomes mutate faster'],
-    a: 1, why: 'The machine was built once; its text records the real family.' },
+    a: 1, why: 'Malaria (eukaryote) and tapeworm (animal) both freeload - from totally different branches of the tree.' },
+  { q: 'Why is ribosome RNA the molecule used to compare a human with a gut bacterium?',
+    opts: ['It mutates faster than anything else in the cell',
+           'Every living cell has it, and it carries frozen stretches to line up plus variable ones to count',
+           'It is the longest molecule in the cell'],
+    a: 1, why: 'No ribosome, no life. The frozen stretches let you align the sequences at all; the variable ones (V1\u2013V9) carry the differences you count.' },
   { q: 'Two lineages split 400 generations ago. Compared with lineages split 100 generations ago, their DNA will show…',
     opts: ['More letter differences', 'Fewer letter differences', 'The same number'],
-    a: 0, why: 'More time apart = more differences. That is the clock.' },
+    a: 0, why: 'Typos pile up with time. More time apart = more differences = the molecular clock.' },
   { q: 'In your matrix, cholera-to-cousin was 2 and malaria was 12 from everyone. So…',
     opts: ['Malaria is the closest relative of cholera', 'Cholera & cousin split recently; malaria branched off long before', 'The numbers are random'],
-    a: 1, why: 'Smallest = newest split. Biggest-to-all = earliest branch.' },
+    a: 1, why: 'Smallest distance = newest split; biggest-to-all = earliest branch. ((1,2),3),4.' },
   { q: 'Pick the TRUE sentence.',
     opts: ['Cholera and malaria are close relatives', 'You and the tapeworm share a more recent ancestor than cholera shares with malaria', 'Viruses sit at the root of the tree'],
-    a: 1, why: 'You + tapeworm: ~600 Mya. Cholera vs malaria: the deepest split there is.' },
+    a: 1, why: 'You + tapeworm = both animals, split ~600 Mya. Cholera vs malaria spans the deepest split there is.' },
 ];
 
 function renderStage6() {
@@ -1029,9 +1128,8 @@ function render() {
   $('#stageNote').innerHTML = NOTES[S.stage];
   $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
   renderLog();
-  requestAnimationFrame(inkResize);
 }
-$('#btnReset').addEventListener('click', () => { S = freshState(); INK.strokes = {}; render(); });
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
 
 /* progress hooks: report to the Science Map backend. Primary transport
    is fetch WITHOUT cookies; script-tag JSONP is the fallback. */
@@ -1067,113 +1165,7 @@ function reportQuiz(score, total, wrong) {
     id: 'fourjars:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
 }
 
-
-/* ---------------- ink layer: draw on the slide with a stylus ----------------
-   The teacher presents from a tablet; pen mode turns the stage into a
-   whiteboard. Strokes are kept per station, so flipping back and forth
-   does not lose what was circled. */
-
-const INK_COLORS = [['#A8F043', 'green'], ['#2BE8F5', 'cyan'], ['#FF5FC8', 'pink'], ['#FFA24A', 'orange']];
-const INK = { on: false, color: '#A8F043', erase: false, strokes: {}, cur: null };
-const cv = $('#inkCanvas');
-const ctx = cv.getContext('2d');
-
-function inkStrokes() {
-  if (!INK.strokes[S.stage]) INK.strokes[S.stage] = [];
-  return INK.strokes[S.stage];
-}
-function inkDraw(st) {
-  ctx.globalCompositeOperation = st.erase ? 'destination-out' : 'source-over';
-  ctx.strokeStyle = st.c;
-  ctx.lineWidth = st.w;
-  ctx.shadowBlur = st.erase ? 0 : 10;
-  ctx.shadowColor = st.erase ? 'transparent' : st.c;
-  ctx.beginPath();
-  ctx.moveTo(st.pts[0][0], st.pts[0][1]);
-  if (st.pts.length === 1) ctx.lineTo(st.pts[0][0] + 0.01, st.pts[0][1]);
-  for (let i = 1; i < st.pts.length; i++) ctx.lineTo(st.pts[i][0], st.pts[i][1]);
-  ctx.stroke();
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.shadowBlur = 0;
-}
-function inkRedraw() {
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, cv.width, cv.height);
-  ctx.restore();
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  for (const st of inkStrokes()) inkDraw(st);
-  if (INK.cur) inkDraw(INK.cur);
-}
-function inkResize() {
-  const box = cv.parentElement;
-  const w = box.clientWidth, ht = box.clientHeight;
-  if (!w || !ht) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  cv.width = Math.round(w * dpr);
-  cv.height = Math.round(ht * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  inkRedraw();
-}
-function inkPos(ev) {
-  const r = cv.getBoundingClientRect();
-  return [ev.clientX - r.left, ev.clientY - r.top];
-}
-cv.addEventListener('pointerdown', (ev) => {
-  if (!INK.on) return;
-  ev.preventDefault();
-  try { cv.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
-  INK.cur = { c: INK.color, w: INK.erase ? 28 : 4, erase: INK.erase, pts: [inkPos(ev)] };
-  inkRedraw();
-});
-cv.addEventListener('pointermove', (ev) => {
-  if (!INK.cur) return;
-  ev.preventDefault();
-  INK.cur.pts.push(inkPos(ev));
-  inkRedraw();
-});
-function inkEnd() {
-  if (!INK.cur) return;
-  inkStrokes().push(INK.cur);
-  INK.cur = null;
-  inkRedraw();
-}
-cv.addEventListener('pointerup', inkEnd);
-cv.addEventListener('pointercancel', inkEnd);
-
-function renderInkBar() {
-  const bar = $('#inkBar');
-  bar.hidden = !INK.on;
-  if (!INK.on) { bar.replaceChildren(); return; }
-  bar.replaceChildren(
-    ...INK_COLORS.map(([c, name]) => h('button', {
-      class: 'swatch', type: 'button', title: 'Pen: ' + name, 'aria-label': 'Pen: ' + name,
-      'aria-pressed': String(!INK.erase && INK.color === c),
-      style: 'background:' + c + ';color:' + c,
-      onclick: () => { INK.color = c; INK.erase = false; renderInkBar(); },
-    })),
-    h('button', {
-      class: 'swatch er', type: 'button', title: 'Eraser', 'aria-label': 'Eraser',
-      'aria-pressed': String(INK.erase),
-      onclick: () => { INK.erase = !INK.erase; renderInkBar(); },
-    }, '⌫'),
-    h('button', {
-      class: 'ghost', type: 'button',
-      onclick: () => { INK.strokes[S.stage] = []; inkRedraw(); },
-    }, 'Clear'));
-}
-$('#btnDraw').addEventListener('click', () => {
-  INK.on = !INK.on;
-  document.body.classList.toggle('drawing', INK.on);
-  $('#btnDraw').setAttribute('aria-pressed', String(INK.on));
-  renderInkBar();
-  inkResize();
-});
-window.addEventListener('resize', inkResize);
-
 window.__S = () => S;
-window.__INK = INK;
 render();
 </script>
 </body>
