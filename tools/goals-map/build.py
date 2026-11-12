@@ -99,9 +99,12 @@ PTS = 'https://meridian-one-jet.vercel.app/passthesun.html'
 TRAINER_PTS = L('Pass the Sun — food webs & energy flow trainer', PTS, 'trainer')
 BTW = 'https://meridian-one-jet.vercel.app/breaktheweb.html'
 TRAINER_BTW = L('Break the Web — pollinators, toxins & biodiversity trainer', BTW, 'trainer')
+RTT = 'https://meridian-one-jet.vercel.app/readthetree.html'
+TRAINER_RTT = L('Read the Tree — classifying life, three domains & LUCA trainer', RTT, 'trainer')
 
 NODE_LINKS = {
  'U6.K2': [L('Build a Tree — phylogenetics trainer', BT, 'trainer'),
+           TRAINER_RTT,
            L('Tree of Life — lesson slides', MAT + 'tree-of-life-slides.pdf', 'slides'),
            L('Tree of Life — background reading', MAT + 'tree-of-life-reading.pdf', 'reading')],
  'U1.A3': [TRAINER_ES],
@@ -213,7 +216,7 @@ edges = [
  E('U1.K2','U4.K1','cross','Specialised cells are what tissues and organs are made of.'),
  E('U3.K3','U2.K3','cross','Sexual reproduction is where variation comes from.'),
  E('U5.K1','U6.K1','cross','Photosynthesis feeds every food chain.'),
- E('U4.K4','U6.K2','cross','The microbe types each sit on their own branch of the tree.'),
+ E('U4.K4','U6.K2','cross','The microbe types each sit on their own branch of the tree.', links=[TRAINER_RTT]),
  E('U9.A3','U4.C1','cross','Every claim in the campaign must survive the evidence test.'),
  E('U9.K1','U4.A3','cross','Cholera twice: as an epidemiological case and as a pathogen.'),
  E('U6.A2','U9.A2','cross','Field counts become tables, graphs and averages.'),
