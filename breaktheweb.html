@@ -515,9 +515,11 @@ function renderStage2() {
 
 /* ================= station 3 · follow the poison ================= */
 
+function units(n) { return n + (n === 1 ? ' unit' : ' units'); }
+
 const LADDER = [
   { id: 'oak', name: 'Oak leaves', emoji: '🌳', dose: 1,
-    line: 'The spray lands here. One unit in a leaf — far too little to hurt anything at all.' },
+    line: 'The spray lands here. One unit in a leaf \u2014 far too little to hurt anything at all.' },
   { id: 'cat', name: 'Caterpillars', emoji: '🐛', dose: 10,
     line: 'A caterpillar eats a great many leaves. The poison does not break down and it does not leave the body, so it just piles up: ten units.' },
   { id: 'tit', name: 'Songbird', emoji: '🐦', dose: 100,
@@ -542,7 +544,7 @@ function renderScene3() {
   LADDER.forEach((lv, i) => {
     const reached = i <= S.s3.level;
     const y = 276 - i * 76;
-    const w = 120 + i * 100;
+    const w = 270 + i * 100;
     svg.append(h('rect', { x: 330 - w / 2, y: y - 30, width: w, height: 60, rx: 10,
       fill: reached ? 'var(--orange-soft)' : 'var(--panel-2)',
       stroke: reached ? 'var(--orange-deep)' : 'var(--line)', 'stroke-width': reached ? 2 : 1.2,
@@ -550,11 +552,11 @@ function renderScene3() {
       class: i === S.s3.level && i > 0 ? 'pop' : null }));
     svg.append(h('text', { x: 330 - w / 2 + 26, y: y + 7, 'text-anchor': 'middle', 'font-size': '22px',
       opacity: reached ? 1 : .35 }, lv.emoji));
-    svg.append(h('text', { x: 330 - w / 2 + 50, y: y + 2, class: 'lab', fill: reached ? 'var(--fg)' : 'var(--gray-letter)' }, lv.name));
-    svg.append(h('text', { x: 330 + w / 2 - 14, y: y + 7, 'text-anchor': 'end',
+    svg.append(h('text', { x: 330 - w / 2 + 52, y: y + 6, class: 'lab big', fill: reached ? 'var(--fg)' : 'var(--gray-letter)' }, lv.name));
+    svg.append(h('text', { x: 330 + w / 2 - 16, y: y + 7, 'text-anchor': 'end',
       style: 'font-family:var(--mono);font-size:17px;font-weight:700',
       fill: reached ? 'var(--orange-deep)' : 'var(--gray-letter)' },
-      reached ? lv.dose + ' units' : '?'));
+      reached ? units(lv.dose) : '?'));
     if (i < LADDER.length - 1) {
       const up = i < S.s3.level;
       svg.append(h('path', { d: 'M 330 ' + (y - 32) + ' L 330 ' + (y - 44),
@@ -580,7 +582,7 @@ function renderStage3() {
       h('div', { class: 'scenebtns' },
         h('button', { class: 'act sun', type: 'button', disabled: top ? 'disabled' : null, onclick: climb },
           top ? 'Top of the web' : 'Eat the level below →'),
-        h('span', { class: 'meter' }, 'concentration now: ', h('b', {}, LADDER[S.s3.level].dose + ' units'))),
+        h('span', { class: 'meter' }, 'concentration now: ', h('b', {}, units(LADDER[S.s3.level].dose)))),
       h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
       doneBar),
     h('aside', { class: 'card rx' },
@@ -590,7 +592,7 @@ function renderStage3() {
       h('p', {}, 'Then the arithmetic does the rest. Each eater has to eat many of the level below to live, and it keeps every dose.'),
       h('p', { class: 'sub' }, 'A poison that washes out of the body in a day never does this, however nasty it is on the day. Lasting matters more than strength.'),
       h('details', { class: 'fine' }, h('summary', {}, 'The case this comes from'),
-        h('p', {}, 'DDT, an insecticide sprayed by the tonne from the 1940s. It was barely toxic to birds directly — but it built up through exactly this ladder and made the eggshells of eagles, ospreys and peregrine falcons too thin to survive being sat on. The parents crushed their own eggs. The United States banned agricultural use in 1972, other countries followed, and the big birds came back over the next thirty years.'))
+        h('p', {}, 'DDT (dichlorodiphenyltrichloroethane), an insecticide sprayed by the tonne from the 1940s. It was barely toxic to birds directly — but it built up through exactly this ladder and made the eggshells of eagles, ospreys and peregrine falcons too thin to survive being sat on. The parents crushed their own eggs. The United States banned agricultural use in 1972, other countries followed, and the big birds came back over the next thirty years.'))
     ));
 }
 
