@@ -97,6 +97,8 @@ def L(t, u, k):
 TRAINER_ES = L('Eat the Sun — cells & photosynthesis trainer', ES, 'trainer')
 PTS = 'https://meridian-one-jet.vercel.app/passthesun.html'
 TRAINER_PTS = L('Pass the Sun — food webs & energy flow trainer', PTS, 'trainer')
+BTW = 'https://meridian-one-jet.vercel.app/breaktheweb.html'
+TRAINER_BTW = L('Break the Web — pollinators, toxins & biodiversity trainer', BTW, 'trainer')
 
 NODE_LINKS = {
  'U6.K2': [L('Build a Tree — phylogenetics trainer', BT, 'trainer'),
@@ -111,6 +113,7 @@ NODE_LINKS = {
  'U9.K1': [L('Epidemic Forensics: Soho 1854 — lesson slides', MAT + 'soho-1854-slides.pdf', 'slides')],
  'U4.K2': [L('Rabies 1885 — lesson slides', MAT + 'rabies-slides.pdf', 'slides')],
  'U6.K1': [TRAINER_PTS],
+ 'U6.K3': [TRAINER_BTW],
  'U9.A3': [L('Medical Detective — CER workbook (.docx)', MAT + 'medical-detective-workbook.docx', 'assignment'),
            L('Medical Detective — how to solve the workbook', MAT + 'medical-detective-instructions.pdf', 'reading'),
            L('Cosmic Epidemics: Is It Real? — lesson slides', MAT + 'cosmic-epidemics-slides.pdf', 'slides')],
@@ -171,7 +174,7 @@ edges = [
  E('U5.K1','U5.K3','unit','Photosynthesis makes the sugar this goal follows.'),
  E('U5.K2','U5.K3','unit','Respiration burns it — in plants too.'),
  # U6
- E('U6.K1','U6.K3','unit','Toxins travel along the web you drew.'),
+ E('U6.K1','U6.K3','unit','Toxins travel along the web you drew.', links=[TRAINER_BTW]),
  E('U6.K2','U6.A1','unit','Classification in theory, identification keys in the field.'),
  E('U6.K1','U6.A2','unit','Webs and biodiversity need real field data.'),
  E('U6.K1','U6.C1','unit','Build the food web from your own observations.'),
