@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Break the Web</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Break the Web — pollinators, toxins climbing a food web, and what human
+   changes do to it. Third in the 11-14 chain after Eat the Sun and Pass the
+   Sun; same Meridian family, same web. */
+:root {
+  color-scheme: light;
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --leaf:        #5B9E22;
+  --leaf-soft:   #E2FDC7;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--fg);
+  font-family: var(--ui); font-size: 15px; line-height: 1.55; margin: 0;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+}
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--violet); }
+h1 { font-size: clamp(27px, 5.4vw, 42px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0; text-wrap: balance; }
+h1 .hi { color: var(--orange-deep); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 68ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--orange-deep);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.card > h2 { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--violet); margin: 0 0 12px; }
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .stagegrid { grid-template-columns: 1fr; } }
+.scene svg { width: 100%; height: auto; display: block; user-select: none; }
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+.act.sun { background: var(--orange-deep); }
+.act.sun:hover { background: #b34a0e; }
+
+.meter { font: 500 13px/1.3 var(--ui); color: var(--fg-dim); background: var(--panel-2); border-radius: 8px; padding: 9px 12px; }
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+.toast.good { color: var(--mint-deep); }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+.rx h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.rx .eq {
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.rx td, .rx th { padding: 6px 8px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.rx tr:first-child :is(td, th) { border-top: 0; }
+.rx th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--violet); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.chip.leaf { background: var(--leaf-soft); color: var(--leaf); }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+.chip.mint { background: var(--mint); color: var(--mint-deep); }
+.chip.sun { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; }
+.logtable tr.off { opacity: .38; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--orange-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--violet-soft); color: var(--violet); font-weight: 700; }
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.foot a { color: var(--violet); font-weight: 600; }
+
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.big { font-size: 13px; fill: var(--fg); font-weight: 700; }
+.pickable { cursor: pointer; }
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  transform-box: fill-box; animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-26px); } }
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+@keyframes pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences &middot; Ecosystems &amp; biodiversity</div>
+    <h1>Break the <span class="hi">Web</span></h1>
+    <p class="lede">In <a href="https://meridian-one-jet.vercel.app/passthesun.html" style="color:var(--leaf);font-weight:600">Pass the Sun</a>
+      you wove a forest food web and worked out who eats whom. Here is the same web &mdash; and here are the
+      three ways people interfere with one. Take out the pollinators, feed in a poison that never leaves,
+      and cut a link to see how far the damage travels.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stations"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Big ideas collected <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five ideas &mdash; together they explain why losing the bees costs us flavour rather than bread, why the poison is worst at the top, and why removing one creature changes a tree three arrows away.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U6.K3 &middot; pollinators, toxins &amp; biodiversity</span>
+      <span class="chip vio">follows U6.K1 &middot; food webs</span>
+    </div>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-11-14.html">Science Map 11&ndash;14</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/passthesun.html">Pass the Sun (previous lesson)</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/eatsun.html">Eat the Sun</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse','marker','defs']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+/* ---------------- state ---------------- */
+
+const STAGE_META = [
+  { n: 1, label: 'The web' },
+  { n: 2, label: 'No pollinators' },
+  { n: 3, label: 'The poison' },
+  { n: 4, label: 'Cut a link' },
+  { n: 5, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: '<b>Station 1 · The web you already know.</b> This is the web you wove in Pass the Sun, already drawn. Two quick checks that you can still read it — then we start breaking it on purpose.',
+  2: '<b>Station 2 · Take out the pollinators.</b> Every bee, hoverfly and butterfly is gone. Go through the shopping and decide, food by food: still on the plate, or gone? The answer is not the one most people expect.',
+  3: '<b>Station 3 · Follow the poison.</b> A chemical that never breaks down lands on the oak leaves. It is far too weak to hurt anything. Now let the web eat it, level by level, and watch the number.',
+  4: '<b>Station 4 · Cut a link.</b> Four things people do to a forest. For each one, predict what happens <b>next</b> — then watch the web redraw. The second thing to happen is usually the surprising one.',
+  5: '<b>Quiz.</b> Six questions. Ace them and you can say what a change to one species does to the rest.',
+};
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    logged: new Set(),
+    s1: { task: 0, msg: '' },
+    s2: { pick: null, sorted: {}, msg: '' },
+    s3: { level: 0, msg: '' },
+    s4: { idx: 0, answered: null, msg: '' },
+    quiz: { picked: {}, submitted: false },
+  };
+}
+S = freshState();
+
+const LOG = [
+  { id: 'read',   name: 'Every arrow is somebody depending on somebody', note: 'read the web backwards and you see who would be missed' },
+  { id: 'pollen', name: 'No bees: the bread stays, the flavour goes', note: 'wheat, rice and maize are wind-pollinated — fruit, nuts and cocoa are not' },
+  { id: 'ladder', name: 'Poison climbs the web, ×10 a step', note: 'each eater swallows many of the level below, and never gets rid of it' },
+  { id: 'ddt',    name: 'DDT was harmless at the bottom and lethal at the top', note: 'eggshells too thin to sit on; banned in 1972, the big birds came back' },
+  { id: 'knock',  name: 'Remove one species and the change travels', note: 'take away a hunter and its prey can strip the plants bare' },
+];
+function logIdea(id) { S.logged.add(id); }
+
+/* ---------------- the Pass the Sun web, reused ---------------- */
+
+const SPECIES = [
+  { id: 'oak', name: 'Oak', emoji: '🌳', x: 120, y: 258 },
+  { id: 'grass', name: 'Grass', emoji: '🌿', x: 330, y: 256 },
+  { id: 'cat', name: 'Caterpillar', emoji: '🐛', x: 92, y: 150 },
+  { id: 'mouse', name: 'Mouse', emoji: '🐭', x: 268, y: 162 },
+  { id: 'rabbit', name: 'Rabbit', emoji: '🐇', x: 470, y: 180 },
+  { id: 'tit', name: 'Songbird', emoji: '🐦', x: 140, y: 56 },
+  { id: 'owl', name: 'Owl', emoji: '🦉', x: 330, y: 44 },
+  { id: 'fox', name: 'Fox', emoji: '🦊', x: 520, y: 62 },
+];
+const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
+/* eater: meals — identical to Pass the Sun */
+const MENU = {
+  cat: ['oak'], mouse: ['oak', 'grass'], rabbit: ['grass'],
+  tit: ['cat'], owl: ['mouse', 'tit'], fox: ['mouse', 'rabbit'],
+};
+const ALL_LINKS = Object.entries(MENU).flatMap(([e, ms]) => ms.map(m => e + '<' + m));
+
+/* One web renderer for stations 1 and 4.
+   opts: onclick, gone (Set), boom (Set), thin (Set), caption */
+function drawWeb(opts = {}) {
+  const gone = opts.gone || new Set();
+  const boom = opts.boom || new Set();
+  const thin = opts.thin || new Set();
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 330', role: 'img',
+    'aria-label': opts.label || 'The forest food web' });
+  ALL_LINKS.forEach(key => {
+    const [e, m] = key.split('<');
+    const a = SP[m], b = SP[e];
+    const dead = gone.has(e) || gone.has(m);
+    const mx = (a.x + b.x) / 2 + (a.y > b.y ? 18 : -18), my = (a.y + b.y) / 2;
+    svg.append(h('path', { d: 'M ' + a.x + ' ' + (a.y - 26) + ' Q ' + mx + ' ' + my + ' ' + b.x + ' ' + (b.y + 30),
+      fill: 'none', stroke: dead ? 'var(--gray-letter)' : 'var(--fg-dim)',
+      'stroke-width': 1.8, opacity: dead ? .3 : .65,
+      'stroke-dasharray': dead ? '5 5' : null }));
+    if (!dead) svg.append(h('text', { x: mx, y: my, class: 'lab', 'text-anchor': 'middle', fill: 'var(--orange-deep)' }, '⚡'));
+  });
+  SPECIES.forEach(sp => {
+    const isPlant = sp.id === 'oak' || sp.id === 'grass';
+    const isGone = gone.has(sp.id), isBoom = boom.has(sp.id), isThin = thin.has(sp.id);
+    const clickable = !!opts.onclick && !isGone;
+    const g = h('g', {
+      class: clickable ? 'pickable' : null,
+      tabindex: clickable ? '0' : null, role: clickable ? 'button' : null,
+      'aria-label': sp.name,
+      onclick: clickable ? () => opts.onclick(sp.id) : null,
+      onkeydown: clickable ? (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onclick(sp.id); } } : null });
+    g.append(h('circle', { cx: sp.x, cy: sp.y, r: isBoom ? 31 : 26,
+      fill: isGone ? 'var(--panel-2)' : isBoom ? 'var(--orange-soft)' : isThin ? 'var(--pink-soft)' : isPlant ? 'var(--leaf-soft)' : 'var(--panel-2)',
+      stroke: isGone ? 'var(--gray-letter)' : isBoom ? 'var(--orange-deep)' : isThin ? 'var(--pink-deep)' : isPlant ? 'var(--leaf)' : 'var(--line)',
+      'stroke-width': (isBoom || isThin) ? 3 : 1.5,
+      'stroke-dasharray': isGone ? '4 4' : null,
+      class: (isBoom || isGone) ? 'pop' : null }));
+    g.append(h('text', { x: sp.x, y: sp.y + 7, 'text-anchor': 'middle', 'font-size': isBoom ? '24px' : '20px',
+      opacity: isGone ? .25 : 1 }, sp.emoji));
+    if (isGone) {
+      svg.append(h('text', { x: sp.x + 20, y: sp.y - 18, 'text-anchor': 'middle', 'font-size': '15px' }, '✕'));
+    }
+    g.append(h('text', { x: sp.x, y: sp.y + 46, class: 'lab', 'text-anchor': 'middle',
+      fill: isGone ? 'var(--gray-letter)' : isBoom ? 'var(--orange-deep)' : isThin ? 'var(--pink-deep)' : 'var(--fg-dim)' },
+      sp.name + (isBoom ? ' ↑' : isThin ? ' ↓' : '')));
+    svg.append(g);
+  });
+  if (opts.caption) {
+    svg.append(h('text', { x: 330, y: 322, class: 'lab', 'text-anchor': 'middle' }, opts.caption));
+  }
+  return svg;
+}
+
+/* ================= station 1 · the web you already know ================= */
+
+const S1TASKS = [
+  { ask: 'Energy gets into this web through one kind of creature. Click a producer.',
+    ok: ['oak', 'grass'],
+    good: 'Right — the plants are the only ones who make their own food out of sunlight. Everybody else is living off them.',
+    bad: 'That one has to find its dinner. Look for something green.' },
+  { ask: 'Exactly one creature here eats the caterpillar. Click it.',
+    ok: ['tit'],
+    good: 'The songbird. One line leaves the caterpillar, and that is where it goes.',
+    bad: 'Follow the line out of the caterpillar and see where it lands.' },
+];
+
+function clickS1(id) {
+  if (S.done[1]) return;
+  const t = S1TASKS[S.s1.task];
+  if (t.ok.includes(id)) {
+    S.s1.msg = 'good:' + t.good;
+    S.s1.task++;
+    if (S.s1.task >= S1TASKS.length) { S.done[1] = true; logIdea('read'); }
+  } else {
+    S.s1.msg = 'bad:' + t.bad;
+  }
+  render();
+}
+
+function renderStage1() {
+  const [kind, msg] = S.s1.msg ? S.s1.msg.split(/:(.*)/s) : ['', ''];
+  const t = S1TASKS[Math.min(S.s1.task, S1TASKS.length - 1)];
+  const doneBar = S.done[1] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Still fluent. Now read it the other way round: every arrow is somebody who would be missed. Let us start pulling things out.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next: take out the pollinators →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      drawWeb({ onclick: clickS1, caption: S.done[1] ? 'the web is intact — for now' : null }),
+      h('div', { class: 'scenebtns' },
+        S.done[1] ? null : h('span', { class: 'meter' }, h('b', {}, t.ask)),
+        h('span', { class: 'meter' }, 'checks passed: ', h('b', {}, S.s1.task + ' / ' + S1TASKS.length))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The same web, one question later'),
+      h('p', { html: 'In Pass the Sun you drew this to answer <b>who eats whom</b>. Read it backwards and it answers a different question: <b>who would be missed</b>.' }),
+      h('p', {}, 'The oak is not just a tree. It is the caterpillar’s only food, which makes it the songbird’s dinner, which makes it part of the owl’s. Three arrows away, and still connected.'),
+      h('p', { class: 'sub' }, 'That is the whole trick of this trainer: nothing new gets added to the web. We only take things away and follow what happens.')
+    ));
+}
+
+/* ================= station 2 · take out the pollinators ================= */
+
+const FOODS = [
+  { id: 'bread', name: 'Bread', emoji: '🍞', keeps: true,
+    why: 'Wheat is pollinated by the wind. It has never needed an insect and it never will.' },
+  { id: 'rice', name: 'Rice', emoji: '🍚', keeps: true,
+    why: 'Rice pollinates itself inside its own flower. Bees are not invited.' },
+  { id: 'maize', name: 'Maize', emoji: '🌽', keeps: true,
+    why: 'Wind again — that dust blowing off the tassels in a maize field is the pollen.' },
+  { id: 'potato', name: 'Potato', emoji: '🥔', keeps: true,
+    why: 'We eat the tuber, which grows underground. The plant does not need to be pollinated at all for that.' },
+  { id: 'apple', name: 'Apple', emoji: '🍎', keeps: false,
+    why: 'Apples need insects to carry pollen between trees. No insects, no apples — orchards in some places already hire beehives.' },
+  { id: 'almond', name: 'Almonds', emoji: '🌰', keeps: false,
+    why: 'Almonds are the extreme case: essentially every almond on Earth exists because a bee visited that flower.' },
+  { id: 'cocoa', name: 'Chocolate', emoji: '🍫', keeps: false,
+    why: 'Cocoa flowers are pollinated by tiny midges, and only a few per cent of flowers get visited even now. Remove the midges and chocolate is finished.' },
+  { id: 'berry', name: 'Blueberries', emoji: '🫐', keeps: false,
+    why: 'Bees again. Most berries you eat are an insect’s work.' },
+];
+const FD = Object.fromEntries(FOODS.map(f => [f.id, f]));
+
+function pickFood(id) {
+  if (S.done[2] || S.s2.sorted[id]) return;
+  S.s2.pick = S.s2.pick === id ? null : id;
+  S.s2.msg = '';
+  render();
+}
+function sortFood(keeps) {
+  const id = S.s2.pick;
+  if (!id) return;
+  const f = FD[id];
+  if (f.keeps === keeps) {
+    S.s2.sorted[id] = true;
+    S.s2.pick = null;
+    S.s2.msg = 'good:' + (f.keeps ? '✓ ' : '✗ ') + f.name + ' — ' + f.why;
+    if (Object.keys(S.s2.sorted).length === FOODS.length) { S.done[2] = true; logIdea('pollen'); }
+  } else {
+    S.s2.pick = null;
+    S.s2.msg = 'bad:Not quite. ' + f.why;
+  }
+  render();
+}
+
+function renderScene2() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 300', role: 'img',
+    'aria-label': 'Sort each food into stays or gone' });
+  svg.append(h('text', { x: 330, y: 22, class: 'lab big', 'text-anchor': 'middle' }, 'every pollinating insect has gone'));
+  FOODS.forEach((f, i) => {
+    const col = i % 4, row = Math.floor(i / 4);
+    const x = 110 + col * 148, y = 92 + row * 118;
+    const settled = !!S.s2.sorted[f.id];
+    const picked = S.s2.pick === f.id;
+    const g = h('g', {
+      class: settled ? null : 'pickable', tabindex: settled ? null : '0',
+      role: settled ? null : 'button', 'aria-label': f.name,
+      onclick: settled ? null : () => pickFood(f.id),
+      onkeydown: settled ? null : (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pickFood(f.id); } } });
+    g.append(h('rect', { x: x - 54, y: y - 40, width: 108, height: 84, rx: 12,
+      fill: !settled ? (picked ? 'var(--violet-soft)' : 'var(--panel-2)') : f.keeps ? 'var(--leaf-soft)' : 'var(--pink-soft)',
+      stroke: !settled ? (picked ? 'var(--violet)' : 'var(--line)') : f.keeps ? 'var(--leaf)' : 'var(--pink-deep)',
+      'stroke-width': picked ? 3 : 1.5, class: picked ? 'pop' : null }));
+    g.append(h('text', { x, y: y - 2, 'text-anchor': 'middle', 'font-size': '28px',
+      opacity: settled && !f.keeps ? .35 : 1 }, f.emoji));
+    g.append(h('text', { x, y: y + 26, class: 'lab', 'text-anchor': 'middle',
+      fill: settled ? (f.keeps ? 'var(--leaf)' : 'var(--pink-deep)') : 'var(--fg-dim)' },
+      f.name + (settled ? (f.keeps ? ' ✓' : ' ✗') : '')));
+    svg.append(g);
+  });
+  svg.append(h('text', { x: 330, y: 292, class: 'lab', 'text-anchor': 'middle' },
+    S.s2.pick ? 'now say what happens to the ' + FD[S.s2.pick].name.toLowerCase() : 'tap a food to decide its fate'));
+  return svg;
+}
+
+function renderStage2() {
+  const [kind, msg] = S.s2.msg ? S.s2.msg.split(/:(.*)/s) : ['', ''];
+  const n = Object.keys(S.s2.sorted).length;
+  const doneBar = S.done[2] ? h('div', { class: 'donebar' },
+    h('span', {}, 'So the honest headline is not “no bees, no food”. It is: no bees, and what is left is bread, rice and potatoes. Nobody starves — and nobody gets a vitamin either.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next: follow the poison →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene2(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', disabled: S.s2.pick ? null : 'disabled',
+          onclick: () => sortFood(true) }, 'Still on the plate'),
+        h('button', { class: 'act alt', type: 'button', disabled: S.s2.pick ? null : 'disabled',
+          onclick: () => sortFood(false) }, 'Gone'),
+        h('span', { class: 'meter' }, 'sorted: ', h('b', {}, n + ' / ' + FOODS.length))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'The bit everyone gets wrong'),
+      h('div', { class: 'chips' },
+        h('span', { class: 'chip leaf' }, 'calories: safe'),
+        h('span', { class: 'chip sun' }, 'vitamins: not safe')),
+      h('p', { html: 'About three quarters of the <b>kinds</b> of crop we grow get some help from animals. But the three crops that actually feed the world &mdash; wheat, rice and maize &mdash; are pollinated by wind or by themselves, and they would carry on without a single insect.' }),
+      h('p', {}, 'What disappears is almost all fruit, most nuts, a lot of vegetables, coffee and cocoa. A diet of bread and porridge keeps you alive and makes you ill in a slower way.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'And the in-between cases?'),
+        h('p', {}, 'Tomatoes can pollinate themselves, but a bumblebee grabbing the flower and buzzing shakes far more pollen loose, so the harvest drops hard without them. Coffee is similar: it self-pollinates, and still yields noticeably more when bees visit. Most of this is not all-or-nothing — it is “how much”.'))
+    ));
+}
+
+/* ================= station 3 · follow the poison ================= */
+
+const LADDER = [
+  { id: 'oak', name: 'Oak leaves', emoji: '🌳', dose: 1,
+    line: 'The spray lands here. One unit in a leaf — far too little to hurt anything at all.' },
+  { id: 'cat', name: 'Caterpillars', emoji: '🐛', dose: 10,
+    line: 'A caterpillar eats a great many leaves. The poison does not break down and it does not leave the body, so it just piles up: ten units.' },
+  { id: 'tit', name: 'Songbird', emoji: '🐦', dose: 100,
+    line: 'The songbird eats a great many caterpillars, each already carrying ten. A hundred units — and the bird still looks fine.' },
+  { id: 'owl', name: 'Owl', emoji: '🦉', dose: 1000,
+    line: 'The owl eats a great many songbirds. A thousand units, from a spray that was harmless on the leaf. This is where birds of prey start dying.' },
+];
+
+function climb() {
+  if (S.s3.level >= LADDER.length - 1) return;
+  S.s3.level++;
+  const step = LADDER[S.s3.level];
+  S.s3.msg = 'good:' + step.line;
+  fx(470, 180 - S.s3.level * 20, '×10');
+  if (S.s3.level === LADDER.length - 1) { S.done[3] = true; logIdea('ladder'); logIdea('ddt'); }
+  render();
+}
+
+function renderScene3() {
+  const svg = h('svg', { id: 'scene', viewBox: '0 0 660 330', role: 'img',
+    'aria-label': 'The poison concentrates as it goes up the web' });
+  LADDER.forEach((lv, i) => {
+    const reached = i <= S.s3.level;
+    const y = 276 - i * 76;
+    const w = 120 + i * 100;
+    svg.append(h('rect', { x: 330 - w / 2, y: y - 30, width: w, height: 60, rx: 10,
+      fill: reached ? 'var(--orange-soft)' : 'var(--panel-2)',
+      stroke: reached ? 'var(--orange-deep)' : 'var(--line)', 'stroke-width': reached ? 2 : 1.2,
+      opacity: reached ? 1 : .55,
+      class: i === S.s3.level && i > 0 ? 'pop' : null }));
+    svg.append(h('text', { x: 330 - w / 2 + 26, y: y + 7, 'text-anchor': 'middle', 'font-size': '22px',
+      opacity: reached ? 1 : .35 }, lv.emoji));
+    svg.append(h('text', { x: 330 - w / 2 + 50, y: y + 2, class: 'lab', fill: reached ? 'var(--fg)' : 'var(--gray-letter)' }, lv.name));
+    svg.append(h('text', { x: 330 + w / 2 - 14, y: y + 7, 'text-anchor': 'end',
+      style: 'font-family:var(--mono);font-size:17px;font-weight:700',
+      fill: reached ? 'var(--orange-deep)' : 'var(--gray-letter)' },
+      reached ? lv.dose + ' units' : '?'));
+    if (i < LADDER.length - 1) {
+      const up = i < S.s3.level;
+      svg.append(h('path', { d: 'M 330 ' + (y - 32) + ' L 330 ' + (y - 44),
+        stroke: up ? 'var(--orange-deep)' : 'var(--line)', 'stroke-width': 2 }));
+      svg.append(h('path', { d: 'M 325 ' + (y - 40) + ' L 330 ' + (y - 47) + ' L 335 ' + (y - 40),
+        fill: 'none', stroke: up ? 'var(--orange-deep)' : 'var(--line)', 'stroke-width': 2 }));
+    }
+  });
+  svg.append(h('text', { x: 330, y: 320, class: 'lab', 'text-anchor': 'middle' },
+    'simplified: a clean ×10 at every step'));
+  return svg;
+}
+
+function renderStage3() {
+  const [kind, msg] = S.s3.msg ? S.s3.msg.split(/:(.*)/s) : ['', ''];
+  const top = S.s3.level >= LADDER.length - 1;
+  const doneBar = S.done[3] ? h('div', { class: 'donebar' },
+    h('span', {}, 'The poison was never strong at the bottom. It got strong by being eaten. Anything that does not break down ends up concentrated in whoever eats last.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next: cut a link →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      renderScene3(),
+      h('div', { class: 'scenebtns' },
+        h('button', { class: 'act sun', type: 'button', disabled: top ? 'disabled' : null, onclick: climb },
+          top ? 'Top of the web' : 'Eat the level below →'),
+        h('span', { class: 'meter' }, 'concentration now: ', h('b', {}, LADDER[S.s3.level].dose + ' units'))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Why it climbs'),
+      h('div', { class: 'eq' }, '1  →  10  →  100  →  1000'),
+      h('p', { html: 'Two conditions, and the poison needs <b>both</b>. It has to survive &mdash; not rot, not break down. And the body has to be unable to get rid of it, so it stays in the fat instead of leaving.' }),
+      h('p', {}, 'Then the arithmetic does the rest. Each eater has to eat many of the level below to live, and it keeps every dose.'),
+      h('p', { class: 'sub' }, 'A poison that washes out of the body in a day never does this, however nasty it is on the day. Lasting matters more than strength.'),
+      h('details', { class: 'fine' }, h('summary', {}, 'The case this comes from'),
+        h('p', {}, 'DDT, an insecticide sprayed by the tonne from the 1940s. It was barely toxic to birds directly — but it built up through exactly this ladder and made the eggshells of eagles, ospreys and peregrine falcons too thin to survive being sat on. The parents crushed their own eggs. The United States banned agricultural use in 1972, other countries followed, and the big birds came back over the next thirty years.'))
+    ));
+}
+
+/* ================= station 4 · cut a link ================= */
+
+const CASES = [
+  {
+    id: 'clear',
+    title: 'The oak wood is cleared for a car park',
+    ask: 'The oaks are gone. Which creature is in trouble first?',
+    opts: [
+      { t: 'The fox — it has lost its shelter', ok: false,
+        why: 'The fox is upset, but it can still eat. Look for someone whose whole menu was the oak.' },
+      { t: 'The caterpillar — oak leaves were its only food', ok: true, why: '' },
+      { t: 'The grass — it needed the shade', ok: false,
+        why: 'Grass does better in the open, not worse. Look at the arrows leaving the oak.' },
+    ],
+    gone: ['oak', 'cat'], thin: ['tit', 'owl'],
+    out: 'The caterpillar only ever ate oak, so it goes with the tree. The songbird ate only caterpillars, so it goes next. And the owl, three arrows from the tree, loses half its menu. Clearing one plant emptied the top of the web.',
+  },
+  {
+    id: 'spray',
+    title: 'The remaining trees are sprayed against insects',
+    ask: 'Every caterpillar dies. What happens to the owl?',
+    opts: [
+      { t: 'The owl dies too — its food chain is broken', ok: false,
+        why: 'Nearly. Check the owl’s menu again: the caterpillar was not the only route to it.' },
+      { t: 'Nothing at all — owls do not eat insects', ok: false,
+        why: 'Not nothing. The songbird did eat insects, and the owl eats songbirds.' },
+      { t: 'It survives on mice, but there are fewer owls than before', ok: true, why: '' },
+    ],
+    gone: ['cat'], thin: ['tit', 'owl'],
+    out: 'The songbird loses its food and crashes. The owl had two meals on its menu, so it switches to mice and survives — but a web with fewer routes feeds fewer owls. This is the difference between a web and a chain, in one picture.',
+  },
+  {
+    id: 'cats',
+    title: 'Houses are built at the edge, and pet cats arrive',
+    ask: 'The cats hunt songbirds, and the songbirds vanish. What happens to the oak?',
+    opts: [
+      { t: 'Nothing — the oak never had anything to do with songbirds', ok: false,
+        why: 'Follow it through: who ate the caterpillars, and what did the caterpillars eat?' },
+      { t: 'The oak does better — one less animal in the wood', ok: false,
+        why: 'The opposite. Think about who the songbird was keeping in check.' },
+      { t: 'The oak suffers — nothing is eating the caterpillars now', ok: true, why: '' },
+    ],
+    gone: ['tit'], boom: ['cat'], thin: ['oak'],
+    out: 'Remove the hunter and its prey explodes. Caterpillars with nothing eating them strip the oak leaves, and a tree that loses its leaves year after year stops growing. The cats never touched the tree, and the tree is the one that suffers.',
+  },
+  {
+    id: 'warm',
+    title: 'Spring arrives two weeks earlier than it used to',
+    ask: 'Warmth wakes the caterpillars early. The songbirds still arrive on the old date. What goes wrong?',
+    opts: [
+      { t: 'Nothing — two weeks is nothing to a bird', ok: false,
+        why: 'It is everything, if the chicks only need food for a fortnight.' },
+      { t: 'The chicks hatch after the caterpillar peak has passed', ok: true, why: '' },
+      { t: 'The caterpillars freeze and die', ok: false,
+        why: 'It is warmer, not colder. The problem is timing, not temperature.' },
+    ],
+    thin: ['tit'], boom: ['cat'],
+    out: 'Nothing was removed from this web at all. Every arrow is still there — they just stopped lining up in time. The caterpillars peak and are gone before the chicks need feeding, so fewer chicks survive. A web can fail on its calendar, not only on its links.',
+  },
+];
+
+function answerCase(oi) {
+  if (S.s4.answered !== null) return;
+  const c = CASES[S.s4.idx];
+  const opt = c.opts[oi];
+  if (!opt.ok) { S.s4.msg = 'bad:' + opt.why; render(); return; }
+  S.s4.answered = oi;
+  S.s4.msg = 'good:' + c.out;
+  if (S.s4.idx === CASES.length - 1) { S.done[4] = true; logIdea('knock'); }
+  render();
+}
+function nextCase() {
+  if (S.s4.idx < CASES.length - 1) { S.s4.idx++; S.s4.answered = null; S.s4.msg = ''; }
+  render();
+}
+
+function renderStage4() {
+  const c = CASES[S.s4.idx];
+  const shown = S.s4.answered !== null;
+  const [kind, msg] = S.s4.msg ? S.s4.msg.split(/:(.*)/s) : ['', ''];
+  const last = S.s4.idx === CASES.length - 1;
+  const doneBar = S.done[4] ? h('div', { class: 'donebar' },
+    h('span', {}, 'Four changes, and not one of them stopped where it started. “Fewer of this” almost always turns into “fewer of something else” — often something nobody was looking at.'),
+    h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Next: the quiz →')) : null;
+  return h('section', { class: 'stagegrid' },
+    h('div', { class: 'card scene' },
+      drawWeb(shown
+        ? { gone: new Set(c.gone || []), boom: new Set(c.boom || []), thin: new Set(c.thin || []), caption: c.title }
+        : { caption: c.title }),
+      h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, 'change ', h('b', {}, (S.s4.idx + 1) + ' / ' + CASES.length))),
+      shown ? null : h('div', { class: 'scenebtns' },
+        h('span', { class: 'meter' }, h('b', {}, c.ask))),
+      shown ? null : h('div', { class: 'scenebtns' },
+        ...c.opts.map((o, oi) => h('button', { class: 'act alt', type: 'button', onclick: () => answerCase(oi) }, o.t))),
+      h('p', { class: 'toast' + (kind === 'good' ? ' good' : '') }, msg),
+      shown && !last ? h('div', { class: 'scenebtns' },
+        h('button', { class: 'act', type: 'button', onclick: nextCase }, 'Next change →')) : null,
+      doneBar),
+    h('aside', { class: 'card rx' },
+      h('h3', {}, 'Four ways people change a web'),
+      h('table', {},
+        h('tr', {}, h('th', {}, 'Action'), h('th', {}, 'What it really does')),
+        h('tr', {}, h('td', {}, 'Clear the habitat'), h('td', {}, 'removes a plant, and with it everyone who specialised in that plant')),
+        h('tr', {}, h('td', {}, 'Spray a pesticide'), h('td', {}, 'removes a whole level, not one pest')),
+        h('tr', {}, h('td', {}, 'Bring in a new species'), h('td', {}, 'adds an eater the locals never evolved alongside')),
+        h('tr', {}, h('td', {}, 'Warm the climate'), h('td', {}, 'leaves every link in place and breaks the timing')),
+      ),
+      h('p', { class: 'sub' }, 'Notice the last one. Nothing is deleted, nothing is added, and the web still fails. Species keep their own calendars, and warming does not move them all by the same number of days.')
+    ));
+}
+
+/* ================= station 5 · quiz ================= */
+
+const QUIZ = [
+  { q: 'Every pollinating insect disappears tomorrow. Which breakfast is still possible?',
+    opts: ['Apple juice and almond butter on toast', 'Porridge, bread and rice', 'Hot chocolate and blueberries'],
+    a: 1, why: 'Oats, wheat and rice are pollinated by wind or by themselves. Apples, almonds, cocoa and berries all need an animal.' },
+  { q: 'So is “no bees, no food” right?',
+    opts: ['Yes — we would all starve within a year', 'No — we would keep the calories and lose most of the fruit, nuts and vegetables', 'No — bees have nothing to do with our food'],
+    a: 1, why: 'The staples that feed the world do not need insects. What goes is almost everything that makes food interesting and most of the vitamins.' },
+  { q: 'A chemical lands on leaves at 1 unit. Why does the owl end up with 1000?',
+    opts: ['The poison grows and multiplies inside bodies', 'Each eater swallows many of the level below, and cannot get rid of what it swallows', 'Owls are more sensitive to poison than caterpillars'],
+    a: 1, why: 'Nothing multiplies. The dose piles up because every meal brings more in and nothing takes any out.' },
+  { q: 'Two poisons are sprayed. Which one is dangerous to a bird of prey?',
+    opts: ['The one that is violently toxic but washes out of the body in a day', 'The one that is barely toxic but never breaks down', 'Both equally — toxicity is all that matters'],
+    a: 1, why: 'Lasting beats strength. Only a substance that stays put can climb the web, which is exactly what DDT did to eagles and falcons.' },
+  { q: 'Cats are brought to the wood and the songbirds disappear. What happens to the oak trees?',
+    opts: ['Nothing — oaks and songbirds are not connected', 'They do better, with fewer animals around', 'They suffer, because caterpillars now have nothing eating them'],
+    a: 2, why: 'Take away a hunter and its prey booms. The caterpillars strip the leaves — the tree is hit by a change two arrows away.' },
+  { q: 'Spring comes earlier, caterpillars wake early, songbirds arrive on the old date. What broke?',
+    opts: ['A link was removed from the web', 'A new species was added', 'Nothing was removed — the timing stopped matching'],
+    a: 2, why: 'Every arrow is still there. The food peaks before the chicks need it, and that is enough to make the web fail.' },
+];
+
+function renderStage5() {
+  const q = S.quiz;
+  const items = QUIZ.map((it, qi) => {
+    const picked = q.picked[qi];
+    const cls = q.submitted ? (picked === it.a ? 'q right' : 'q wrong') : 'q';
+    return h('div', { class: cls },
+      h('p', { class: 'qt' }, (qi + 1) + '. ' + it.q),
+      ...it.opts.map((op, oi) => h('label', {},
+        h('input', { type: 'radio', name: 'q' + qi, checked: picked === oi ? 'checked' : null,
+          disabled: q.submitted ? 'disabled' : null,
+          onchange: () => { S.quiz.picked[qi] = oi; render(); } }),
+        h('span', {}, op))),
+      q.submitted ? h('p', { class: 'why' }, (picked === it.a ? '✓ ' : '✗ Correct: “' + it.opts[it.a] + '”. ') + it.why) : null);
+  });
+  const allPicked = Object.keys(q.picked).length === QUIZ.length;
+  let band = null;
+  if (q.submitted) {
+    const score = QUIZ.reduce((s, it, qi) => s + (q.picked[qi] === it.a ? 1 : 0), 0);
+    band = h('div', { class: 'scoreband' },
+      score === QUIZ.length
+        ? score + ' / ' + QUIZ.length + ' — you can now say what one change does to everything else.' + (kidSignedIn() ? ' 🏅 Saved to your Science Map!' : ' Sign in on the Science Map, then try again to collect ⚡.')
+        : score + ' / ' + QUIZ.length + '. Walk the stations again — the web is still broken.' + (kidSignedIn() ? ' ⚡ lands on your map only at 6 / 6.' : ''));
+  }
+  return h('section', { class: 'stagegrid', style: 'grid-template-columns:1fr' },
+    h('div', { class: 'card' },
+      h('h2', {}, 'Quiz · pollinators, poison and knock-on effects'),
+      ...items,
+      h('div', { class: 'scenebtns' },
+        q.submitted
+          ? h('button', { class: 'act alt', type: 'button', onclick: () => { S.quiz = { picked: {}, submitted: false }; render(); } }, 'Try again')
+          : h('button', { class: 'act', type: 'button', disabled: allPicked ? null : 'disabled', onclick: () => {
+              S.quiz.submitted = true;
+              const wrongQs = QUIZ.map((it, qi) => S.quiz.picked[qi] === it.a ? null : qi + 1).filter(Boolean); reportQuiz(QUIZ.length - wrongQs.length, QUIZ.length, wrongQs);
+              if (QUIZ.every((it, qi) => S.quiz.picked[qi] === it.a)) { S.done[5] = true; awardTrainer(); }
+              render();
+            } }, 'Check my answers'),
+        h('span', { class: 'meter' }, 'Covers ', h('b', {}, 'U6.K3 · pollinators, toxins & biodiversity'))),
+      band));
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 5 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'breaktheweb' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'breaktheweb:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+
+window.__S = () => S;
+render();
+</script>
+</body>
+</html>
