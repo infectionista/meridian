@@ -38,7 +38,7 @@ KID = {
  'U4.A1':'Make your heart race','U4.A2':"What's really in your food?",'U4.A3':'Ride along with a germ','U4.C1':'Launch a health campaign',
  'U5.K1':'How plants eat sunlight','U5.K2':'Burning fuel without fire','U5.K3':'Solar panels & power plants',
  'U5.A1':'The hidden colours of leaves','U5.A2':'Make yeast burp','U5.C1':'Design your own experiment',
- 'U6.K1':'Who eats whom?','U6.K2':'The tree of all life','U6.K3':'No bees, no breakfast',
+ 'U6.K1':'Who eats whom?','U6.K2':'The tree of all life','U6.K3':'No bees, no breakfast?',
  'U6.A1':'Name that creature','U6.A2':'Count a meadow','U6.C1':'Your Hochrindl field guide',
  'U7.K1':'What everything is made of','U7.K2':'The alphabet of matter','U7.K3':'Unmix the mixture',
  'U7.A1':'Why salt melts ice','U7.A2':'Rescue the salt','U7.A3':'How salty is your sea?','U7.C1':'Build a water filter',
