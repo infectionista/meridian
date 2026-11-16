@@ -115,6 +115,7 @@ TRAINER_BT = L('Build a Tree - phylogenetics trainer', SITE, 'trainer')
 TRAINER_MB = L('Make and Break - reactions & ATP trainer', SITE + 'makebreak.html', 'trainer')
 TRAINER_CC = L('Copy the Code - DNA replication trainer', SITE + 'copycode.html', 'trainer')
 TRAINER_TTT = L('Trace the Trait - pedigrees & medical genetics trainer', SITE + 'tracethetrait.html', 'trainer')
+TRAINER_RTT = L('Read the Tree - classifying life, three domains & LUCA trainer', SITE + 'readthetree.html', 'trainer')
 
 MAT = SITE + 'materials/'
 SLIDES_MR = L('Molecules & Reactions - lesson slides', MAT + 'molecules-reactions-slides.pdf', 'slides')
@@ -141,7 +142,7 @@ NODE_LINKS = {
  'U3.K1': [TRAINER_CC, SLIDES_DNA],
  'U3.K2': [TRAINER_CC, SLIDES_DNA],
  'U6.A2': [TRAINER_TTT, ASSIGN_PED, ASSIGN_PEDT],
- 'U6.K3': [TRAINER_BT, ASSIGN_BAT, SLIDES_TREE, READ_TREE],
+ 'U6.K3': [TRAINER_BT, TRAINER_RTT, ASSIGN_BAT, SLIDES_TREE, READ_TREE],
  'U6.K2': [SLIDES_MAL],
  'U7.K2': [SLIDES_RAB],
  'U7.K1': [SLIDES_COS],
