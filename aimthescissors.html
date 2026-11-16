@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aim the Scissors</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a lab bench. Six stations share one engine: unzip, pair, bond,
+   proofread, clock, quiz. Scene on the left, the chemistry card on the
+   right, a reaction log that fills up along the bottom. Stacks to one
+   column on a phone. Light white-and-lilac theme after the Meridian
+   Learning calendar poster — same family as Build a Tree. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 66ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+/* ---------- panels ---------- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .stagegrid { grid-template-columns: 1fr; }
+}
+
+.scene svg { width: 100%; height: auto; display: block; }
+
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+
+.meter {
+  font: 500 13px/1.3 var(--ui); color: var(--fg-dim);
+  background: var(--panel-2); border-radius: 8px; padding: 9px 12px;
+}
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+/* ---------- reaction card ---------- */
+
+.rx h3 {
+  margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.rx .eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+/* ---------- reaction log ---------- */
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; white-space: nowrap; }
+.logtable .eqc { font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim); }
+.logtable tr.off { opacity: .38; }
+.logtable tr.fresh .nm { color: var(--violet); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--mint-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+@media (max-width: 820px) {
+  .logtable .eqc { display: none; }
+  .logtable .nm { white-space: normal; }
+  .logtable .chip { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ---------- quiz ---------- */
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--violet-soft); color: var(--violet); font-weight: 700;
+}
+
+/* ---------- error ladder ---------- */
+
+.ladder { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ladder .rung { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.ladder .bar { height: 14px; border-radius: 7px; background: var(--violet); opacity: .85; }
+.ladder .lb b { display: block; font-variant-numeric: tabular-nums; }
+.ladder .lb { color: var(--fg-dim); }
+
+/* ---------- stage 5 ---------- */
+
+.seqrows { font-family: var(--mono); font-size: 13px; line-height: 2; overflow-x: auto; white-space: nowrap; }
+.seqrows .tag { display: inline-block; width: 86px; font-family: var(--ui); font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.seqrows .mut { color: var(--violet); background: var(--violet-soft); border-radius: 3px; }
+.slider-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--violet); }
+.bignum { font-size: 26px; font-weight: 800; color: var(--violet); font-variant-numeric: tabular-nums; }
+
+.punch {
+  margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+  background: var(--violet-soft); border: 1px solid var(--violet);
+  font-size: 14px;
+}
+.punch b { color: var(--violet); }
+.punch a { color: var(--violet); font-weight: 700; }
+
+/* ---------- footer ---------- */
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+/* ---------- svg bits ---------- */
+
+.bl { font-family: var(--mono); font-size: 19px; font-weight: 700; fill: var(--fg); }
+.bl.dim { fill: var(--gray-letter); }
+.bl.new { fill: var(--violet); }
+.bl.bad { fill: var(--pink-deep); }
+.rail { stroke: var(--gray-letter); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.rail.new { stroke: var(--violet); }
+.hb { stroke: var(--pink-deep); stroke-width: 2; stroke-dasharray: 2.5 3.5; opacity: .75; }
+.hb.bad { stroke: var(--pink-deep); opacity: .9; }
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.mono { font-family: var(--mono); }
+.heli { fill: var(--violet); opacity: .92; }
+.helieye { fill: #fff; }
+.pickable { cursor: pointer; }
+.pickable:hover .bl { fill: var(--violet); }
+
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-26px); }
+}
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+.floater { transform-box: fill-box; }
+@keyframes pop {
+  0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* --- additions for Build the Protein --- */
+:root { --leaf: #5B9E22; --leaf-soft: #E2FDC7; }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+</style></head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences &middot; DNA technology</div>
+    <h1>Aim the <span class="hi">Scissors</span></h1>
+    <p class="lede">Cutting DNA has been easy since the 1970s. Cutting it <b>in one chosen place</b>, out of
+      three billion letters, took another forty years &mdash; and the thing that finally solved it was not a
+      better blade but a better address. Three tools here, one idea underneath all of them, and a last
+      question that no amount of technique can answer for you.
+      <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html" style="color:var(--leaf);font-weight:600">Build the Protein</a>
+      is what you are cutting into.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stages"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Big ideas collected <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five ideas &mdash; enough to see why every DNA tool is really a way of writing down an address, and why the hardest question in the field is not how to cut but whose cells you cut.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U3.K3 &middot; gene regulation &amp; DNA tech</span>
+      <span class="chip vio">U3.K4 &middot; somatic vs germline</span>
+    </div>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-15-18.html">Science Map 15&ndash;18</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html">Build the Protein</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror (sequencing)</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse','marker','defs']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+
+/* ================= data ================= */
+
+const STAGE_META = [
+  { n: 1, label: 'Find the spot' },
+  { n: 2, label: 'The guide' },
+  { n: 3, label: 'The photocopier' },
+  { n: 4, label: 'Whose cells' },
+  { n: 5, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: 'A restriction enzyme does not read genes, or know what a gene is. It knows <b>six letters</b>, and it cuts wherever it finds them. Find the one place in this strand that EcoRI will touch.',
+  2: 'Six letters is not aim — it is a shotgun. CRISPR fixed that by letting you <b>write the target yourself</b>. How long does the target have to be?',
+  3: 'Cutting is half the job. The other half is having enough DNA to cut in the first place.',
+  4: 'The scissors do not care which cell they are in. <b>You</b> have to. Three real editing jobs — decide who ends up carrying each one.',
+  5: 'Five questions. Get them all and the trainer is marked on your Science Map.',
+};
+
+const LOG = [
+  { id: 'palindrome', name: 'Cut sites read both ways', note: 'GAATTC on the top strand is GAATTC on the bottom strand too. One enzyme, both cuts.' },
+  { id: 'aim',        name: 'Length is aim',             note: 'Six letters turn up about 760,000 times in a human genome. Twenty turn up once.' },
+  { id: 'pam',        name: 'The scissors need a parking spot', note: 'Cas9 only cuts beside NGG, so some targets cannot be reached at all.' },
+  { id: 'doubling',   name: 'Thirty doublings is a billion', note: 'PCR does not copy faster. It copies the copies.' },
+  { id: 'germline',   name: 'Which cell decides who inherits', note: 'Body cell: the edit stops with the patient. Embryo: it never stops.' },
+];
+
+/* ---- stage 1 ---- */
+const COMP = { A: 'T', T: 'A', G: 'C', C: 'G' };
+const S1SEQ = 'TTCGGAATCCTAGAATTCGCAATTGCACGTGAATTA';
+const S1BOT = [...S1SEQ].map(c => COMP[c]).join('');
+const SITE = 'GAATTC';
+const SITE_I = 12;
+const TOP_CUT = 13;   // top strand breaks before this index
+const BOT_CUT = 17;   // bottom strand breaks before this index
+
+const S1NOTE = {
+  'GAATCC': 'GAATCC — one letter out. The enzyme is not <i>nearly</i> right or <i>mostly</i> right. It is exactly right, or it walks past.',
+  'GAATTA': 'GAATTA — five of six. Still nothing. Enzymes do not round up.',
+  'CAATTG': 'CAATTG is a palindrome, and a different enzyme (MfeI) does cut there. EcoRI will not.',
+  'CACGTG': 'CACGTG is a palindrome too — another enzyme’s site, not this one.',
+};
+
+/* ---- stage 2 ---- */
+const GENOME = 3.1e9;
+const LENS = [
+  { n: 6,  ticks: 110, verdict: 'useless for aiming' },
+  { n: 12, ticks: 14,  verdict: 'still far too many' },
+  { n: 20, ticks: 1,   verdict: 'one place, or none' },
+];
+function hits(n) { return GENOME / Math.pow(4, n); }
+function fmtHits(n) {
+  const v = hits(n);
+  if (v >= 1000) return Math.round(v / 1000) * 1000 >= 1e5
+    ? (Math.round(v / 1e4) * 1e4).toLocaleString('en-US') : Math.round(v).toLocaleString('en-US');
+  if (v >= 1) return String(Math.round(v));
+  return v.toFixed(3);
+}
+
+const PAMS = [
+  { id: 'a', seq: 'TGACCTGAGGAGAAGTCTGC', pam: 'AGG', ok: true,
+    why: 'A, then GG. That is NGG — Cas9 can park here and cut.' },
+  { id: 'b', seq: 'CATGGTGCATCTGACTCCTG', pam: 'GGA', ok: false,
+    why: 'It has a GG, but in the wrong two places. The pattern is <b>N–G–G</b>: the GG has to be the second and third letters.' },
+  { id: 'c', seq: 'GTAACGGCAGACTTCTCCTC', pam: 'ATC', ok: false,
+    why: 'No GG at all. Perfect target, unreachable scissors.' },
+];
+
+/* ---- stage 3 ---- */
+const MAXCYC = 30;
+const PCRQ = [
+  { k: 'primers', lab: 'Two short primers you design', ok: true,
+    why: 'Primers are short sequences you order to match each end of the stretch you want. The enzyme only starts where a primer has landed, so the primers are the aim — the same trick as the restriction site and the guide RNA.' },
+  { k: 'heat', lab: 'The temperature', ok: false,
+    why: 'Heat separates the strands, but it does that everywhere at once. It cannot pick a gene.' },
+  { k: 'enzyme', lab: 'The enzyme knows the gene', ok: false,
+    why: 'It does not. Taq polymerase will copy anything handed to it; it has no idea what a gene is.' },
+];
+
+/* ---- stage 4 ---- */
+const CASES = [
+  {
+    id: 'casgevy', tag: 'Boston, 2023',
+    title: 'Casgevy — the first approved CRISPR medicine',
+    brief: 'Blood stem cells are taken out of a patient with sickle cell disease, edited in a dish, and put back.',
+    ans: 'no', body: [0, 3, 7], germ: false,
+    why: 'Blood stem cells are body cells. The edit lives in the bone marrow for the rest of the patient’s life and goes no further. Their children inherit the original sickle gene, untouched.',
+    twist: 'And it does not repair the sickle typo at all. It switches a <b>different</b> gene off, so the fetal haemoglobin you made before you were born comes back on and drowns out the broken adult kind. Sometimes the fix is a switch, not a repair.',
+  },
+  {
+    id: 'embryo', tag: 'Shenzhen, 2018',
+    title: 'The edited embryo',
+    brief: 'A one-cell embryo is edited to disable CCR5, the doorway HIV uses to get into a cell, and then implanted. Twin girls are born.',
+    ans: 'yes', body: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], germ: true,
+    why: 'Edit the one cell everything grows from and every cell that follows carries it — including the ones that make eggs. It is in the family from now on, in everyone descended from those girls.',
+    twist: 'It also did not work cleanly. One twin ended up with both copies of CCR5 disabled, the other with only one — so she may not be protected at all. Analysts of the data found probable accidental edits elsewhere in the girls’ DNA. The scientist was sentenced to three years in prison.',
+  },
+  {
+    id: 'liver', tag: 'a clinical trial',
+    title: 'An editing drug, infused',
+    brief: 'The editing machinery is injected into the bloodstream. It reaches liver cells and switches off a faulty gene there.',
+    ans: 'no', body: [4, 5], germ: false,
+    why: 'Liver cells are body cells, so nothing is inherited. Notice too how <b>few</b> cells are edited: a somatic edit almost never reaches all of them. It has to reach enough of them to matter.',
+    twist: null,
+  },
+];
+
+const QUIZ = [
+  {
+    q: 'Why does a restriction enzyme cut both strands of the DNA at its site?',
+    opts: [
+      'Because the site reads the same on both strands — it is a palindrome',
+      'Because the enzyme turns around and comes back',
+      'Because the second strand is always cut by a second enzyme',
+      'Because the strands are held together too weakly to survive one cut',
+    ],
+    a: 0,
+    why: 'GAATTC read 5′→3′ on the top is GAATTC read 5′→3′ on the bottom. One enzyme shape fits both.',
+  },
+  {
+    q: 'A six-letter target turns up about 760,000 times in a human genome. Roughly how many times does a twenty-letter target turn up?',
+    opts: ['Less than once — it is effectively unique', 'About 180 times', 'About 2,000 times', 'About the same — length does not matter'],
+    a: 0,
+    why: '4²⁰ is about 1.1 trillion, far more than the 3.1 billion letters in the genome. There is no room for a second copy.',
+  },
+  {
+    q: 'Cas9 needs an NGG sequence next to its target. What does that mean in practice?',
+    opts: [
+      'Some sequences cannot be targeted, because there is no NGG beside them',
+      'The guide RNA must be exactly 20 letters long',
+      'Cas9 cuts twice at every site',
+      'The target must be a palindrome',
+    ],
+    a: 0,
+    why: 'No parking spot, no cut — however good your guide is. It is the main constraint on where you can aim.',
+  },
+  {
+    q: 'After 30 cycles of PCR, roughly how many copies has one starting molecule become?',
+    opts: ['About a billion', 'About sixty', 'About a thousand', 'About a million'],
+    a: 0,
+    why: '2³⁰ is 1,073,741,824. Each cycle doubles what the last one left.',
+  },
+  {
+    q: 'A patient’s bone marrow cells are edited to treat a disease. Who carries the edit afterwards?',
+    opts: [
+      'Only the patient — their children inherit the unedited gene',
+      'The patient and all of their descendants',
+      'Nobody — edits to body cells are temporary',
+      'Only the patient’s children, not the patient',
+    ],
+    a: 0,
+    why: 'Bone marrow is body tissue, not germline. The edit stops where the patient stops.',
+  },
+];
+
+/* ================= state ================= */
+
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    logged: new Set(),
+    s1: { pick: null, msg: '', found: false, palOK: false },
+    s2: { seen: new Set(), len: null, pamPick: null, pamOK: false },
+    s3: { cyc: 30, pick: null, ok: false },
+    s4: { open: null, guess: {}, shown: new Set() },
+    s5: { ans: {}, checked: false },
+  };
+}
+let S = freshState();
+
+function logIdea(id) { S.logged.add(id); }
+
+/* ================= stage 1 : restriction site ================= */
+
+const P1 = 16, X1 = 30, SHIFT = 26;
+
+function s1x(i, top, cut) {
+  const brk = top ? TOP_CUT : BOT_CUT;
+  return X1 + i * P1 + (cut && i >= brk ? SHIFT : 0);
+}
+
+function renderStage1() {
+  const st = S.s1;
+  const cut = st.found && st.palOK;
+  const svg = h('svg', { viewBox: '0 0 660 ' + (cut ? 208 : 164), id: 'scene', role: 'img',
+    'aria-label': 'A double-stranded piece of DNA to scan for the EcoRI site' });
+
+  svg.append(h('text', { x: 30, y: 22, class: 'lab' },
+    cut ? 'CUT — and look at the ends it leaves' : 'THE DNA — EcoRI reads GAATTC and nothing else'));
+
+  // highlight for the current proposal
+  if (st.pick !== null && !cut) {
+    const good = st.pick === SITE_I;
+    svg.append(h('rect', {
+      x: s1x(st.pick, true, false) - 3, y: 48, width: 6 * P1, height: 72, rx: 6,
+      fill: good ? 'var(--mint)' : 'var(--pink-soft)',
+      stroke: good ? 'var(--mint-deep)' : 'var(--pink-deep)', 'stroke-width': 2,
+    }));
+  }
+  if (cut) {
+    svg.append(h('rect', { x: s1x(SITE_I, true, true) - 3, y: 48, width: 6 * P1 + SHIFT, height: 72, rx: 6,
+      fill: 'var(--mint)', opacity: '.5' }));
+  }
+
+  // the two strands
+  for (const row of [true, false]) {
+    const seq = row ? S1SEQ : S1BOT;
+    const y = row ? 78 : 112;
+    for (let i = 0; i < seq.length; i++) {
+      const inSite = cut && i >= SITE_I && i < SITE_I + 6;
+      svg.append(h('text', {
+        x: s1x(i, row, cut) + 6, y: y, 'text-anchor': 'middle',
+        class: 'bl', style: 'font-size:15px' + (inSite ? ';fill:var(--mint-deep)' : ''),
+      }, seq[i]));
+    }
+    svg.append(h('text', { x: 4, y: y, class: 'lab mono' }, row ? '5′' : '3′'));
+    svg.append(h('text', { x: X1 + 36 * P1 + (cut ? SHIFT : 0) + 8, y: y, class: 'lab mono' }, row ? '3′' : '5′'));
+  }
+
+  // clickable columns
+  if (!cut) {
+    for (let i = 0; i + 6 <= S1SEQ.length; i++) {
+      svg.append(h('rect', {
+        x: X1 + i * P1 - 2, y: 52, width: P1, height: 64,
+        fill: 'transparent', class: 'pickable', onclick: () => pick1(i),
+      }));
+    }
+    svg.append(h('text', { x: 30, y: 146, class: 'lab' }, 'click a letter to start a six-letter window there'));
+  } else {
+    svg.append(h('text', { x: 30, y: 148, class: 'lab', style: 'fill:var(--mint-deep)' },
+      'two pieces — each with four unpaired letters hanging off. Sticky ends.'));
+    svg.append(h('text', { x: 30, y: 170, class: 'lab' },
+      'Any other DNA cut by the same enzyme has the same overhang, so the pieces snap together.'));
+    svg.append(h('text', { x: 30, y: 192, class: 'lab' },
+      'That is how a human gene first went into a bacterium — two unrelated genomes, one enzyme.'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (!st.found) {
+    scene.append(h('p', { class: 'toast', html: st.msg || 'Thirty-six letters. One of them starts GAATTC.' }));
+  } else if (!st.palOK) {
+    scene.append(h('div', { class: 'punch', html: 'Found it. Now read the <b>bottom</b> strand across the same six letters, 5′→3′ — that is right to left. What do you get?' }));
+    const row = h('div', { class: 'scenebtns' });
+    ['CTTAAG', 'GAATTC', 'GTTAAC'].forEach(o => row.append(h('button', {
+      class: 'act alt', type: 'button', onclick: () => pal1(o),
+    }, o)));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast', id: 't1p' }, ''));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Same six letters, both strands, read the same direction. That is what a palindrome buys you.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'Scissors that cannot be pointed'));
+  rx.append(h('p', { html: 'Bacteria grew these enzymes to shred invading virus DNA. We borrowed them. <b>EcoRI</b> comes from <i>E. coli</i> and recognises one word:' }));
+  rx.append(h('div', { class: 'eq' }, "5'-G A A T T C-3'"));
+  rx.append(h('div', { class: 'eq' }, "3'-C T T A A G-5'"));
+  rx.append(h('p', { class: 'sub', html: 'Read either strand in its own 5′→3′ direction and you get the same word. The enzyme works as a pair, each half gripping one strand.' }));
+  if (cut) {
+    rx.append(h('hr'));
+    rx.append(h('p', { html: 'It cuts between the G and the A on both strands — offset, not straight across. That leaves four unpaired letters, <b>AATT</b>, on each piece.' }));
+    rx.append(h('div', { class: 'punch', html: 'Here is the limit, though. EcoRI cuts <b>every</b> GAATTC it meets. It cannot be told where to cut, and in a human genome there are hundreds of thousands of them. Useful for moving genes about in a dish. Hopeless for fixing one.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick1(i) {
+  const st = S.s1;
+  st.pick = i;
+  const w = S1SEQ.slice(i, i + 6);
+  if (i === SITE_I) { st.found = true; st.msg = ''; }
+  else if (S1NOTE[w]) st.msg = S1NOTE[w];
+  else {
+    let d = 0;
+    for (let k = 0; k < 6; k++) if (w[k] !== SITE[k]) d++;
+    st.msg = w + ' — ' + d + ' letters wrong. Keep scanning.';
+  }
+  render();
+}
+
+function pal1(o) {
+  if (o === 'GAATTC') {
+    S.s1.palOK = true;
+    S.done[1] = true;
+    logIdea('palindrome');
+    render();
+  } else {
+    render();
+    const t = $('#t1p');
+    if (t) t.innerHTML = o === 'CTTAAG'
+      ? 'That is the bottom strand read <i>left to right</i> — but the bottom strand’s 5′ end is on the right. Read it the other way.'
+      : 'Check the pairing: G goes with C, A with T.';
+  }
+}
+
+/* ================= stage 2 : the guide ================= */
+
+function renderStage2() {
+  const st = S.s2;
+  const svg = h('svg', { viewBox: '0 0 660 250', id: 'scene', role: 'img',
+    'aria-label': 'How many places in a genome a target of each length would match' });
+
+  svg.append(h('text', { x: 14, y: 22, class: 'lab' }, 'THE HUMAN GENOME — 3.1 BILLION LETTERS'));
+
+  LENS.forEach((L, i) => {
+    const y = 56 + i * 62;
+    const seen = st.seen.has(L.n);
+    svg.append(h('text', { x: 14, y: y + 4, class: 'lab' }, L.n + ' letters'));
+    svg.append(h('rect', { x: 96, y: y - 12, width: 404, height: 24, rx: 5, fill: 'var(--panel-2)' }));
+    if (seen) {
+      const col = L.n === 20 ? 'var(--mint-deep)' : 'var(--pink-deep)';
+      for (let k = 0; k < L.ticks; k++) {
+        const x = L.ticks === 1 ? 96 + 404 * 0.62 : 100 + (k + 0.5) * (396 / L.ticks);
+        svg.append(h('line', { x1: x, y1: y - 12, x2: x, y2: y + 12, stroke: col, 'stroke-width': L.ticks === 1 ? 3 : 1.6 }));
+      }
+      svg.append(h('text', { x: 514, y: y + 1, class: 'lab', style: 'font-size:15px;fill:' + col }, fmtHits(L.n)));
+      svg.append(h('text', { x: 514, y: y + 16, class: 'lab', style: 'fill:' + col }, L.verdict));
+    }
+  });
+  svg.append(h('text', { x: 96, y: 238, class: 'lab' },
+    'ticks show the pattern, not the count — the numbers on the right are the real ones'));
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (!st.pamOK) {
+    if (st.len !== 20) {
+      const row = h('div', { class: 'scenebtns' });
+      LENS.forEach(L => row.append(h('button', {
+        class: 'act' + (st.seen.has(L.n) ? ' alt' : ''), type: 'button', onclick: () => pick2(L.n),
+      }, L.n + ' letters')));
+      scene.append(row);
+      scene.append(h('p', { class: 'toast', html: st.len
+        ? 'A ' + st.len + '-letter word fits in about ' + fmtHits(st.len) + ' places. Try longer.'
+        : 'How long does your target have to be before it means <b>one</b> place?' }));
+    } else {
+      scene.append(h('div', { class: 'punch', html: 'Twenty letters. That is the length of a CRISPR <b>guide RNA</b> — a short piece of RNA you design, that leads the cutting protein to the one matching spot. But there is a catch: Cas9 can only cut where the three letters just after the target read <b>NGG</b> (any letter, then G, then G). Which of these can it reach?' }));
+      const row = h('div', { class: 'scenebtns' });
+      PAMS.forEach(c => row.append(h('button', {
+        class: 'act alt', type: 'button', style: 'font-family:var(--mono);font-size:12.5px',
+        onclick: () => pam2(c),
+      }, '…' + c.seq.slice(-6) + ' | ' + c.pam)));
+      scene.append(row);
+      scene.append(h('p', { class: 'toast', html: st.pamPick ? st.pamPick.why : '' }));
+    }
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'A twenty-letter guide you write yourself, next to a parking spot you did not choose.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'Why length is aim'));
+  rx.append(h('p', { html: 'Every extra letter multiplies the number of possible words by four, so it divides the number of accidental matches by four.' }));
+  rx.append(h('div', { class: 'eq' }, '4⁶  =           4,096'));
+  rx.append(h('div', { class: 'eq' }, '4¹² =      16,777,216'));
+  rx.append(h('div', { class: 'eq' }, '4²⁰ = 1,099,511,627,776'));
+  rx.append(h('p', { class: 'sub', html: 'Once the number of possible words is far bigger than the genome, your word almost certainly occurs nowhere else by chance.' }));
+  if (st.len === 20) {
+    rx.append(h('hr'));
+    rx.append(h('p', { html: 'This is the whole difference. A restriction enzyme <b>is</b> its target — change the target and you need a different protein. Cas9 is one protein that takes the target as an <b>instruction</b>, written in RNA, twenty letters long.' }));
+    rx.append(h('div', { class: 'chips' },
+      h('span', { class: 'chip non' }, 'EcoRI: target built in'),
+      h('span', { class: 'chip hyd' }, 'Cas9: target typed in')));
+  }
+  if (st.pamOK) {
+    rx.append(h('div', { class: 'punch', html: 'The NGG — the <b>PAM</b> — is how Cas9 tells an invader’s DNA from its own. Bacteria keep a record of past viruses, but never beside an NGG, so the scissors never turn on their owner. We inherited that safety catch along with the tool, and it is the main reason some targets are still out of reach.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick2(n) {
+  S.s2.seen.add(n);
+  S.s2.len = n;
+  if (n === 20) logIdea('aim');
+  render();
+}
+function pam2(c) {
+  S.s2.pamPick = c;
+  if (c.ok) { S.s2.pamOK = true; S.done[2] = true; logIdea('pam'); }
+  render();
+}
+
+/* ================= stage 3 : PCR ================= */
+
+function renderStage3() {
+  const st = S.s3;
+  const copies = Math.pow(2, st.cyc);
+  const svg = h('svg', { viewBox: '0 0 660 250', id: 'scene', role: 'img',
+    'aria-label': 'Copies of one DNA molecule against the number of PCR cycles' });
+
+  const x0 = 56, y0 = 206, w = 560, hgt = 164, top = Math.pow(2, MAXCYC);
+
+  svg.append(h('text', { x: 14, y: 22, class: 'lab' }, 'COPIES OF ONE MOLECULE'));
+  svg.append(h('line', { x1: x0, y1: y0, x2: x0 + w, y2: y0, stroke: 'var(--line)', 'stroke-width': 2 }));
+  svg.append(h('line', { x1: x0, y1: y0, x2: x0, y2: y0 - hgt, stroke: 'var(--line)', 'stroke-width': 2 }));
+  svg.append(h('text', { x: x0 + w, y: y0 + 20, 'text-anchor': 'end', class: 'lab' }, MAXCYC + ' cycles'));
+  svg.append(h('text', { x: x0, y: y0 + 20, class: 'lab' }, '0'));
+  svg.append(h('text', { x: x0 - 8, y: y0 - hgt + 4, 'text-anchor': 'end', class: 'lab' }, '1bn'));
+
+  let d = '';
+  for (let n = 0; n <= st.cyc; n++) {
+    const x = x0 + (n / MAXCYC) * w;
+    const y = y0 - (Math.pow(2, n) / top) * hgt;
+    d += (n === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+  }
+  svg.append(h('path', { d: d, fill: 'none', stroke: 'var(--violet)', 'stroke-width': 3, 'stroke-linejoin': 'round' }));
+  const cx = x0 + (st.cyc / MAXCYC) * w, cy = y0 - (copies / top) * hgt;
+  svg.append(h('circle', { cx: cx, cy: cy, r: 6, fill: 'var(--violet)' }));
+
+  svg.append(h('text', { x: x0 + 30, y: 108, class: 'bl',
+    style: 'font-size:26px;fill:var(--violet)' }, copies.toLocaleString('en-US')));
+  svg.append(h('text', { x: x0 + 30, y: 128, class: 'lab' },
+    'copies after ' + st.cyc + (st.cyc === 1 ? ' cycle' : ' cycles')));
+  if (st.cyc <= 25) {
+    svg.append(h('text', { x: x0 + 14, y: y0 - 16, class: 'lab' },
+      'flat on this scale — and doubling every single cycle'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  const sl = h('div', { class: 'slider-row' });
+  sl.append(h('span', { class: 'lab', style: 'font-size:13px' }, 'cycles'));
+  sl.append(h('input', {
+    type: 'range', min: '1', max: String(MAXCYC), value: String(st.cyc),
+    oninput: e => { S.s3.cyc = +e.target.value; render(); },
+  }));
+  scene.append(sl);
+
+  if (!st.ok) {
+    scene.append(h('p', { class: 'meter', style: 'display:inline-block;margin-top:12px',
+      html: 'You want <b>one gene</b> copied, not the whole genome. What makes the machine start in the right place?' }));
+    const row = h('div', { class: 'scenebtns' });
+    PCRQ.forEach(o => row.append(h('button', { class: 'act alt', type: 'button', onclick: () => pick3(o) }, o.lab)));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast', html: st.pick ? st.pick.why : '' }));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Cut site, guide RNA, primer — three tools, one idea: a short sequence is the address.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'One cycle, three temperatures'));
+  rx.append(h('div', { class: 'chips' },
+    h('span', { class: 'chip non' }, '95°C · split'),
+    h('span', { class: 'chip con' }, '60°C · primers land'),
+    h('span', { class: 'chip en' }, '72°C · copy')));
+  rx.append(h('p', { html: 'Heat the tube to 95°C and the two strands come apart. Cool it and the primers find their matching ends. Warm it a little and the enzyme runs along, building the second strand. Then do it again.' }));
+  rx.append(h('hr'));
+  rx.append(h('p', { html: 'The snag held the method up for years: 95°C destroys an ordinary enzyme, so you had to add fresh enzyme by hand every single cycle. The fix came from a bacterium living in a <b>Yellowstone hot spring</b>, whose polymerase works happily at those temperatures. That is Taq — and it turned a day of pipetting into a machine you switch on.' }));
+  if (st.ok) {
+    rx.append(h('div', { class: 'punch', html: 'Every COVID test that came back positive was this: two primers that only fit the virus, and enough doublings to turn a few molecules into something a machine can see.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick3(o) {
+  S.s3.pick = o;
+  if (o.ok) { S.s3.ok = true; S.done[3] = true; logIdea('doubling'); }
+  render();
+}
+
+/* ================= stage 4 : whose cells ================= */
+
+function renderStage4() {
+  const st = S.s4;
+  const c = st.open ? CASES.find(x => x.id === st.open) : null;
+  const show = c && st.shown.has(c.id);
+
+  const svg = h('svg', { viewBox: '0 0 660 250', id: 'scene', role: 'img',
+    'aria-label': 'Which of a person’s cells carry an edit, and whether their child does' });
+
+  svg.append(h('text', { x: 14, y: 22, class: 'lab' }, 'THIS PERSON’S CELLS'));
+  const edited = show ? new Set(c.body) : new Set();
+  for (let i = 0; i < 12; i++) {
+    const cx = 36 + (i % 6) * 54, cy = 58 + Math.floor(i / 6) * 50;
+    const on = edited.has(i);
+    svg.append(h('circle', {
+      cx: cx, cy: cy, r: 19, fill: on ? 'var(--violet)' : 'var(--panel-2)',
+      stroke: on ? 'var(--violet)' : 'var(--line)', 'stroke-width': 2,
+    }));
+  }
+  // the germ cell, set apart
+  svg.append(h('text', { x: 374, y: 34, class: 'lab' }, 'EGG / SPERM CELLS'));
+  const gOn = show && c.germ;
+  svg.append(h('circle', {
+    cx: 414, cy: 72, r: 26, fill: gOn ? 'var(--violet)' : 'var(--panel-2)',
+    stroke: gOn ? 'var(--violet)' : 'var(--line)', 'stroke-width': 2.5,
+  }));
+  svg.append(h('circle', { cx: 414, cy: 72, r: 9, fill: gOn ? '#fff' : 'var(--line)', opacity: gOn ? '.55' : '1' }));
+
+  // arrow to the child
+  svg.append(h('path', {
+    d: 'M448 72 L516 72 M506 64 L516 72 L506 80',
+    fill: 'none', stroke: gOn ? 'var(--violet)' : 'var(--gray-letter)',
+    'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+  }));
+  svg.append(h('text', { x: 560, y: 34, class: 'lab' }, 'THEIR CHILD'));
+  svg.append(h('circle', {
+    cx: 580, cy: 72, r: 26, fill: gOn ? 'var(--violet)' : 'var(--panel-2)',
+    stroke: gOn ? 'var(--violet)' : 'var(--line)', 'stroke-width': 2.5,
+  }));
+
+  svg.append(h('text', { x: 14, y: 150, class: 'lab' }, show ? (c.ans === 'yes'
+    ? 'edited — and in every generation after' : 'edited — and it stops here') : 'pick a case below'));
+
+  if (show) {
+    svg.append(h('rect', { x: 374, y: 170, width: 272, height: 44, rx: 10,
+      fill: c.ans === 'yes' ? 'var(--violet-soft)' : 'var(--mint)' }));
+    svg.append(h('text', { x: 510, y: 197, 'text-anchor': 'middle', class: 'lab',
+      style: 'font-size:14px;fill:' + (c.ans === 'yes' ? 'var(--violet)' : 'var(--mint-deep)') },
+      c.ans === 'yes' ? 'GERMLINE — inherited' : 'SOMATIC — not inherited'));
+    svg.append(h('text', { x: 14, y: 182, class: 'lab', style: 'font-size:13px' },
+      c.body.length + ' of 12 body cells carry it'));
+    svg.append(h('text', { x: 14, y: 204, class: 'lab', style: 'font-size:13px' },
+      c.germ ? 'the egg cells carry it too' : 'the egg cells do not'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  const row = h('div', { class: 'scenebtns' });
+  CASES.forEach(x => row.append(h('button', {
+    class: 'act' + (st.open === x.id ? '' : ' alt'), type: 'button',
+    onclick: () => { S.s4.open = x.id; render(); },
+  }, x.tag, st.shown.has(x.id) ? ' ✓' : '')));
+  scene.append(row);
+
+  if (c && !show) {
+    scene.append(h('p', { class: 'meter', style: 'display:inline-block;margin-top:12px',
+      html: '<b>' + c.brief + '</b> Who ends up carrying the edit?' }));
+    const g = h('div', { class: 'scenebtns' });
+    [['no', 'Only this person'], ['yes', 'This person and their descendants']]
+      .forEach(([k, lab]) => g.append(h('button', { class: 'act alt', type: 'button', onclick: () => guess4(c, k) }, lab)));
+    scene.append(g);
+    scene.append(h('p', { class: 'toast' },
+      st.guess[c.id] && st.guess[c.id] !== c.ans ? 'Not quite — ask which cells the scissors actually reached.' : ''));
+  } else if (show) {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, st.shown.size + ' of 3 settled.'),
+      S.done[4]
+        ? h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Quiz →')
+        : h('span', {}, 'Try another case.')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  if (!c) {
+    rx.append(h('h3', {}, 'One rule, and it is not about the technology'));
+    rx.append(h('p', { html: 'The same scissors, the same guide, the same protocol. What changes everything is <b>which cell you put them in</b>.' }));
+    rx.append(h('p', { class: 'sub', html: 'Edit a body cell — blood, liver, muscle, eye — and the edit lives as long as that tissue does, then stops. Edit an egg, a sperm, or the single cell an embryo starts as, and it is in every cell of the person who grows from it, and in everyone who comes after them.' }));
+    rx.append(h('p', {}, 'Pick a case. Decide before you look.'));
+  } else if (!show) {
+    rx.append(h('h3', {}, c.title));
+    rx.append(h('p', {}, c.brief));
+    rx.append(h('p', { class: 'sub', html: 'Ask one question: <b>did the scissors reach the cells that make eggs or sperm?</b>' }));
+  } else {
+    rx.append(h('h3', {}, c.title));
+    rx.append(h('div', { class: 'chips' }, h('span', { class: 'chip ' + (c.ans === 'yes' ? 'non' : 'hyd') },
+      c.ans === 'yes' ? 'germline' : 'somatic')));
+    rx.append(h('p', { html: c.why }));
+    if (c.twist) { rx.append(h('hr')); rx.append(h('p', { html: c.twist })); }
+  }
+  if (S.done[4]) {
+    rx.append(h('div', { class: 'punch', html: 'Somatic editing is a treatment: it is offered to a patient who can agree to it, and the consequences are theirs. Germline editing is a decision taken on behalf of everyone who comes afterwards, none of whom can be asked. That is why almost every country allows the first and bans the second — and it is a line drawn by <b>which cell</b>, nothing else.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function guess4(c, k) {
+  S.s4.guess[c.id] = k;
+  if (k === c.ans) {
+    S.s4.shown.add(c.id);
+    if (S.s4.shown.size === CASES.length) { S.done[4] = true; logIdea('germline'); }
+  }
+  render();
+}
+
+/* ================= stage 5 : quiz ================= */
+
+function renderStage5() {
+  const st = S.s5;
+  const card = h('section', { class: 'card' }, h('h2', {}, 'Quiz'));
+  QUIZ.forEach((q, qi) => {
+    const picked = st.ans[qi];
+    const right = picked === q.a;
+    const box = h('div', { class: 'q' + (st.checked ? (right ? ' right' : ' wrong') : '') });
+    box.append(h('p', { class: 'qt' }, `${qi + 1}. ${q.q}`));
+    q.opts.forEach((o, oi) => {
+      const lab = h('label', {});
+      lab.append(h('input', {
+        type: 'radio', name: 'q' + qi, checked: picked === oi, disabled: st.checked,
+        onchange: () => { S.s5.ans[qi] = oi; },
+      }));
+      lab.append(h('span', {}, o));
+      box.append(lab);
+    });
+    if (st.checked) box.append(h('p', { class: 'why' }, (right ? '✓ ' : '✗ ') + q.why));
+    card.append(box);
+  });
+
+  if (!st.checked) {
+    card.append(h('button', { class: 'act', type: 'button', onclick: check5 }, 'Check my answers'));
+  } else {
+    const score = QUIZ.filter((q, i) => st.ans[i] === q.a).length;
+    const band = h('div', { class: 'scoreband' });
+    band.append(h('span', {}, `${score} / ${QUIZ.length}. `));
+    if (score === QUIZ.length) {
+      band.append(h('span', {}, kidSignedIn()
+        ? '🏅 Saved to your Science Map!'
+        : 'All of them. Sign in on the Science Map to have it recorded.'));
+    } else {
+      band.append(h('span', {}, 'Read the explanations and try again.'));
+      band.append(h('div', { style: 'margin-top:10px' },
+        h('button', { class: 'act', type: 'button', onclick: () => { S.s5 = { ans: {}, checked: false }; render(); } }, 'Try again')));
+    }
+    card.append(band);
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'Three tools, one idea'));
+  rx.append(h('p', { html: 'A restriction enzyme, a guide RNA and a PCR primer look nothing alike. All three work the same way: <b>a short sequence is an address</b>, and finding it is the whole trick.' }));
+  rx.append(h('p', { class: 'sub', html: 'Next door: <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html">Build the Protein</a> is what you are editing, and <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror</a> is how you check that the edit landed where you aimed.' }));
+  return h('div', { class: 'stagegrid' }, card, rx);
+}
+
+function check5() {
+  S.s5.checked = true;
+  const score = QUIZ.filter((q, i) => S.s5.ans[i] === q.a).length;
+  const wrong = QUIZ.map((q, i) => (S.s5.ans[i] === q.a ? null : i + 1)).filter(Boolean);
+  reportQuiz(score, QUIZ.length, wrong);
+  if (score === QUIZ.length) { S.done[5] = true; awardTrainer(); }
+  render();
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 5 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'aimthescissors' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'aimthescissors:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+
+</script>
+</body>
+</html>
