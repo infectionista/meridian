@@ -119,6 +119,7 @@ TRAINER_RTT = L('Read the Tree - classifying life, three domains & LUCA trainer'
 TRAINER_RTM = L('Read the Mirror - DNA sequencing trainer', SITE + 'readthemirror.html', 'trainer')
 TRAINER_BTP = L('Build the Protein - transcription, translation & point mutations trainer', SITE + 'buildtheprotein.html', 'trainer')
 TRAINER_ATS = L('Aim the Scissors - restriction enzymes, CRISPR, PCR & germline trainer', SITE + 'aimthescissors.html', 'trainer')
+TRAINER_FTS = L('Flip the Switch - chromatin packing, what is readable & the lac operon trainer', SITE + 'fliptheswitch.html', 'trainer')
 
 MAT = SITE + 'materials/'
 SLIDES_MR = L('Molecules & Reactions - lesson slides', MAT + 'molecules-reactions-slides.pdf', 'slides')
@@ -143,8 +144,8 @@ NODE_LINKS = {
  'U1.K2': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U5.K1': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U3.K1': [TRAINER_BTP, TRAINER_CC, SLIDES_DNA],
- 'U3.K2': [TRAINER_CC, SLIDES_DNA],
- 'U3.K3': [TRAINER_ATS, TRAINER_RTM],
+ 'U3.K2': [TRAINER_FTS, TRAINER_CC, SLIDES_DNA],
+ 'U3.K3': [TRAINER_ATS, TRAINER_FTS, TRAINER_RTM],
  'U3.K4': [TRAINER_ATS],
  'U3.A1': [TRAINER_BTP],
  'U3.A2': [TRAINER_RTM],
@@ -189,7 +190,7 @@ edges = [
  E('U2.K2','U2.A2','unit','Osmosis theory becomes a number you can read off a graph.'),
  E('U2.K2','U2.C1','unit','Model one transport process - then break it.'),
  # U3 Molecular genetics
- E('U3.K1','U3.K2','unit','The text you can read is packed, copied and repaired.'),
+ E('U3.K1','U3.K2','unit','The text you can read is packed, copied and repaired.', links=[TRAINER_FTS]),
  E('U3.K1','U3.A1','unit','Base pairing and codons, now with pencil and paper.', links=[TRAINER_BTP]),
  E('U3.K2','U3.A1','unit','Predict what one typo does to the protein.', links=[TRAINER_BTP]),
  E('U3.K3','U3.A2','unit','PCR and gels in theory, then a gel in your hands.', links=[TRAINER_RTM]),
@@ -262,7 +263,7 @@ edges = [
  E('U10.K2','U1.C1','cross','A good investigation plan is a study design in miniature.'),
  E('U10.A1','U5.A1','cross','Leaf discs behave only for a well-planned design.'),
  E('U10.A1','U9.C1','cross','The fair test is where design meets the shopping aisle.'),
- E('U7.K1','U3.K3','cross','Gene switches flipped by the environment - the operon logic, in orbit.'),
+ E('U7.K1','U3.K3','cross','Gene switches flipped by the environment - the operon logic, in orbit.', links=[TRAINER_FTS]),
  E('U4.K2','U3.K2','cross','Checkpoints read the damage reports that repair enzymes write.'),
  E('U6.A3','U10.A2','cross','Simpson’s index is statistics with mud on its boots.'),
  E('U9.A2','U10.A2','cross','Uncertainty: where titration meets statistics.'),

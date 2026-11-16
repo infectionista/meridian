@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flip the Switch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a lab bench. Six stations share one engine: unzip, pair, bond,
+   proofread, clock, quiz. Scene on the left, the chemistry card on the
+   right, a reaction log that fills up along the bottom. Stacks to one
+   column on a phone. Light white-and-lilac theme after the Meridian
+   Learning calendar poster — same family as Build a Tree. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 66ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+/* ---------- panels ---------- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .stagegrid { grid-template-columns: 1fr; }
+}
+
+.scene svg { width: 100%; height: auto; display: block; }
+
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+
+.meter {
+  font: 500 13px/1.3 var(--ui); color: var(--fg-dim);
+  background: var(--panel-2); border-radius: 8px; padding: 9px 12px;
+}
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+/* ---------- reaction card ---------- */
+
+.rx h3 {
+  margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.rx .eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+/* ---------- reaction log ---------- */
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; white-space: nowrap; }
+.logtable .eqc { font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim); }
+.logtable tr.off { opacity: .38; }
+.logtable tr.fresh .nm { color: var(--violet); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--mint-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+@media (max-width: 820px) {
+  .logtable .eqc { display: none; }
+  .logtable .nm { white-space: normal; }
+  .logtable .chip { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ---------- quiz ---------- */
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--violet-soft); color: var(--violet); font-weight: 700;
+}
+
+/* ---------- error ladder ---------- */
+
+.ladder { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ladder .rung { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.ladder .bar { height: 14px; border-radius: 7px; background: var(--violet); opacity: .85; }
+.ladder .lb b { display: block; font-variant-numeric: tabular-nums; }
+.ladder .lb { color: var(--fg-dim); }
+
+/* ---------- stage 5 ---------- */
+
+.seqrows { font-family: var(--mono); font-size: 13px; line-height: 2; overflow-x: auto; white-space: nowrap; }
+.seqrows .tag { display: inline-block; width: 86px; font-family: var(--ui); font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.seqrows .mut { color: var(--violet); background: var(--violet-soft); border-radius: 3px; }
+.slider-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--violet); }
+.bignum { font-size: 26px; font-weight: 800; color: var(--violet); font-variant-numeric: tabular-nums; }
+
+.punch {
+  margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+  background: var(--violet-soft); border: 1px solid var(--violet);
+  font-size: 14px;
+}
+.punch b { color: var(--violet); }
+.punch a { color: var(--violet); font-weight: 700; }
+
+/* ---------- footer ---------- */
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+/* ---------- svg bits ---------- */
+
+.bl { font-family: var(--mono); font-size: 19px; font-weight: 700; fill: var(--fg); }
+.bl.dim { fill: var(--gray-letter); }
+.bl.new { fill: var(--violet); }
+.bl.bad { fill: var(--pink-deep); }
+.rail { stroke: var(--gray-letter); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.rail.new { stroke: var(--violet); }
+.hb { stroke: var(--pink-deep); stroke-width: 2; stroke-dasharray: 2.5 3.5; opacity: .75; }
+.hb.bad { stroke: var(--pink-deep); opacity: .9; }
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.mono { font-family: var(--mono); }
+.heli { fill: var(--violet); opacity: .92; }
+.helieye { fill: #fff; }
+.pickable { cursor: pointer; }
+.pickable:hover .bl { fill: var(--violet); }
+
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-26px); }
+}
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+.floater { transform-box: fill-box; }
+@keyframes pop {
+  0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* --- additions for Build the Protein --- */
+:root { --leaf: #5B9E22; --leaf-soft: #E2FDC7; }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+</style></head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences &middot; chromatin &amp; gene regulation</div>
+    <h1>Flip the <span class="hi">Switch</span></h1>
+    <p class="lede">Every cell in your body carries the same two metres of DNA, and almost none of it is
+      being used. A liver cell and a neuron are not different because they hold different genes &mdash;
+      they hold exactly the same ones. They are different because of which ones are <b>reachable</b>.
+      This is where genetics stops being about what you have and starts being about what is switched on.
+      <a href="https://meridian-one-jet.vercel.app/aimthescissors.html" style="color:var(--leaf);font-weight:600">Aim the Scissors</a>
+      is how you get at a switch.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stages"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Big ideas collected <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five ideas &mdash; enough to see why the same genome makes a liver and a brain, why a switch is just an address with a protein sitting on it, and why the first CRISPR medicine breaks something on purpose.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U3.K2 &middot; chromatin &amp; packaging</span>
+      <span class="chip vio">U3.K3 &middot; gene regulation</span>
+    </div>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-15-18.html">Science Map 15&ndash;18</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html">Build the Protein</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/aimthescissors.html">Aim the Scissors (editing)</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse','marker','defs']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+
+/* ================= data ================= */
+
+const STAGE_META = [
+  { n: 1, label: 'Two metres' },
+  { n: 2, label: 'Same DNA' },
+  { n: 3, label: 'The switch' },
+  { n: 4, label: 'Break or fix' },
+  { n: 5, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: 'Every one of your cells holds about <b>two metres</b> of DNA, inside a nucleus six thousandths of a millimetre across. Work out what that actually means, then fold it.',
+  2: 'A liver cell and a neuron have exactly the same genome — the same letters, in the same order, every one of them. So what makes them different?',
+  3: 'Bacteria solved this first, and the answer is the same trick you have now met twice: a <b>short sequence</b> that a protein recognises.',
+  4: 'A patient has one wrong letter in their haemoglobin gene. You have scissors. There are two ways in, and the obvious one is not the one that works.',
+  5: 'Five questions. Get them all and the trainer is marked on your Science Map.',
+};
+
+const LOG = [
+  { id: 'packing',    name: 'Two metres into six micrometres', note: 'Wrapped, stacked, looped and coiled — about ten thousandfold in all.' },
+  { id: 'marks',      name: 'Tight means unreadable',          note: 'Chemical tags on the packing decide which genes a machine can even reach.' },
+  { id: 'samedna',    name: 'Every cell has the same genome',  note: 'A liver cell and a neuron differ in what is open, not in what is written.' },
+  { id: 'operator',   name: 'The switch sits beside the gene', note: 'A short sequence a protein recognises — a cut site, a guide, an operator. Same idea.' },
+  { id: 'breakvsfix', name: 'Breaking is easy, correcting is hard', note: 'The first approved CRISPR medicine deliberately breaks a switch instead of repairing a typo.' },
+];
+
+/* ---- stage 1 ---- */
+const SCALEQ = [
+  { lab: '20 metres', ok: false, why: 'That is the DNA multiplied by ten, not by ten thousand.' },
+  { lab: '20 kilometres', ok: true, why: '6 micrometres to 6 centimetres is ten thousand times bigger. So two metres becomes 2 × 10,000 = 20,000 metres.' },
+  { lab: '2 kilometres', ok: false, why: 'Close in shape, out by a factor of ten. Check the scale factor again: 6 µm to 6 cm.' },
+];
+
+const LEVELS = [
+  { name: 'naked DNA', len: '2 m', sub: 'the double helix, 2 nanometres wide', kind: 'line' },
+  { name: 'nucleosomes', len: '29 cm', sub: '147 letters wound round eight histone proteins, over and over — beads on a string', kind: 'beads' },
+  { name: '30 nm fibre', len: '5 cm', sub: 'the beads stack into a thicker coil', kind: 'fibre' },
+  { name: 'loops and coils', len: '2 mm', sub: 'the fibre is pinned into loops against a protein scaffold', kind: 'loops' },
+  { name: 'metaphase chromosome', len: '0.2 mm', sub: 'the shape you see down a microscope, and only during cell division', kind: 'chrom' },
+];
+
+/* ---- stage 2 ---- */
+const GENES = [
+  { sym: 'ACTB', what: 'actin — the scaffolding inside every cell', liver: true,  neuron: true },
+  { sym: 'ALB',  what: 'albumin — the main protein in your blood', liver: true,  neuron: false },
+  { sym: 'INS',  what: 'insulin', liver: false, neuron: false },
+  { sym: 'HBB',  what: 'haemoglobin, the β half', liver: false, neuron: false },
+  { sym: 'SYN1', what: 'synapsin — holds packets of neurotransmitter at a synapse', liver: false, neuron: true },
+];
+
+/* ---- stage 3 ---- */
+const LACQ = [
+  {
+    id: 'off', lab: 'No lactose', ans: 'off',
+    why: 'With no lactose about, the repressor protein sits on the operator and physically blocks the polymerase. The genes for digesting lactose are not made, and nothing is wasted.',
+  },
+  {
+    id: 'on', lab: 'Lactose arrives', ans: 'on',
+    why: 'Lactose itself binds the repressor and changes its shape, so it can no longer grip the operator. It falls off, the polymerase runs, and within minutes the cell is making the enzymes that digest lactose.',
+  },
+  {
+    id: 'broken', lab: 'Repressor gene broken', ans: 'on',
+    why: 'No working repressor means nothing is sitting on the operator, ever. The genes run flat out whether or not there is any lactose to digest — the switch has been taken off the wall. Bacteria like this exist, and they grow more slowly than their cousins.',
+  },
+];
+
+/* ---- stage 4 ---- */
+const ROUTES = [
+  {
+    id: 'fix', lab: 'Correct the typo', ok: false,
+    head: 'Cut HBB and correct GTG back to GAG',
+    why: 'To put a specific letter back you have to cut, <b>and</b> hand the cell a template, <b>and</b> hope it uses the careful repair pathway rather than the sloppy one. Blood stem cells mostly choose the sloppy one. You would need this to work in nearly every stem cell in the marrow, and it does not.',
+  },
+  {
+    id: 'break', lab: 'Break a switch instead', ok: true,
+    head: 'Cut the switch that silences fetal haemoglobin',
+    why: 'You carried a second haemoglobin gene before you were born, and it was switched off shortly after birth by a protein called BCL11A. That protein has a stretch of control DNA that only matters in red-cell precursors. Cut it and let the cell repair it <b>badly</b> — the sloppy repair is the point. The switch breaks, fetal haemoglobin comes back on, and it dilutes the sickle kind.',
+  },
+];
+
+const QUIZ = [
+  {
+    q: 'If a cell nucleus were blown up to the size of a tennis ball, how long would its DNA be?',
+    opts: ['About 20 kilometres', 'About 20 metres', 'About 2 kilometres', 'About 200 metres'],
+    a: 0,
+    why: '6 µm to 6 cm is a factor of 10,000. Two metres × 10,000 = 20 km — of thread thinner than a hair, in a tennis ball.',
+  },
+  {
+    q: 'What is the difference between a liver cell and a neuron?',
+    opts: [
+      'Which genes are packed away and which are reachable',
+      'They carry different genes',
+      'The liver cell has more chromosomes',
+      'The neuron has lost the genes it does not need',
+    ],
+    a: 0,
+    why: 'Both carry the whole genome, letter for letter. Chemical marks on the packing decide what a cell can read.',
+  },
+  {
+    q: 'In the lac operon, what does the repressor protein actually bind to?',
+    opts: [
+      'A short DNA sequence beside the genes, called the operator',
+      'The lactose-digesting enzymes themselves',
+      'The middle of the first gene',
+      'The RNA copy, after it has been made',
+    ],
+    a: 0,
+    why: 'The switch is not inside the gene. It is a short address next to it — the same idea as a restriction site or a guide RNA target.',
+  },
+  {
+    q: 'A bacterium’s repressor gene is destroyed by a mutation. What happens to the lac genes?',
+    opts: [
+      'They are switched on all the time, lactose or not',
+      'They are switched off all the time',
+      'They work normally',
+      'They are deleted along with the repressor',
+    ],
+    a: 0,
+    why: 'Nothing is left to sit on the operator, so transcription never stops. The cell wastes energy making enzymes it may have no use for.',
+  },
+  {
+    q: 'Why does the approved CRISPR treatment for sickle cell break a switch instead of correcting the sickle mutation?',
+    opts: [
+      'Because cells repair a cut sloppily, and breaking something only needs a sloppy repair',
+      'Because the sickle mutation cannot be found',
+      'Because breaking DNA is safer than editing it',
+      'Because the sickle gene is too tightly packed to cut',
+    ],
+    a: 0,
+    why: 'Putting a specific letter back needs a template and the careful repair pathway. Destroying a control sequence needs neither — any messy repair will do.',
+  },
+];
+
+/* ================= state ================= */
+
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    logged: new Set(),
+    s1: { scale: null, lvl: 0 },
+    s2: { open: { ACTB: false, ALB: false, INS: false, HBB: false, SYN1: false }, checked: false, right: false },
+    s3: { open: null, guess: {}, shown: new Set() },
+    s4: { pick: null, ok: false },
+    s5: { ans: {}, checked: false },
+  };
+}
+let S = freshState();
+
+function logIdea(id) { S.logged.add(id); }
+
+/* ================= stage 1 : packing ================= */
+
+function drawLevel(svg, kind, cx, cy) {
+  const V = 'var(--violet)', L = 'var(--line)';
+  if (kind === 'line') {
+    let d = 'M' + (cx - 230) + ' ' + cy;
+    for (let i = 0; i <= 46; i++) d += ' Q' + (cx - 230 + i * 10 + 5) + ' ' + (cy + (i % 2 ? 9 : -9)) + ' ' + (cx - 230 + (i + 1) * 10) + ' ' + cy;
+    svg.append(h('path', { d: d, fill: 'none', stroke: V, 'stroke-width': 2.5 }));
+  } else if (kind === 'beads') {
+    svg.append(h('line', { x1: cx - 230, y1: cy, x2: cx + 230, y2: cy, stroke: L, 'stroke-width': 3 }));
+    for (let i = 0; i < 7; i++) {
+      const x = cx - 192 + i * 64;
+      svg.append(h('circle', { cx: x, cy: cy, r: 20, fill: 'var(--violet-soft)', stroke: V, 'stroke-width': 2.5 }));
+      svg.append(h('circle', { cx: x, cy: cy, r: 9, fill: V, opacity: '.35' }));
+    }
+  } else if (kind === 'fibre') {
+    let d = '';
+    for (let i = 0; i <= 11; i++) {
+      const x = cx - 180 + i * 33;
+      d += (i === 0 ? 'M' : 'L') + x + ' ' + (cy + (i % 2 ? 26 : -26));
+    }
+    svg.append(h('path', { d: d, fill: 'none', stroke: V, 'stroke-width': 13, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: '.3' }));
+    svg.append(h('path', { d: d, fill: 'none', stroke: V, 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+  } else if (kind === 'loops') {
+    svg.append(h('line', { x1: cx - 150, y1: cy, x2: cx + 150, y2: cy, stroke: 'var(--orange-deep)', 'stroke-width': 5 }));
+    for (let i = 0; i < 6; i++) {
+      const x = cx - 125 + i * 50, up = i % 2 === 0;
+      svg.append(h('path', {
+        d: `M${x} ${cy} C${x - 26} ${cy + (up ? -58 : 58)} ${x + 76} ${cy + (up ? -58 : 58)} ${x + 50} ${cy}`,
+        fill: 'none', stroke: V, 'stroke-width': 4,
+      }));
+    }
+  } else {
+    for (const s of [-1, 1]) {
+      svg.append(h('path', {
+        d: `M${cx + s * 34} ${cy - 56} C${cx + s * 10} ${cy - 16} ${cx + s * 10} ${cy + 16} ${cx + s * 34} ${cy + 56}`,
+        fill: 'none', stroke: V, 'stroke-width': 26, 'stroke-linecap': 'round',
+      }));
+    }
+    svg.append(h('circle', { cx: cx, cy: cy, r: 9, fill: 'var(--paper)' }));
+  }
+}
+
+function renderStage1() {
+  const st = S.s1;
+  const last = st.scale !== null && st.lvl === LEVELS.length - 1;
+  const svg = h('svg', { viewBox: '0 0 660 ' + (last ? 264 : 240), id: 'scene', role: 'img',
+    'aria-label': 'DNA at each level of packing, from the bare helix to a chromosome' });
+
+  if (st.scale === null) {
+    svg.append(h('text', { x: 24, y: 24, class: 'lab' }, 'A THOUGHT EXPERIMENT'));
+    svg.append(h('circle', { cx: 120, cy: 128, r: 54, fill: 'var(--violet-soft)', stroke: 'var(--violet)', 'stroke-width': 2.5 }));
+    svg.append(h('text', { x: 120, y: 124, 'text-anchor': 'middle', class: 'lab', style: 'font-size:13px' }, 'nucleus'));
+    svg.append(h('text', { x: 120, y: 142, 'text-anchor': 'middle', class: 'lab mono', style: 'font-size:13px' }, '6 µm'));
+    svg.append(h('path', { d: 'M196 128 L266 128 M254 119 L266 128 L254 137', fill: 'none',
+      stroke: 'var(--gray-letter)', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    svg.append(h('circle', { cx: 360, cy: 128, r: 62, fill: 'var(--leaf-soft)', stroke: 'var(--leaf)', 'stroke-width': 2.5 }));
+    svg.append(h('path', { d: 'M310 94 C344 122 344 134 310 162 M410 94 C376 122 376 134 410 162',
+      fill: 'none', stroke: 'var(--leaf)', 'stroke-width': 2 }));
+    svg.append(h('text', { x: 360, y: 124, 'text-anchor': 'middle', class: 'lab', style: 'font-size:13px' }, 'tennis ball'));
+    svg.append(h('text', { x: 360, y: 142, 'text-anchor': 'middle', class: 'lab mono', style: 'font-size:13px' }, '6 cm'));
+    svg.append(h('text', { x: 450, y: 110, class: 'lab', style: 'font-size:14px' }, 'blow the nucleus up'));
+    svg.append(h('text', { x: 450, y: 130, class: 'lab', style: 'font-size:14px' }, 'to a tennis ball.'));
+    svg.append(h('text', { x: 450, y: 154, class: 'lab', style: 'font-size:14px;fill:var(--violet)' }, 'How long is the DNA?'));
+  } else {
+    const L = LEVELS[st.lvl];
+    svg.append(h('text', { x: 24, y: 24, class: 'lab' }, 'LEVEL ' + (st.lvl + 1) + ' OF 5 — ' + L.name.toUpperCase()));
+    drawLevel(svg, L.kind, 330, 118);
+    svg.append(h('text', { x: 24, y: 204, class: 'bl', style: 'font-size:24px;fill:var(--violet)' }, L.len));
+    svg.append(h('text', { x: 24 + L.len.length * 15 + 14, y: 204, class: 'lab' },
+      'end to end, if you pulled it straight'));
+    svg.append(h('text', { x: 24, y: 230, class: 'lab', style: 'font-size:13px' }, L.sub));
+    if (last) {
+      svg.append(h('text', { x: 24, y: 254, class: 'lab', style: 'font-size:13px;fill:var(--mint-deep)' },
+        'ten thousand times shorter than where you began'));
+    }
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (st.scale === null) {
+    const row = h('div', { class: 'scenebtns' });
+    SCALEQ.forEach((o, i) => row.append(h('button', { class: 'act alt', type: 'button', onclick: () => scale1(i) }, o.lab)));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast', id: 't1' }, ''));
+  } else if (st.lvl < LEVELS.length - 1) {
+    scene.append(h('div', { class: 'scenebtns' },
+      h('button', { class: 'act', type: 'button', onclick: () => { S.s1.lvl++; render(); } }, 'Fold it →'),
+      h('span', { class: 'meter' }, h('b', {}, String(st.lvl + 1)), ' / 5 levels')));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Folded away — and now most of it is unreachable. Which turns out to be the point.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  if (st.scale === null) {
+    rx.append(h('h3', {}, 'The numbers'));
+    rx.append(h('div', { class: 'eq' }, '6,000,000,000 base pairs'));
+    rx.append(h('div', { class: 'eq' }, '× 0.34 nm each  =  2.04 m'));
+    rx.append(h('p', { class: 'sub', html: 'Six billion, because you carry two copies of the genome — one from each parent.' }));
+    rx.append(h('hr'));
+    rx.append(h('p', { html: 'The nucleus holding all of it is about <b>6 µm</b> across — six thousandths of a millimetre.' }));
+  } else {
+    rx.append(h('h3', {}, '20 km in a tennis ball'));
+    rx.append(h('p', { html: 'At that scale the thread would be about <b>20 micrometres</b> thick — a third the width of a human hair — and twenty kilometres long.' }));
+    rx.append(h('p', { class: 'sub' }, 'And you have to be able to find and read any one centimetre of it, on demand, within minutes.'));
+    rx.append(h('hr'));
+    rx.append(h('p', { html: 'Folding is the easy half. The hard half is that a folded gene <b>cannot be read</b>: the polymerase cannot get at DNA that is wound tight. So the packing is not just storage. It is a list of what this cell is allowed to do.' }));
+    if (st.lvl === LEVELS.length - 1) {
+      rx.append(h('div', { class: 'punch', html: 'The tightest level only happens when a cell is dividing. The rest of the time the chromosome is a loose, uneven mess — some stretches open and busy, others shut away for the whole life of the cell.' }));
+    }
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function scale1(i) {
+  const o = SCALEQ[i];
+  if (o.ok) { S.s1.scale = i; logIdea('packing'); render(); }
+  else { render(); const t = $('#t1'); if (t) t.textContent = o.why; }
+}
+
+/* ================= stage 2 : same DNA ================= */
+
+function chromatin(svg, x, y, w, open) {
+  if (open) {
+    svg.append(h('line', { x1: x, y1: y, x2: x + w, y2: y, stroke: 'var(--line)', 'stroke-width': 2.5 }));
+    const n = Math.max(2, Math.round(w / 34));
+    for (let i = 0; i < n; i++) {
+      svg.append(h('circle', { cx: x + 17 + i * 34, cy: y, r: 11,
+        fill: 'var(--mint)', stroke: 'var(--mint-deep)', 'stroke-width': 2 }));
+    }
+  } else {
+    let d = '';
+    const n = Math.round(w / 11);
+    for (let i = 0; i <= n; i++) d += (i === 0 ? 'M' : 'L') + (x + i * 11) + ' ' + (y + (i % 2 ? 8 : -8));
+    svg.append(h('path', { d: d, fill: 'none', stroke: 'var(--gray-letter)', 'stroke-width': 11,
+      'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+  }
+}
+
+function renderStage2() {
+  const st = S.s2;
+  const svg = h('svg', { viewBox: '0 0 660 ' + (st.right ? 300 : 232), id: 'scene', role: 'img',
+    'aria-label': 'Five genes, packed tight or opened up, in a liver cell and a neuron' });
+
+  svg.append(h('text', { x: 14, y: 22, class: 'lab' },
+    st.right ? 'LIVER CELL' : 'A LIVER CELL — open the genes it needs, leave the rest packed'));
+  if (st.right) svg.append(h('text', { x: 400, y: 22, class: 'lab' }, 'NEURON — same genome'));
+
+  GENES.forEach((g, i) => {
+    const y = 56 + i * 34;
+    svg.append(h('text', { x: 14, y: y + 5, class: 'bl', style: 'font-size:14px' }, g.sym));
+    const w = st.right ? 170 : 420;
+    const on = st.open[g.sym];
+    const grp = h('g', { class: st.right ? '' : 'pickable', onclick: st.right ? null : () => toggle2(g.sym) });
+    grp.append(h('rect', { x: 72, y: y - 16, width: w + 10, height: 32, rx: 7,
+      fill: st.checked ? (on === g.liver ? 'transparent' : 'var(--pink-soft)') : 'transparent' }));
+    chromatin(grp, 80, y, w, on);
+    svg.append(grp);
+    if (st.right) {
+      chromatin(svg, 400, y, 170, g.neuron);
+      svg.append(h('text', { x: 590, y: y + 5, class: 'lab', style: 'font-size:12px' },
+        g.liver === g.neuron ? 'same' : 'different'));
+    }
+  });
+
+  if (!st.right) {
+    svg.append(h('text', { x: 14, y: 226, class: 'lab' }, 'click a gene to open or pack it'));
+  } else {
+    svg.append(h('text', { x: 14, y: 296, class: 'lab', style: 'fill:var(--mint-deep);font-size:14px' },
+      'Identical letters. Different bookmarks. That is the whole difference between the two cells.'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (!st.right) {
+    scene.append(h('div', { class: 'scenebtns' },
+      h('button', { class: 'act', type: 'button', onclick: check2 }, 'Check this cell')));
+    scene.append(h('p', { class: 'toast', id: 't2' },
+      st.checked ? 'Not yet — the ones in pink are wrong. Ask what a liver cell actually has to make.' : ''));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'So how does a cell decide what to open? Something has to flip the switch.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'What the marks are'));
+  const tbl = h('table', { class: 'logtable' });
+  GENES.forEach(g => tbl.append(h('tr', {},
+    h('td', { class: 'nm' }, g.sym),
+    h('td', { style: 'color:var(--fg-dim)' }, g.what))));
+  rx.append(tbl);
+  rx.append(h('hr'));
+  rx.append(h('p', { html: 'The histones the DNA is wound round have tails sticking out, and cells hang small chemical tags on those tails. Some tags loosen the grip and open the stretch up; others tighten it shut. Methyl groups can also be put straight onto the DNA, which usually means <b>off</b>.' }));
+  rx.append(h('div', { class: 'chips' },
+    h('span', { class: 'chip hyd' }, 'open · readable'),
+    h('span', { class: 'chip plain' }, 'packed · out of reach')));
+  rx.append(h('p', { class: 'sub', html: 'The tags are copied when a cell divides, which is why a liver cell’s daughters are liver cells. The genome is the hardware; this is the configuration file.' }));
+  if (st.right) {
+    rx.append(h('div', { class: 'punch', html: 'Nothing was deleted to make a neuron. The albumin gene is still there in every neuron you own, perfectly spelled and permanently shut. Specialising is <b>subtraction by silence</b>, not by loss.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function toggle2(sym) {
+  S.s2.open[sym] = !S.s2.open[sym];
+  S.s2.checked = false;
+  render();
+}
+function check2() {
+  const ok = GENES.every(g => S.s2.open[g.sym] === g.liver);
+  S.s2.checked = true;
+  S.s2.right = ok;
+  if (ok) { S.done[2] = true; logIdea('marks'); logIdea('samedna'); }
+  render();
+}
+
+/* ================= stage 3 : the lac operon ================= */
+
+function renderStage3() {
+  const st = S.s3;
+  const c = st.open ? LACQ.find(x => x.id === st.open) : null;
+  const show = c && st.shown.has(c.id);
+  const on = show && c.ans === 'on';
+
+  const svg = h('svg', { viewBox: '0 0 660 250', id: 'scene', role: 'img',
+    'aria-label': 'The lac operon with its promoter, operator and three genes' });
+
+  svg.append(h('text', { x: 14, y: 22, class: 'lab' }, 'A PIECE OF E. COLI CHROMOSOME'));
+
+  // the DNA track
+  svg.append(h('line', { x1: 14, y1: 108, x2: 646, y2: 108, stroke: 'var(--line)', 'stroke-width': 4 }));
+  const parts = [
+    { x: 40, w: 86, lab: 'promoter', fill: 'var(--orange-soft)', stroke: 'var(--orange-deep)' },
+    { x: 134, w: 64, lab: 'operator', fill: 'var(--pink-soft)', stroke: 'var(--pink-deep)' },
+    { x: 214, w: 128, lab: 'lacZ', fill: 'var(--violet-soft)', stroke: 'var(--violet)' },
+    { x: 350, w: 128, lab: 'lacY', fill: 'var(--violet-soft)', stroke: 'var(--violet)' },
+    { x: 486, w: 128, lab: 'lacA', fill: 'var(--violet-soft)', stroke: 'var(--violet)' },
+  ];
+  parts.forEach(p => {
+    svg.append(h('rect', { x: p.x, y: 92, width: p.w, height: 32, rx: 7, fill: p.fill, stroke: p.stroke, 'stroke-width': 2 }));
+    svg.append(h('text', { x: p.x + p.w / 2, y: 113, 'text-anchor': 'middle', class: 'lab', style: 'font-size:12.5px' }, p.lab));
+  });
+  svg.append(h('text', { x: 214, y: 146, class: 'lab', style: 'font-size:12px' }, 'the three genes for digesting lactose'));
+
+  if (show) {
+    // repressor
+    if (c.id === 'off') {
+      svg.append(h('path', { d: 'M134 86 a32 26 0 0 1 64 0 Z', fill: 'var(--pink-deep)', opacity: '.9' }));
+      svg.append(h('text', { x: 166, y: 52, 'text-anchor': 'middle', class: 'lab', style: 'fill:var(--pink-deep)' }, 'repressor'));
+      svg.append(h('text', { x: 230, y: 70, class: 'lab', style: 'font-size:13px;fill:var(--pink-deep)' }, 'sitting on the operator — nothing gets past'));
+    } else if (c.id === 'on') {
+      svg.append(h('path', { d: 'M196 54 a32 26 0 0 1 64 0 Z', fill: 'var(--pink-deep)', opacity: '.45',
+        transform: 'rotate(24 228 40)' }));
+      svg.append(h('circle', { cx: 212, cy: 36, r: 9, fill: 'var(--leaf)' }));
+      svg.append(h('text', { x: 290, y: 44, class: 'lab', style: 'font-size:13px;fill:var(--leaf)' }, 'lactose has bound the repressor and knocked it off'));
+    } else {
+      svg.append(h('text', { x: 134, y: 70, class: 'lab', style: 'font-size:13px;fill:var(--pink-deep)' }, 'no repressor exists at all'));
+    }
+    // polymerase + transcript
+    if (on) {
+      svg.append(h('circle', { cx: 83, cy: 108, r: 21, fill: 'var(--violet)', opacity: '.22' }));
+      svg.append(h('circle', { cx: 83, cy: 108, r: 21, fill: 'none', stroke: 'var(--violet)', 'stroke-width': 2.5 }));
+      svg.append(h('text', { x: 83, y: 150, 'text-anchor': 'middle', class: 'lab', style: 'font-size:11.5px;fill:var(--violet)' }, 'polymerase'));
+      svg.append(h('path', { d: 'M110 108 L206 108 M196 100 L206 108 L196 116', fill: 'none',
+        stroke: 'var(--violet)', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      let d = 'M214 170';
+      for (let i = 0; i <= 38; i++) d += ' Q' + (218 + i * 10) + ' ' + (170 + (i % 2 ? 7 : -7)) + ' ' + (224 + i * 10) + ' 170';
+      svg.append(h('path', { d: d, fill: 'none', stroke: 'var(--violet)', 'stroke-width': 2.5 }));
+      svg.append(h('text', { x: 214, y: 196, class: 'lab', style: 'font-size:13px;fill:var(--violet)' }, 'mRNA — the enzymes get made'));
+    } else {
+      svg.append(h('circle', { cx: 83, cy: 108, r: 21, fill: 'var(--gray-letter)', opacity: '.4' }));
+      svg.append(h('text', { x: 83, y: 150, 'text-anchor': 'middle', class: 'lab', style: 'font-size:11.5px' }, 'polymerase'));
+      svg.append(h('path', { d: 'M110 108 L146 108', fill: 'none', stroke: 'var(--gray-letter)', 'stroke-width': 2.5 }));
+      svg.append(h('text', { x: 158, y: 148, class: 'lab', style: 'font-size:15px;fill:var(--pink-deep)' }, '\u2715'));
+      svg.append(h('text', { x: 214, y: 174, class: 'lab', style: 'font-size:13px' }, 'no mRNA — nothing is made'));
+    }
+    svg.append(h('rect', { x: 14, y: 212, width: 230, height: 32, rx: 9,
+      fill: on ? 'var(--mint)' : 'var(--panel-2)' }));
+    svg.append(h('text', { x: 129, y: 232, 'text-anchor': 'middle', class: 'lab',
+      style: 'font-size:14px;fill:' + (on ? 'var(--mint-deep)' : 'var(--fg-dim)') },
+      on ? 'GENES ON' : 'GENES OFF'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  const row = h('div', { class: 'scenebtns' });
+  LACQ.forEach(x => row.append(h('button', {
+    class: 'act' + (st.open === x.id ? '' : ' alt'), type: 'button',
+    onclick: () => { S.s3.open = x.id; render(); },
+  }, x.lab, st.shown.has(x.id) ? ' ✓' : '')));
+  scene.append(row);
+
+  if (c && !show) {
+    scene.append(h('p', { class: 'meter', style: 'display:inline-block;margin-top:12px',
+      html: '<b>' + c.lab + '.</b> Are the lactose genes on or off?' }));
+    const g = h('div', { class: 'scenebtns' });
+    [['on', 'On'], ['off', 'Off']].forEach(([k, lab]) =>
+      g.append(h('button', { class: 'act alt', type: 'button', onclick: () => guess3(c, k) }, lab)));
+    scene.append(g);
+    scene.append(h('p', { class: 'toast' },
+      st.guess[c.id] && st.guess[c.id] !== c.ans ? 'Not that. Ask whether anything is sitting on the operator.' : ''));
+  } else if (show) {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, st.shown.size + ' of 3 worked out.'),
+      S.done[3]
+        ? h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Next →')
+        : h('span', {}, 'Try another condition.')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  if (!c) {
+    rx.append(h('h3', {}, 'A bacterium deciding what to eat'));
+    rx.append(h('p', { html: '<i>E. coli</i> prefers glucose. If lactose turns up instead, it needs three enzymes to handle it — and making enzymes it does not need would be a waste it cannot afford.' }));
+    rx.append(h('p', { html: 'So the three genes sit in a row with two short stretches of control DNA in front of them: a <b>promoter</b>, where the polymerase lands, and an <b>operator</b>, where a repressor protein can sit and block the way.' }));
+    rx.append(h('p', { class: 'sub' }, 'Pick a condition. Work it out before you look.'));
+  } else {
+    rx.append(h('h3', {}, c.lab));
+    if (show) {
+      rx.append(h('div', { class: 'chips' },
+        h('span', { class: 'chip ' + (c.ans === 'on' ? 'hyd' : 'plain') }, c.ans === 'on' ? 'genes on' : 'genes off')));
+      rx.append(h('p', { html: c.why }));
+    } else {
+      rx.append(h('p', { class: 'sub', html: 'One question answers it: <b>is anything sitting on the operator?</b>' }));
+    }
+  }
+  if (S.done[3]) {
+    rx.append(h('div', { class: 'punch', html: 'Look at what the repressor actually grips: a <b>short sequence of DNA beside the genes</b>. A restriction enzyme recognises six letters. A guide RNA matches twenty. A repressor binds an operator. Three completely different machines, one idea — and your own cells run the same logic, except the control sequence can sit fifty thousand letters away and loop round to reach the gene.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function guess3(c, k) {
+  S.s3.guess[c.id] = k;
+  if (k === c.ans) {
+    S.s3.shown.add(c.id);
+    if (S.s3.shown.size === LACQ.length) { S.done[3] = true; logIdea('operator'); }
+  }
+  render();
+}
+
+/* ================= stage 4 : break or fix ================= */
+
+function renderStage4() {
+  const st = S.s4;
+  const svg = h('svg', { viewBox: '0 0 660 250', id: 'scene', role: 'img',
+    'aria-label': 'Two editing routes to treating sickle cell disease' });
+
+  svg.append(h('text', { x: 14, y: 22, class: 'lab' }, 'ONE PATIENT, ONE WRONG LETTER, TWO WAYS IN'));
+
+  const done = st.ok;
+  // route A : repair HBB
+  const gA = h('g', done && st.pick === 'break' ? { opacity: '0.4' } : {});
+  gA.append(h('rect', { x: 14, y: 40, width: 300, height: 92, rx: 11,
+    fill: 'var(--panel-2)', stroke: 'var(--line)', 'stroke-width': 1.5 }));
+  gA.append(h('text', { x: 30, y: 64, class: 'lab', style: 'font-size:13px' }, 'HBB — the broken gene'));
+  ['C C U', 'G U G', 'G A G'].forEach((t, i) => {
+    gA.append(h('rect', { x: 30 + i * 86, y: 78, width: 76, height: 32, rx: 7,
+      fill: i === 1 ? 'var(--pink-soft)' : 'var(--panel)',
+      stroke: i === 1 ? 'var(--pink-deep)' : 'var(--line)', 'stroke-width': i === 1 ? 2.5 : 1.5 }));
+    gA.append(h('text', { x: 68 + i * 86, y: 100, 'text-anchor': 'middle', class: 'bl',
+      style: 'font-size:14px' + (i === 1 ? ';fill:var(--pink-deep)' : '') }, t));
+  });
+  gA.append(h('text', { x: 30, y: 125, class: 'lab', style: 'font-size:12px' }, 'put GAG back — needs a template'));
+  svg.append(gA);
+
+  // route B : break the switch
+  svg.append(h('rect', { x: 346, y: 40, width: 300, height: 92, rx: 11,
+    fill: done && st.pick === 'break' ? 'var(--mint)' : 'var(--panel-2)',
+    stroke: 'var(--line)', 'stroke-width': 1.5 }));
+  svg.append(h('text', { x: 362, y: 64, class: 'lab', style: 'font-size:13px' }, 'BCL11A — the switch that silences HbF'));
+  svg.append(h('line', { x1: 362, y1: 94, x2: 630, y2: 94, stroke: 'var(--line)', 'stroke-width': 4 }));
+  svg.append(h('rect', { x: 400, y: 78, width: 96, height: 32, rx: 7,
+    fill: 'var(--orange-soft)', stroke: 'var(--orange-deep)', 'stroke-width': 2.5 }));
+  svg.append(h('text', { x: 448, y: 100, 'text-anchor': 'middle', class: 'lab', style: 'font-size:12px' }, 'enhancer'));
+  if (done && st.pick === 'break') {
+    svg.append(h('path', { d: 'M448 66 L448 118', stroke: 'var(--pink-deep)', 'stroke-width': 3, 'stroke-dasharray': '5 4' }));
+  }
+  svg.append(h('text', { x: 362, y: 125, class: 'lab', style: 'font-size:12px' }, 'just wreck it — any sloppy repair does'));
+
+  if (done) {
+    svg.append(h('text', { x: 14, y: 168, class: 'lab' }, 'FETAL HAEMOGLOBIN, SHARE OF THE TOTAL'));
+    [['before', 1, 'var(--gray-letter)'], ['at 6 months', 43.9, 'var(--mint-deep)']].forEach(([lab, v, col], i) => {
+      const y = 190 + i * 32;
+      svg.append(h('text', { x: 14, y: y + 5, class: 'lab', style: 'font-size:12.5px' }, lab));
+      svg.append(h('rect', { x: 110, y: y - 10, width: 420, height: 20, rx: 5, fill: 'var(--panel-2)' }));
+      svg.append(h('rect', { x: 110, y: y - 10, width: Math.max(4, (v / 100) * 420), height: 20, rx: 5, fill: col }));
+      svg.append(h('text', { x: 546, y: y + 5, class: 'lab', style: 'font-size:14px;fill:' + col },
+        (v < 2 ? 'under 1' : String(v)) + '%'));
+    });
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (!done) {
+    scene.append(h('p', { class: 'meter', style: 'display:inline-block;margin-top:12px',
+      html: 'You can cut wherever you like. Which route actually gets a medicine?' }));
+    const row = h('div', { class: 'scenebtns' });
+    ROUTES.forEach(r => row.append(h('button', { class: 'act alt', type: 'button', onclick: () => pick4(r) }, r.lab)));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast' }, st.pick === 'fix' ? 'That is the obvious route, and it is the one that does not work yet. Try the other.' : ''));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Under 1% to 43.9%, and holding for at least two years.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Quiz →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  if (!done) {
+    rx.append(h('h3', {}, 'What a cut actually does'));
+    rx.append(h('p', { html: 'Cas9 does not edit anything. It makes a <b>break</b>, and then the cell repairs it. There are two repair routes, and the cell mostly picks the quick one, which glues the ends back with a few letters lost or gained.' }));
+    rx.append(h('div', { class: 'chips' },
+      h('span', { class: 'chip non' }, 'quick & sloppy · common'),
+      h('span', { class: 'chip hyd' }, 'careful & templated · rare')));
+    rx.append(h('p', { class: 'sub', html: 'So ask of each route: does it need the rare repair, or will the common one do?' }));
+  } else {
+    const r = ROUTES[1];
+    rx.append(h('h3', {}, r.head));
+    rx.append(h('p', { html: r.why }));
+    rx.append(h('hr'));
+    rx.append(h('p', { html: 'The cleverness is <b>where</b> they cut. That stretch of control DNA only does anything in red-cell precursors, so BCL11A carries on with its other jobs everywhere else in the body.' }));
+    rx.append(h('div', { class: 'punch', html: 'The first approved CRISPR medicine does not repair anything. It breaks a switch on purpose, and lets the cell’s own clumsiness finish the job. <b>Breaking is easy; putting a specific letter back is still hard.</b>' }));
+    rx.append(h('p', { class: 'sub', html: 'The typo itself is in <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html">Build the Protein</a>; the scissors are in <a href="https://meridian-one-jet.vercel.app/aimthescissors.html">Aim the Scissors</a>.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick4(r) {
+  S.s4.pick = r.id;
+  if (r.ok) { S.s4.ok = true; S.done[4] = true; logIdea('breakvsfix'); }
+  render();
+}
+
+/* ================= stage 5 : quiz ================= */
+
+function renderStage5() {
+  const st = S.s5;
+  const card = h('section', { class: 'card' }, h('h2', {}, 'Quiz'));
+  QUIZ.forEach((q, qi) => {
+    const picked = st.ans[qi];
+    const right = picked === q.a;
+    const box = h('div', { class: 'q' + (st.checked ? (right ? ' right' : ' wrong') : '') });
+    box.append(h('p', { class: 'qt' }, `${qi + 1}. ${q.q}`));
+    q.opts.forEach((o, oi) => {
+      const lab = h('label', {});
+      lab.append(h('input', {
+        type: 'radio', name: 'q' + qi, checked: picked === oi, disabled: st.checked,
+        onchange: () => { S.s5.ans[qi] = oi; },
+      }));
+      lab.append(h('span', {}, o));
+      box.append(lab);
+    });
+    if (st.checked) box.append(h('p', { class: 'why' }, (right ? '✓ ' : '✗ ') + q.why));
+    card.append(box);
+  });
+
+  if (!st.checked) {
+    card.append(h('button', { class: 'act', type: 'button', onclick: check5 }, 'Check my answers'));
+  } else {
+    const score = QUIZ.filter((q, i) => st.ans[i] === q.a).length;
+    const band = h('div', { class: 'scoreband' });
+    band.append(h('span', {}, `${score} / ${QUIZ.length}. `));
+    if (score === QUIZ.length) {
+      band.append(h('span', {}, kidSignedIn()
+        ? '🏅 Saved to your Science Map!'
+        : 'All five. Sign in on the Science Map to have it recorded.'));
+    } else {
+      band.append(h('span', {}, 'Read the explanations and try again.'));
+      band.append(h('div', { style: 'margin-top:10px' },
+        h('button', { class: 'act', type: 'button', onclick: () => { S.s5 = { ans: {}, checked: false }; render(); } }, 'Try again')));
+    }
+    card.append(band);
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'Where this leaves you'));
+  rx.append(h('p', { html: 'The genome is not a list of instructions being followed. It is two metres of folded thread, most of it shut, with a small working set open — and the open set is what a cell <b>is</b>.' }));
+  rx.append(h('p', { class: 'sub', html: 'The rest of the unit: <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a> (replication), <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html">Build the Protein</a> (expression), <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror</a> (sequencing), <a href="https://meridian-one-jet.vercel.app/aimthescissors.html">Aim the Scissors</a> (editing).' }));
+  return h('div', { class: 'stagegrid' }, card, rx);
+}
+
+function check5() {
+  S.s5.checked = true;
+  const score = QUIZ.filter((q, i) => S.s5.ans[i] === q.a).length;
+  const wrong = QUIZ.map((q, i) => (S.s5.ans[i] === q.a ? null : i + 1)).filter(Boolean);
+  reportQuiz(score, QUIZ.length, wrong);
+  if (score === QUIZ.length) { S.done[5] = true; awardTrainer(); }
+  render();
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 5 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'fliptheswitch' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'fliptheswitch:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+
+</script>
+</body>
+</html>
