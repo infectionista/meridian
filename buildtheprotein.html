@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Build the Protein</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a lab bench. Six stations share one engine: unzip, pair, bond,
+   proofread, clock, quiz. Scene on the left, the chemistry card on the
+   right, a reaction log that fills up along the bottom. Stacks to one
+   column on a phone. Light white-and-lilac theme after the Meridian
+   Learning calendar poster — same family as Build a Tree. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 66ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+/* ---------- panels ---------- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .stagegrid { grid-template-columns: 1fr; }
+}
+
+.scene svg { width: 100%; height: auto; display: block; }
+
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+
+.meter {
+  font: 500 13px/1.3 var(--ui); color: var(--fg-dim);
+  background: var(--panel-2); border-radius: 8px; padding: 9px 12px;
+}
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+/* ---------- reaction card ---------- */
+
+.rx h3 {
+  margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.rx .eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+/* ---------- reaction log ---------- */
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; white-space: nowrap; }
+.logtable .eqc { font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim); }
+.logtable tr.off { opacity: .38; }
+.logtable tr.fresh .nm { color: var(--violet); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--mint-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+@media (max-width: 820px) {
+  .logtable .eqc { display: none; }
+  .logtable .nm { white-space: normal; }
+  .logtable .chip { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ---------- quiz ---------- */
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--violet-soft); color: var(--violet); font-weight: 700;
+}
+
+/* ---------- error ladder ---------- */
+
+.ladder { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ladder .rung { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.ladder .bar { height: 14px; border-radius: 7px; background: var(--violet); opacity: .85; }
+.ladder .lb b { display: block; font-variant-numeric: tabular-nums; }
+.ladder .lb { color: var(--fg-dim); }
+
+/* ---------- stage 5 ---------- */
+
+.seqrows { font-family: var(--mono); font-size: 13px; line-height: 2; overflow-x: auto; white-space: nowrap; }
+.seqrows .tag { display: inline-block; width: 86px; font-family: var(--ui); font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.seqrows .mut { color: var(--violet); background: var(--violet-soft); border-radius: 3px; }
+.slider-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--violet); }
+.bignum { font-size: 26px; font-weight: 800; color: var(--violet); font-variant-numeric: tabular-nums; }
+
+.punch {
+  margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+  background: var(--violet-soft); border: 1px solid var(--violet);
+  font-size: 14px;
+}
+.punch b { color: var(--violet); }
+.punch a { color: var(--violet); font-weight: 700; }
+
+/* ---------- footer ---------- */
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+/* ---------- svg bits ---------- */
+
+.bl { font-family: var(--mono); font-size: 19px; font-weight: 700; fill: var(--fg); }
+.bl.dim { fill: var(--gray-letter); }
+.bl.new { fill: var(--violet); }
+.bl.bad { fill: var(--pink-deep); }
+.rail { stroke: var(--gray-letter); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.rail.new { stroke: var(--violet); }
+.hb { stroke: var(--pink-deep); stroke-width: 2; stroke-dasharray: 2.5 3.5; opacity: .75; }
+.hb.bad { stroke: var(--pink-deep); opacity: .9; }
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.mono { font-family: var(--mono); }
+.heli { fill: var(--violet); opacity: .92; }
+.helieye { fill: #fff; }
+.pickable { cursor: pointer; }
+.pickable:hover .bl { fill: var(--violet); }
+
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-26px); }
+}
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+.floater { transform-box: fill-box; }
+@keyframes pop {
+  0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* --- additions for Build the Protein --- */
+:root { --leaf: #5B9E22; --leaf-soft: #E2FDC7; }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+</style></head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences &middot; from gene to protein</div>
+    <h1>Build the <span class="hi">Protein</span></h1>
+    <p class="lede">A gene is a string of letters. A protein is a chain of beads. Nothing in the letters
+      looks anything like a bead, and yet every cell in your body does the translation thousands of times
+      a second without ever making a dictionary. Here is the dictionary, and here is what happens when
+      <b>one letter</b> of it goes wrong.
+      <a href="https://meridian-one-jet.vercel.app/copycode.html" style="color:var(--leaf);font-weight:600">Copy the Code</a>
+      is where the DNA came from.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" aria-label="Stages"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Big ideas collected <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>Five ideas &mdash; together they take you from a strand nobody can read to a protein you can hold a picture of, and explain why one letter is sometimes free and sometimes a lifetime.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U3.K1 &middot; transcription &amp; translation</span>
+      <span class="chip vio">U3.A1 &middot; codons &amp; point mutations</span>
+    </div>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-15-18.html">Science Map 15&ndash;18</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code (replication)</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror (sequencing)</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse','marker','defs']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+
+/* ================= data ================= */
+
+const STAGE_META = [
+  { n: 1, label: 'Copy it out' },
+  { n: 2, label: 'Why three' },
+  { n: 3, label: 'Read it out' },
+  { n: 4, label: 'One letter' },
+  { n: 5, label: 'Quiz' },
+];
+
+const NOTES = {
+  1: 'A gene is two strands, but only <b>one</b> of them gets copied. Pair an RNA letter against each base of the template &mdash; and watch what RNA writes where DNA writes T.',
+  2: 'Four letters in the alphabet. Twenty amino acids to name. How long does a word have to be?',
+  3: 'The ribosome reads three letters at a time, from the start codon to a stop. Look each word up and hang the amino acid on the chain.',
+  4: 'One codon. Three different single-letter edits. Guess what each one does to the protein <b>before</b> you look.',
+  5: 'Five questions. Get them all and the trainer is marked on your Science Map.',
+};
+
+const LOG = [
+  { id: 'template',  name: 'One strand is read',        note: 'The other strand is not copied. It is the reference the copy ends up matching.' },
+  { id: 'uracil',    name: 'RNA writes U',              note: 'Wherever DNA has T, the RNA copy has U. Same pairing job, different letter.' },
+  { id: 'three',     name: 'Words are three letters',   note: 'Two letters give only 16 combinations. There are 20 amino acids.' },
+  { id: 'start',     name: 'AUG starts, UAA/UAG/UGA stop', note: 'The start codon sets where the words begin. A stop codon ends the chain.' },
+  { id: 'oneletter', name: 'One letter, three fates',   note: 'Nothing at all, one amino acid swapped, or the protein cut short.' },
+];
+
+const CODING   = 'ATGGTGCACCTGTAA';   // 5' -> 3'  the strand that is NOT copied
+const TEMPLATE = 'TACCACGTGGACATT';   // 3' -> 5'  the strand the machine runs along
+const MRNA     = 'AUGGUGCACCUGUAA';   // 5' -> 3'  what comes out
+
+const PAIR = { T: 'A', A: 'U', C: 'G', G: 'C' };
+
+const CODE = [
+  { c: 'AUG', aa: 'Met', full: 'methionine', tag: 'start' },
+  { c: 'GUG', aa: 'Val', full: 'valine' },
+  { c: 'CAC', aa: 'His', full: 'histidine' },
+  { c: 'CUG', aa: 'Leu', full: 'leucine' },
+  { c: 'ACU', aa: 'Thr', full: 'threonine' },
+  { c: 'CCU', aa: 'Pro', full: 'proline' },
+  { c: 'GAA', aa: 'Glu', full: 'glutamate' },
+  { c: 'GAG', aa: 'Glu', full: 'glutamate' },
+  { c: 'UAA', aa: null, full: 'stop' },
+  { c: 'UAG', aa: null, full: 'stop' },
+  { c: 'UGA', aa: null, full: 'stop' },
+];
+const CODEMAP = Object.fromEntries(CODE.map(r => [r.c, r]));
+
+const AA_COLOR = {
+  Met: 'var(--violet)', Val: 'var(--orange-deep)', His: 'var(--mint-deep)',
+  Leu: 'var(--leaf)', Thr: 'var(--pink-deep)', Pro: 'var(--violet)', Glu: 'var(--mint-deep)',
+};
+
+const TRANSLATE = [
+  { codon: 'AUG', opts: ['Val', 'Met', 'Leu', 'His'], ans: 'Met' },
+  { codon: 'GUG', opts: ['Thr', 'Glu', 'Val', 'Pro'], ans: 'Val' },
+  { codon: 'CAC', opts: ['His', 'Leu', 'Met', 'Val'], ans: 'His' },
+  { codon: 'CUG', opts: ['Pro', 'Leu', 'Glu', 'Thr'], ans: 'Leu' },
+  { codon: 'UAA', opts: ['Thr', 'Stop', 'Met', 'Glu'], ans: 'Stop' },
+];
+
+const FRAG = ['ACU', 'CCU', 'GAG', 'GAG'];   // codons 5-8 of the haemoglobin gene
+const MUT_I = 2;                              // the one we edit
+
+const MUTS = [
+  {
+    id: 'silent', dna: 'GAG → GAA', rna: 'GAG → GAA', to: 'GAA',
+    kind: 'nothing',
+    why: 'GAA and GAG are two spellings of the same word. 64 codons, 20 amino acids — most amino acids have spares. The protein comes out identical. Nobody would ever know.',
+    chip: 'silent',
+  },
+  {
+    id: 'missense', dna: 'GAG → GTG', rna: 'GAG → GUG', to: 'GUG',
+    kind: 'swap',
+    why: 'Glutamate out, valine in. Glutamate likes water; valine does not. That one swap makes haemoglobin molecules stick to each other, the red cell buckles into a crescent, and the person has sickle cell disease.',
+    chip: 'missense',
+  },
+  {
+    id: 'nonsense', dna: 'GAG → TAG', rna: 'GAG → UAG', to: 'UAG',
+    kind: 'stop',
+    why: 'UAG is a stop codon. The ribosome lets go here, 140 amino acids before the end. What is left is a stub that cannot carry oxygen at all.',
+    chip: 'nonsense',
+  },
+];
+
+const QUIZ = [
+  {
+    q: 'A gene’s template strand starts 3′-TACCAC-5′. What are the first two codons of the mRNA?',
+    opts: ['AUG GUG', 'TAC CAC', 'AUG CAC', 'UAC CAC'],
+    a: 0,
+    why: 'Pair each base and swap T for U: T→A, A→U, C→G, C→G, A→U, C→G.',
+  },
+  {
+    q: 'Why does the genetic code use three letters per word instead of two?',
+    opts: [
+      'Two letters give only 16 combinations, and there are 20 amino acids',
+      'Three letters make the DNA stronger',
+      'Because DNA has three kinds of bond',
+      'Two letters would be read too quickly',
+    ],
+    a: 0,
+    why: '4 × 4 = 16. Not enough names for 20 amino acids. 4 × 4 × 4 = 64, which is plenty.',
+  },
+  {
+    q: 'A mutation changes a codon from GAG to GAA. What happens to the protein?',
+    opts: [
+      'Nothing — both codons mean glutamate',
+      'One amino acid is swapped',
+      'The protein is cut short',
+      'The protein gets one amino acid longer',
+    ],
+    a: 0,
+    why: 'A silent mutation. The spare spellings in the code absorb it.',
+  },
+  {
+    q: 'In sickle cell disease one DNA letter changes GAG to GTG. What does the protein get instead of glutamate?',
+    opts: ['Valine', 'Methionine', 'Nothing — it stops', 'Proline'],
+    a: 0,
+    why: 'GUG in the mRNA is valine. One letter, one swapped amino acid, a lifelong disease.',
+  },
+  {
+    q: 'A mutation turns a codon in the middle of a gene into UAG. What happens?',
+    opts: [
+      'The ribosome lets go there and the protein is cut short',
+      'The protein is built twice',
+      'The amino acid is skipped and building carries on',
+      'Nothing — UAG is a spare spelling',
+    ],
+    a: 0,
+    why: 'UAG is one of the three stop codons. An early stop usually destroys the protein completely.',
+  },
+];
+
+/* ================= state ================= */
+
+function freshState() {
+  return {
+    stage: 1,
+    done: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    logged: new Set(),
+    s1: { i: 0, built: '', wrong: null, reveal: false },
+    s2: { seen: new Set(), letters: null, count: null },
+    s3: { i: 0, chain: [], wrong: null },
+    s4: { open: null, guess: {}, shown: new Set() },
+    s5: { ans: {}, checked: false },
+  };
+}
+let S = freshState();
+
+function logIdea(id) {
+  if (S.logged.has(id)) return;
+  S.logged.add(id);
+}
+
+/* ================= shared drawing ================= */
+
+const BX = 30, GAP = 6, PITCH = BX + GAP, X0 = 60;
+const BEADTXT = 'fill:#fff;font-size:13px;font-weight:800';
+
+function bxs(i) { return X0 + i * PITCH; }
+
+function baseCell(i, ch, o) {
+  o = o || {};
+  const x = bxs(i);
+  const g = h('g', o.onclick ? { class: 'pickable', onclick: o.onclick } : {});
+  g.append(h('rect', {
+    x: x, y: o.y - 21, width: BX, height: 30, rx: 7,
+    fill: o.fill || 'var(--panel-2)',
+    stroke: o.stroke || 'var(--line)', 'stroke-width': o.sw || 1.5,
+  }));
+  if (ch) g.append(h('text', { x: x + BX / 2, y: o.y, 'text-anchor': 'middle', class: 'bl' + (o.cls ? ' ' + o.cls : '') }, ch));
+  return g;
+}
+
+function endLabel(x, y, txt) {
+  return h('text', { x: x, y: y, 'text-anchor': 'middle', class: 'lab mono' }, txt);
+}
+
+/* ================= stage 1 : transcription ================= */
+
+function renderStage1() {
+  const st = S.s1;
+  const svg = h('svg', { viewBox: '0 0 660 ' + (st.reveal ? 300 : 208), id: 'scene', role: 'img',
+    'aria-label': 'A DNA template strand with an RNA copy being built underneath it' });
+
+  svg.append(h('text', { x: 60, y: 24, class: 'lab' }, 'TEMPLATE STRAND — the machine runs along this one'));
+
+  for (let i = 0; i < TEMPLATE.length; i++) {
+    const active = i === st.i && !st.reveal;
+    svg.append(baseCell(i, TEMPLATE[i], {
+      y: 62,
+      fill: active ? 'var(--violet-soft)' : 'var(--panel-2)',
+      stroke: active ? 'var(--violet)' : 'var(--line)',
+      sw: active ? 2.5 : 1.5,
+    }));
+  }
+  svg.append(endLabel(X0 - 22, 62, '3′'));
+  svg.append(endLabel(bxs(TEMPLATE.length - 1) + BX + 22, 62, '5′'));
+
+  // pairing marks for the bases already copied
+  for (let i = 0; i < st.built.length; i++) {
+    const x = bxs(i) + BX / 2;
+    svg.append(h('line', { x1: x, y1: 74, x2: x, y2: 112, class: 'hb' }));
+  }
+  if (st.i < TEMPLATE.length && !st.reveal) {
+    const x = bxs(st.i) + BX / 2;
+    svg.append(h('path', { d: `M${x} 78 L${x} 104 M${x - 6} 97 L${x} 104 L${x + 6} 97`, class: 'rail new' }));
+  }
+
+  svg.append(h('text', { x: 60, y: 148, class: 'lab' }, 'RNA COPY — what the machine writes down'));
+
+  for (let i = 0; i < TEMPLATE.length; i++) {
+    const got = i < st.built.length;
+    const isBad = st.wrong && st.wrong.i === i;
+    svg.append(baseCell(i, isBad ? st.wrong.ch : (got ? st.built[i] : ''), {
+      y: 186,
+      fill: isBad ? 'var(--pink-soft)' : (got ? 'var(--violet-soft)' : 'var(--panel)'),
+      stroke: isBad ? 'var(--pink-deep)' : (got ? 'var(--violet)' : 'var(--line)'),
+      sw: got || isBad ? 2 : 1.5,
+      cls: isBad ? 'bad' : (got ? 'new' : ''),
+    }));
+  }
+  svg.append(endLabel(X0 - 22, 186, '5′'));
+  svg.append(endLabel(bxs(TEMPLATE.length - 1) + BX + 22, 186, '3′'));
+
+  if (st.reveal) {
+    svg.append(h('text', { x: 60, y: 248, class: 'lab' }, 'THE OTHER DNA STRAND — never copied, and yet…'));
+    for (let i = 0; i < CODING.length; i++) {
+      const diff = CODING[i] !== MRNA[i];
+      svg.append(baseCell(i, CODING[i], {
+        y: 286,
+        fill: diff ? 'var(--orange-soft)' : 'var(--mint)',
+        stroke: diff ? 'var(--orange-deep)' : 'var(--mint-deep)',
+        sw: 2,
+      }));
+    }
+    svg.append(endLabel(X0 - 22, 286, '5′'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (!st.reveal) {
+    const row = h('div', { class: 'scenebtns' });
+    for (const ch of ['A', 'U', 'G', 'C', 'T']) {
+      row.append(h('button', {
+        class: 'act' + (ch === 'T' ? ' alt' : ''), type: 'button',
+        disabled: st.i >= TEMPLATE.length,
+        onclick: () => pick1(ch),
+      }, ch));
+    }
+    row.append(h('span', { class: 'meter' },
+      h('b', {}, String(st.built.length)), ' / ' + TEMPLATE.length + ' copied'));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast', id: 'toast1' }, st.wrong ? st.wrong.msg : ''));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'The copy matches the strand that was never read — letter for letter, with U in place of T.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(2) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'Why copy at all?'));
+  rx.append(h('p', { html: 'DNA stays in the nucleus. It is the master copy and it does not leave. So the cell makes a <b>working copy</b> of one gene — messenger RNA — and sends that out to be read.' }));
+  rx.append(h('hr'));
+  rx.append(h('p', { html: 'The copier pairs bases the same way replication does, with one swap: <b>RNA has no T</b>. It uses uracil, U, which pairs with A just as well.' }));
+  rx.append(h('div', { class: 'eq' }, 'DNA  A – T   G – C'));
+  rx.append(h('div', { class: 'eq' }, 'RNA  A – U   G – C'));
+  rx.append(h('hr'));
+  rx.append(h('p', { class: 'sub', html: 'Only the <b>template</b> strand is copied. Which one that is depends on the gene — some genes are written on one strand, some on the other.' }));
+  if (st.reveal) {
+    rx.append(h('div', { class: 'punch', html: 'Notice what you built. The RNA is not a copy of the strand it was built against — it is a copy of the <b>other</b> one. Pair twice and you are back where you started. That is why the unread strand is called the <b>coding</b> strand: it reads like the message.' }));
+  }
+
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick1(ch) {
+  const st = S.s1;
+  if (st.i >= TEMPLATE.length) return;
+  const want = PAIR[TEMPLATE[st.i]];
+  if (ch === want) {
+    st.built += ch;
+    st.wrong = null;
+    st.i++;
+    logIdea('template');
+    if (ch === 'U') logIdea('uracil');
+    if (st.i >= TEMPLATE.length) {
+      st.reveal = true;
+      S.done[1] = true;
+      logIdea('uracil');
+    }
+  } else if (ch === 'T' && want === 'A') {
+    st.wrong = { i: st.i, ch: 'T', msg: 'Careful — T pairs with A, but this is RNA. RNA never writes T.' };
+  } else if (ch === 'T') {
+    st.wrong = { i: st.i, ch: 'T', msg: 'RNA has no T at all. Its four letters are A, U, G, C.' };
+  } else {
+    st.wrong = { i: st.i, ch: ch, msg: `${TEMPLATE[st.i]} pairs with ${want}. Try again.` };
+  }
+  render();
+}
+
+/* ================= stage 2 : why three ================= */
+
+const WORDS = [
+  { n: 1, total: 4,  label: '1 letter',  note: 'A, U, G, C. Four names. You have run out before you reach the fifth amino acid.' },
+  { n: 2, total: 16, label: '2 letters', note: 'AA, AU, AG… sixteen names. So close — and still four amino acids short.' },
+  { n: 3, total: 64, label: '3 letters', note: 'Sixty-four names for twenty amino acids. Enough, with spares left over.' },
+];
+
+function renderStage2() {
+  const st = S.s2;
+  const svg = h('svg', { viewBox: '0 0 660 290', id: 'scene', role: 'img',
+    'aria-label': 'How many words you can spell with one, two or three letters' });
+
+  const bx = 124, bw = 372, maxv = 64;
+  svg.append(h('text', { x: 60, y: 24, class: 'lab' }, 'HOW MANY DIFFERENT WORDS CAN YOU SPELL?'));
+
+  // the 20-amino-acid line
+  const needX = bx + (20 / maxv) * bw;
+  svg.append(h('line', { x1: needX, y1: 44, x2: needX, y2: 240, stroke: 'var(--pink-deep)', 'stroke-width': 2, 'stroke-dasharray': '4 4' }));
+  svg.append(h('text', { x: needX + 8, y: 262, class: 'lab', style: 'fill:var(--pink-deep)' }, 'you need 20'));
+
+  WORDS.forEach((w, i) => {
+    const y = 76 + i * 56;
+    const seen = st.seen.has(w.n);
+    svg.append(h('text', { x: bx - 14, y: y + 5, 'text-anchor': 'end', class: 'lab' }, w.label));
+    svg.append(h('rect', { x: bx, y: y - 13, width: bw, height: 26, rx: 13, fill: 'var(--panel-2)' }));
+    if (seen) {
+      const ww = Math.max(16, (w.total / maxv) * bw);
+      svg.append(h('rect', {
+        x: bx, y: y - 13, width: ww, height: 26, rx: 13,
+        fill: w.total >= 20 ? 'var(--mint-deep)' : 'var(--pink-deep)',
+      }));
+      svg.append(h('text', {
+        x: bx + bw + 14, y: y + 5, class: 'lab',
+        style: 'font-size:14px;fill:' + (w.total >= 20 ? 'var(--mint-deep)' : 'var(--pink-deep)'),
+      }, w.total + ' words'));
+    }
+  });
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (st.letters !== 3) {
+    const row = h('div', { class: 'scenebtns' });
+    WORDS.forEach(w => row.append(h('button', {
+      class: 'act' + (st.seen.has(w.n) ? ' alt' : ''), type: 'button',
+      onclick: () => pick2(w.n),
+    }, w.label)));
+    scene.append(row);
+    const last = st.letters ? WORDS.find(w => w.n === st.letters) : null;
+    scene.append(h('p', { class: 'toast' }, last ? last.note : 'Pick a word length and see how many names it gives you.'));
+  } else if (st.count === null) {
+    scene.append(h('div', { class: 'punch', html: 'Three letters it is. Now the message you copied out: <span style="font-family:var(--mono)">AUGGUGCACCUGUAA</span>, fifteen letters. <b>How many words is that?</b>' }));
+    const row = h('div', { class: 'scenebtns' });
+    [3, 5, 15].forEach(k => row.append(h('button', { class: 'act', type: 'button', onclick: () => count2(k) }, String(k))));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast', id: 'toast2' }, ''));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Fifteen letters, five words. Now go and read them.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(3) }, 'Next →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'Four letters, twenty meanings'));
+  rx.append(h('p', { html: 'A protein is a chain of <b>amino acids</b>, and there are twenty kinds. The message is written in an alphabet of four. So the cell has to spell each amino acid out of A, U, G and C.' }));
+  rx.append(h('div', { class: 'eq' }, '1 letter   4¹ =  4'));
+  rx.append(h('div', { class: 'eq' }, '2 letters  4² = 16'));
+  rx.append(h('div', { class: 'eq' }, '3 letters  4³ = 64'));
+  if (st.letters === 3) {
+    rx.append(h('hr'));
+    rx.append(h('p', { html: 'Sixty-four words, twenty meanings. So the code has <b>synonyms</b>: several codons that mean the same amino acid.' }));
+    rx.append(h('div', { class: 'chips' },
+      h('span', { class: 'chip hyd' }, 'GAA = Glu'),
+      h('span', { class: 'chip hyd' }, 'GAG = Glu'),
+      h('span', { class: 'chip en' }, 'GUU GUC GUA GUG = Val')));
+    rx.append(h('p', { class: 'sub', html: 'Put that in your pocket. In step 4 it is the difference between a mutation nobody notices and a mutation that changes a life.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick2(n) {
+  S.s2.seen.add(n);
+  S.s2.letters = n;
+  if (n === 3) logIdea('three');
+  render();
+}
+function count2(k) {
+  if (k === 5) {
+    S.s2.count = 5;
+    S.done[2] = true;
+    logIdea('three');
+    render();
+  } else {
+    render();
+    const t = $('#toast2');
+    if (t) t.textContent = k === 15 ? 'That is the number of letters, not words. Three letters make one word.' : '15 ÷ 3. Try again.';
+  }
+}
+
+/* ================= stage 3 : translation ================= */
+
+function renderStage3() {
+  const st = S.s3;
+  const svg = h('svg', { viewBox: '0 0 660 272', id: 'scene', role: 'img',
+    'aria-label': 'A ribosome reading codons and building a chain of amino acids' });
+
+  const cw = 108, cgap = 10, cx0 = 36;
+  svg.append(h('text', { x: 36, y: 22, class: 'lab' }, 'THE MESSAGE — read three letters at a time'));
+
+  // the ribosome is drawn first: the message runs through it
+  if (st.i < TRANSLATE.length) {
+    const rb = cx0 + st.i * (cw + cgap) + cw / 2;
+    svg.append(h('rect', { x: rb - 64, y: 34, width: 128, height: 86, rx: 30,
+      fill: 'var(--violet)', opacity: '.13' }));
+    svg.append(h('rect', { x: rb - 64, y: 34, width: 128, height: 86, rx: 30,
+      fill: 'none', stroke: 'var(--violet)', 'stroke-width': 2.5 }));
+    svg.append(h('text', { x: rb, y: 111, 'text-anchor': 'middle', class: 'lab' }, 'ribosome'));
+  }
+
+  TRANSLATE.forEach((t, i) => {
+    const x = cx0 + i * (cw + cgap);
+    const here = i === st.i;
+    const done = i < st.i;
+    svg.append(h('rect', {
+      x: x, y: 46, width: cw, height: 40, rx: 9,
+      fill: here ? 'var(--panel)' : (done ? 'var(--mint)' : 'var(--panel-2)'),
+      stroke: here ? 'var(--violet)' : (done ? 'var(--mint-deep)' : 'var(--line)'),
+      'stroke-width': here ? 2.5 : 1.5,
+    }));
+    svg.append(h('text', {
+      x: x + cw / 2, y: 73, 'text-anchor': 'middle',
+      class: 'bl' + (here ? ' new' : ''), 'letter-spacing': '2',
+    }, t.codon));
+  });
+  svg.append(endLabel(24, 73, '5′'));
+
+  // peptide chain
+  svg.append(h('text', { x: 36, y: 152, class: 'lab' }, 'THE PROTEIN — one bead per amino acid'));
+  const r = 26;
+  st.chain.forEach((aa, i) => {
+    const cx = 62 + i * 74, cy = 200;
+    if (i > 0) svg.append(h('line', { x1: cx - 74 + r, y1: cy, x2: cx - r, y2: cy, class: 'rail new' }));
+    svg.append(h('circle', { cx: cx, cy: cy, r: r, fill: AA_COLOR[aa] || 'var(--violet)' }));
+    svg.append(h('text', { x: cx, y: cy + 5, 'text-anchor': 'middle', class: 'lab', style: BEADTXT }, aa));
+  });
+  if (!st.chain.length) {
+    svg.append(h('text', { x: 62, y: 206, class: 'lab' }, 'nothing yet'));
+  }
+  if (S.done[3]) {
+    svg.append(h('text', { x: 36, y: 256, class: 'lab', style: 'fill:var(--mint-deep)' },
+      'released — four amino acids of haemoglobin'));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  if (st.i < TRANSLATE.length) {
+    const t = TRANSLATE[st.i];
+    scene.append(h('p', { class: 'meter', style: 'display:inline-block',
+      html: `The ribosome is sitting on <b>${t.codon}</b>. What does it bring in?` }));
+    const row = h('div', { class: 'scenebtns' });
+    t.opts.forEach(o => row.append(h('button', {
+      class: 'act' + (o === 'Stop' ? ' alt' : ''), type: 'button', onclick: () => pick3(o),
+    }, o === 'Stop' ? 'nothing — stop' : o)));
+    scene.append(row);
+    scene.append(h('p', { class: 'toast' }, st.wrong || ''));
+  } else {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Met · Val · His · Leu. Three codons further along sits the one that causes sickle cell disease.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Go there →')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'The code — the part you need'));
+  const tbl = h('table', { class: 'logtable' });
+  CODE.filter(r => ['AUG', 'GUG', 'CAC', 'CUG', 'ACU', 'CCU', 'GAA', 'GAG'].includes(r.c)).forEach(r => {
+    tbl.append(h('tr', {},
+      h('td', { class: 'eqc' }, r.c),
+      h('td', { class: 'nm' }, r.aa),
+      h('td', { style: 'color:var(--fg-dim)' }, r.full + (r.tag ? ' · start' : ''))));
+  });
+  tbl.append(h('tr', {},
+    h('td', { class: 'eqc' }, 'UAA UAG UGA'),
+    h('td', { class: 'nm' }, '—'),
+    h('td', { style: 'color:var(--fg-dim)' }, 'stop')));
+  rx.append(tbl);
+  rx.append(h('p', { class: 'sub', html: 'This is an extract. The full table has all 64 codons, and every textbook prints it on one page.' }));
+  rx.append(h('hr'));
+  rx.append(h('p', { html: '<b>AUG does two jobs.</b> It means methionine, and it is where reading starts. Everything before it is ignored, which is how the ribosome knows where the words begin.' }));
+  rx.append(h('p', { html: 'The three stop codons name no amino acid at all. Nothing arrives, the ribosome lets go, and the finished protein floats away.' }));
+  if (S.done[3]) {
+    rx.append(h('div', { class: 'punch', html: 'Met · Val · His · Leu is not an invented example. It is the real beginning of β-globin — half of the haemoglobin molecule that carries oxygen around your body right now.' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function pick3(o) {
+  const st = S.s3;
+  const t = TRANSLATE[st.i];
+  if (o !== t.ans) {
+    st.wrong = `Not ${o}. Check ${t.codon} in the table on the right.`;
+    render();
+    return;
+  }
+  st.wrong = null;
+  if (o === 'Stop') {
+    st.i++;
+    S.done[3] = true;
+    logIdea('start');
+  } else {
+    st.chain.push(o);
+    st.i++;
+    if (st.i === 1) logIdea('start');
+  }
+  render();
+}
+
+/* ================= stage 4 : one letter ================= */
+
+function mutatedChain(to) {
+  return FRAG.map((c, i) => (i === MUT_I ? to : c)).map(c => CODEMAP[c]);
+}
+
+function renderStage4() {
+  const st = S.s4;
+  const m = st.open ? MUTS.find(x => x.id === st.open) : null;
+  const guessed = m ? st.guess[m.id] : null;
+  const show = m && st.shown.has(m.id);
+
+  const svg = h('svg', { viewBox: '0 0 660 ' + (show ? 282 : 250), id: 'scene', role: 'img',
+    'aria-label': 'One codon edited three ways and what each does to the protein' });
+
+  const cw = 120, cgap = 14, cx0 = 66;
+  svg.append(h('text', { x: 36, y: 24, class: 'lab' },
+    'HAEMOGLOBIN, CODONS 5–8 — three letters past where you stopped'));
+
+  const codons = show ? FRAG.map((c, i) => (i === MUT_I ? m.to : c)) : FRAG;
+  codons.forEach((c, i) => {
+    const x = cx0 + i * (cw + cgap);
+    const hot = i === MUT_I;
+    svg.append(h('rect', {
+      x: x, y: 44, width: cw, height: 42, rx: 9,
+      fill: hot ? (show ? 'var(--orange-soft)' : 'var(--violet-soft)') : 'var(--panel-2)',
+      stroke: hot ? (show ? 'var(--orange-deep)' : 'var(--violet)') : 'var(--line)',
+      'stroke-width': hot ? 2.5 : 1.5,
+    }));
+    for (let k = 0; k < 3; k++) {
+      const changed = hot && show && c[k] !== FRAG[MUT_I][k];
+      svg.append(h('text', {
+        x: x + 24 + k * 36, y: 73, 'text-anchor': 'middle',
+        class: 'bl' + (changed ? ' bad' : (hot ? ' new' : '')),
+      }, c[k]));
+    }
+  });
+  svg.append(endLabel(50, 73, '5′'));
+
+  // protein beads
+  svg.append(h('text', { x: 36, y: 142, class: 'lab' }, 'THE PROTEIN THAT COMES OUT'));
+  const rows = show ? mutatedChain(m.to) : FRAG.map(c => CODEMAP[c]);
+  const r = 28;
+  let stopped = false;
+  rows.forEach((rec, i) => {
+    if (stopped) return;
+    const cx = 66 + i * 86, cy = 196;
+    if (!rec.aa) {
+      svg.append(h('text', { x: cx - 10, y: cy + 6, class: 'lab', style: 'fill:var(--pink-deep);font-size:15px' }, '✕ stop'));
+      stopped = true;
+      return;
+    }
+    if (i > 0) svg.append(h('line', { x1: cx - 86 + r, y1: cy, x2: cx - r, y2: cy, class: 'rail new' }));
+    const swapped = show && m.kind === 'swap' && i === MUT_I;
+    svg.append(h('circle', {
+      cx: cx, cy: cy, r: r, fill: AA_COLOR[rec.aa] || 'var(--violet)',
+      stroke: swapped ? 'var(--orange-deep)' : 'none', 'stroke-width': swapped ? 4 : 0,
+    }));
+    svg.append(h('text', { x: cx, y: cy + 5, 'text-anchor': 'middle', class: 'lab', style: BEADTXT }, rec.aa));
+  });
+  if (show) {
+    const verdict = m.kind === 'nothing' ? 'identical protein'
+      : m.kind === 'swap' ? 'one bead different' : 'chain cut short';
+    svg.append(h('text', { x: 36, y: 262, class: 'lab',
+      style: 'font-size:14px;fill:' + (m.kind === 'nothing' ? 'var(--mint-deep)' : 'var(--pink-deep)') }, verdict));
+  }
+
+  const scene = h('div', { class: 'card scene' }, svg);
+
+  const row = h('div', { class: 'scenebtns' });
+  MUTS.forEach(x => row.append(h('button', {
+    class: 'act' + (st.open === x.id ? '' : ' alt'), type: 'button',
+    onclick: () => { S.s4.open = x.id; render(); },
+  }, x.dna, st.shown.has(x.id) ? ' ✓' : '')));
+  scene.append(row);
+
+  if (m && !show) {
+    scene.append(h('p', { class: 'meter', style: 'display:inline-block;margin-top:12px',
+      html: `In the mRNA that is <b>${m.rna}</b>. What does it do to the protein?` }));
+    const g = h('div', { class: 'scenebtns' });
+    [['nothing', 'Nothing changes'], ['swap', 'One amino acid swapped'], ['stop', 'Protein cut short']]
+      .forEach(([k, lab]) => g.append(h('button', { class: 'act alt', type: 'button', onclick: () => guess4(m, k) }, lab)));
+    scene.append(g);
+    scene.append(h('p', { class: 'toast' }, guessed && guessed !== m.kind ? 'Not that one. Look at the code table again.' : ''));
+  } else if (m && show) {
+    scene.append(h('div', { class: 'donebar' },
+      h('span', {}, `${st.shown.size} of 3 found.`),
+      S.done[4]
+        ? h('button', { class: 'act', type: 'button', onclick: () => go(5) }, 'Quiz →')
+        : h('span', {}, 'Try another edit.')));
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, m ? m.dna : 'One codon, three edits'));
+  if (!m) {
+    rx.append(h('p', { html: 'The codon in the middle is <b>GAG</b> — glutamate, amino acid number 6 of haemoglobin. Pick an edit on the left. Each one changes exactly <b>one letter</b> of the DNA.' }));
+    rx.append(h('p', { class: 'sub' }, 'Guess what it does before you look. The guess is the point.'));
+  } else if (!show) {
+    rx.append(h('p', { html: `One letter of DNA changes: <b>${m.dna}</b>.` }));
+    rx.append(h('div', { class: 'eq' }, 'mRNA  ' + m.rna));
+    rx.append(h('p', { class: 'sub' }, 'Look up both codons in the table before you answer.'));
+    rx.append(h('hr'));
+    const tbl = h('table', { class: 'logtable' });
+    ['GAG', 'GAA', 'GUG', 'UAG'].forEach(c => tbl.append(h('tr', {},
+      h('td', { class: 'eqc' }, c),
+      h('td', { class: 'nm' }, CODEMAP[c].aa || '—'),
+      h('td', { style: 'color:var(--fg-dim)' }, CODEMAP[c].full))));
+    rx.append(tbl);
+  } else {
+    rx.append(h('div', { class: 'chips' }, h('span', {
+      class: 'chip ' + (m.kind === 'nothing' ? 'hyd' : m.kind === 'swap' ? 'en' : 'non'),
+    }, m.chip)));
+    rx.append(h('p', {}, m.why));
+    if (m.id === 'missense') {
+      rx.append(h('p', { class: 'sub', html: 'This is the change you pulled off the gel in <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror</a> — now you can see what it costs.' }));
+    }
+  }
+  if (S.done[4]) {
+    rx.append(h('div', { class: 'punch', html: 'Same codon. Same size of edit — one letter. Nothing, a disease, or a protein that never finishes. <b>The size of a mutation tells you nothing about the size of its effect.</b>' }));
+  }
+  return h('div', { class: 'stagegrid' }, scene, rx);
+}
+
+function guess4(m, k) {
+  S.s4.guess[m.id] = k;
+  if (k === m.kind) {
+    S.s4.shown.add(m.id);
+    if (S.s4.shown.size === MUTS.length) {
+      S.done[4] = true;
+      logIdea('oneletter');
+    }
+  }
+  render();
+}
+
+/* ================= stage 5 : quiz ================= */
+
+function renderStage5() {
+  const st = S.s5;
+  const card = h('section', { class: 'card' }, h('h2', {}, 'Quiz'));
+  QUIZ.forEach((q, qi) => {
+    const picked = st.ans[qi];
+    const right = picked === q.a;
+    const box = h('div', { class: 'q' + (st.checked ? (right ? ' right' : ' wrong') : '') });
+    box.append(h('p', { class: 'qt' }, `${qi + 1}. ${q.q}`));
+    q.opts.forEach((o, oi) => {
+      const lab = h('label', {});
+      lab.append(h('input', {
+        type: 'radio', name: 'q' + qi, checked: picked === oi, disabled: st.checked,
+        onchange: () => { S.s5.ans[qi] = oi; },
+      }));
+      lab.append(h('span', {}, o));
+      box.append(lab);
+    });
+    if (st.checked) box.append(h('p', { class: 'why' }, (right ? '✓ ' : '✗ ') + q.why));
+    card.append(box);
+  });
+
+  if (!st.checked) {
+    card.append(h('button', { class: 'act', type: 'button', onclick: check5 }, 'Check my answers'));
+  } else {
+    const score = QUIZ.filter((q, i) => st.ans[i] === q.a).length;
+    const band = h('div', { class: 'scoreband' });
+    band.append(h('span', {}, `${score} / ${QUIZ.length}. `));
+    if (score === QUIZ.length) {
+      band.append(h('span', {}, kidSignedIn()
+        ? '🏅 Saved to your Science Map!'
+        : 'Every one. Sign in on the Science Map to have it recorded.'));
+    } else {
+      band.append(h('span', {}, 'Read the explanations and try again.'));
+      band.append(h('div', { style: 'margin-top:10px' },
+        h('button', { class: 'act', type: 'button', onclick: () => { S.s5 = { ans: {}, checked: false }; render(); } }, 'Try again')));
+    }
+    card.append(band);
+  }
+
+  const rx = h('section', { class: 'card rx' });
+  rx.append(h('h3', {}, 'What you just did'));
+  rx.append(h('p', { html: 'You took a stretch of DNA, copied it into RNA, read it three letters at a time, built a protein out of it, and then broke it three different ways with one letter each.' }));
+  rx.append(h('p', { class: 'sub', html: 'Next door: <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code</a> is how the DNA got there in the first place, and <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror</a> is how you find out which letter changed.' }));
+  return h('div', { class: 'stagegrid' }, card, rx);
+}
+
+function check5() {
+  S.s5.checked = true;
+  const score = QUIZ.filter((q, i) => S.s5.ans[i] === q.a).length;
+  const wrong = QUIZ.map((q, i) => (S.s5.ans[i] === q.a ? null : i + 1)).filter(Boolean);
+  reportQuiz(score, QUIZ.length, wrong);
+  if (score === QUIZ.length) { S.done[5] = true; awardTrainer(); }
+  render();
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      m.n === 5 ? `${m.label} ` : `${m.n} · ${m.label} `, S.done[m.n] ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: S.logged.has(r.id) ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${S.logged.size} / ${LOG.length}`;
+  $('#logDone').hidden = S.logged.size < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+function render() {
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => { S = freshState(); render(); });
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'buildtheprotein' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'buildtheprotein:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+
+</script>
+</body>
+</html>

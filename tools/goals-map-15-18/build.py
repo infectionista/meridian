@@ -117,6 +117,7 @@ TRAINER_CC = L('Copy the Code - DNA replication trainer', SITE + 'copycode.html'
 TRAINER_TTT = L('Trace the Trait - pedigrees & medical genetics trainer', SITE + 'tracethetrait.html', 'trainer')
 TRAINER_RTT = L('Read the Tree - classifying life, three domains & LUCA trainer', SITE + 'readthetree.html', 'trainer')
 TRAINER_RTM = L('Read the Mirror - DNA sequencing trainer', SITE + 'readthemirror.html', 'trainer')
+TRAINER_BTP = L('Build the Protein - transcription, translation & point mutations trainer', SITE + 'buildtheprotein.html', 'trainer')
 
 MAT = SITE + 'materials/'
 SLIDES_MR = L('Molecules & Reactions - lesson slides', MAT + 'molecules-reactions-slides.pdf', 'slides')
@@ -140,9 +141,10 @@ ASSIGN_PEDT = L('Pedigree answer sheet - template (.docx)', MAT + 'pedigree-answ
 NODE_LINKS = {
  'U1.K2': [TRAINER_MB, SLIDES_MR, READ_4M],
  'U5.K1': [TRAINER_MB, SLIDES_MR, READ_4M],
- 'U3.K1': [TRAINER_CC, SLIDES_DNA],
+ 'U3.K1': [TRAINER_BTP, TRAINER_CC, SLIDES_DNA],
  'U3.K2': [TRAINER_CC, SLIDES_DNA],
  'U3.K3': [TRAINER_RTM],
+ 'U3.A1': [TRAINER_BTP],
  'U3.A2': [TRAINER_RTM],
  'U6.A2': [TRAINER_TTT, ASSIGN_PED, ASSIGN_PEDT],
  'U6.K3': [TRAINER_BT, TRAINER_RTT, ASSIGN_BAT, SLIDES_TREE, READ_TREE],
@@ -186,8 +188,8 @@ edges = [
  E('U2.K2','U2.C1','unit','Model one transport process - then break it.'),
  # U3 Molecular genetics
  E('U3.K1','U3.K2','unit','The text you can read is packed, copied and repaired.'),
- E('U3.K1','U3.A1','unit','Base pairing and codons, now with pencil and paper.'),
- E('U3.K2','U3.A1','unit','Predict what one typo does to the protein.'),
+ E('U3.K1','U3.A1','unit','Base pairing and codons, now with pencil and paper.', links=[TRAINER_BTP]),
+ E('U3.K2','U3.A1','unit','Predict what one typo does to the protein.', links=[TRAINER_BTP]),
  E('U3.K3','U3.A2','unit','PCR and gels in theory, then a gel in your hands.', links=[TRAINER_RTM]),
  E('U3.K3','U3.C1','unit','The clinic menu is built from these technologies.'),
  E('U3.K4','U3.A3','unit','Somatic or germline - the distinction that decides the case.'),
@@ -242,7 +244,7 @@ edges = [
  E('U1.K3','U5.K1','cross','Respiration is a relay race run by enzymes.'),
  E('U2.K1','U5.K1','cross','Mitochondria: the tenants that pay rent in ATP.'),
  E('U2.C1','U8.A3','cross','The cure for cholera is a solution you can now mix yourself.'),
- E('U3.A1','U6.K2','cross','GAG to GTG: the typo behind the whole sickle story.'),
+ E('U3.A1','U6.K2','cross','GAG to GTG: the typo behind the whole sickle story.', links=[TRAINER_BTP]),
  E('U4.K3','U6.K3','cross','Meiosis makes the variation Hardy-Weinberg counts.'),
  E('U4.K1','U3.K4','cross','Somatic versus germline, met twice: in cells and in consequences.'),
  E('U5.K2','U6.K4','cross','Photosynthesis is the planet’s carbon intake.'),
