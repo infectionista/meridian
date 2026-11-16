@@ -335,8 +335,7 @@ tr.on .dot { background: var(--mint-deep); }
     Part of the Meridian map:
     <a href="https://meridian-one-jet.vercel.app/goals-map-15-18.html">Science Map 15&ndash;18</a> &middot;
     <a href="https://meridian-one-jet.vercel.app/copycode.html">Copy the Code (replication)</a> &middot;
-    <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror (sequencing)</a> &middot;
-    <a href="https://meridian-one-jet.vercel.app/aimthescissors.html">Aim the Scissors (editing)</a>
+    <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror (sequencing)</a>
   </footer>
 
 </div>
@@ -862,6 +861,10 @@ function renderStage3() {
   rx.append(h('hr'));
   rx.append(h('p', { html: '<b>AUG does two jobs.</b> It means methionine, and it is where reading starts. Everything before it is ignored, which is how the ribosome knows where the words begin.' }));
   rx.append(h('p', { html: 'The three stop codons name no amino acid at all. Nothing arrives, the ribosome lets go, and the finished protein floats away.' }));
+  const fine = h('details', { class: 'fine' }, h('summary', {}, 'Fine print \u2014 two honest adjustments'));
+  fine.append(h('p', { html: 'The stop codon here has been <b>brought forward</b> to keep the exercise short. The real \u03b2-globin gene does not stop after four amino acids \u2014 it runs on for 147 codons, and step 4 picks it up three codons further along.' }));
+  fine.append(h('p', { html: 'And the finished protein is numbered from valine, not methionine: that first Met is <b>cut off</b> after translation. So the seventh codon of the gene makes the sixth amino acid of the protein \u2014 which is why the sickle change is known as \u03b2<sup>6</sup> Glu\u2192Val.' }));
+  rx.append(fine);
   if (S.done[3]) {
     rx.append(h('div', { class: 'punch', html: 'Met · Val · His · Leu is not an invented example. It is the real beginning of β-globin — half of the haemoglobin molecule that carries oxygen around your body right now.' }));
   }
@@ -984,7 +987,7 @@ function renderStage4() {
   const rx = h('section', { class: 'card rx' });
   rx.append(h('h3', {}, m ? m.dna : 'One codon, three edits'));
   if (!m) {
-    rx.append(h('p', { html: 'The codon in the middle is <b>GAG</b> — glutamate, amino acid number 6 of haemoglobin. Pick an edit on the left. Each one changes exactly <b>one letter</b> of the DNA.' }));
+    rx.append(h('p', { html: 'The codon in the middle is <b>GAG</b> — the seventh codon of the gene, which makes the sixth amino acid of the finished protein, because the starting methionine is cut off afterwards. It is glutamate, and it is the one that goes wrong in sickle cell disease. Pick an edit on the left. Each one changes exactly <b>one letter</b> of the DNA.' }));
     rx.append(h('p', { class: 'sub' }, 'Guess what it does before you look. The guess is the point.'));
   } else if (!show) {
     rx.append(h('p', { html: `One letter of DNA changes: <b>${m.dna}</b>.` }));

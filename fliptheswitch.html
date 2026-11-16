@@ -430,7 +430,7 @@ const LACQ = [
   },
   {
     id: 'on', lab: 'Lactose arrives', ans: 'on',
-    why: 'Lactose itself binds the repressor and changes its shape, so it can no longer grip the operator. It falls off, the polymerase runs, and within minutes the cell is making the enzymes that digest lactose.',
+    why: 'Lactose gets into the cell, and a little of it is rearranged into <b>allolactose</b> \u2014 same two sugars, joined differently. That is what binds the repressor and changes its shape, so it can no longer grip the operator. It falls off, the polymerase runs, and within minutes the cell is making the enzymes that digest lactose.',
   },
   {
     id: 'broken', lab: 'Repressor gene broken', ans: 'on',
@@ -780,7 +780,7 @@ function renderStage3() {
       svg.append(h('path', { d: 'M196 54 a32 26 0 0 1 64 0 Z', fill: 'var(--pink-deep)', opacity: '.45',
         transform: 'rotate(24 228 40)' }));
       svg.append(h('circle', { cx: 212, cy: 36, r: 9, fill: 'var(--leaf)' }));
-      svg.append(h('text', { x: 290, y: 44, class: 'lab', style: 'font-size:13px;fill:var(--leaf)' }, 'lactose has bound the repressor and knocked it off'));
+      svg.append(h('text', { x: 290, y: 44, class: 'lab', style: 'font-size:13px;fill:var(--leaf)' }, 'allolactose has bound the repressor and knocked it off'));
     } else {
       svg.append(h('text', { x: 134, y: 70, class: 'lab', style: 'font-size:13px;fill:var(--pink-deep)' }, 'no repressor exists at all'));
     }
@@ -841,6 +841,10 @@ function renderStage3() {
     rx.append(h('p', { html: '<i>E. coli</i> prefers glucose. If lactose turns up instead, it needs three enzymes to handle it — and making enzymes it does not need would be a waste it cannot afford.' }));
     rx.append(h('p', { html: 'So the three genes sit in a row with two short stretches of control DNA in front of them: a <b>promoter</b>, where the polymerase lands, and an <b>operator</b>, where a repressor protein can sit and block the way.' }));
     rx.append(h('p', { class: 'sub' }, 'Pick a condition. Work it out before you look.'));
+    const d = h('details', { class: 'fine' }, h('summary', {}, 'Fine print \u2014 two things this picture leaves out'));
+    d.append(h('p', { html: 'The thing that actually binds the repressor is <b>allolactose</b>, an isomer the cell makes from lactose once some gets in. Lactose itself does not fit.' }));
+    d.append(h('p', { html: 'And the repressor is only half the switch. A second protein, <b>CAP</b>, has to sit down beside the promoter before the polymerase works properly \u2014 and CAP only does that when glucose is <i>low</i>. So the operon really asks two questions: is there lactose, and is the glucose gone? Both have to be answered yes.' }));
+    rx.append(d);
   } else {
     rx.append(h('h3', {}, c.lab));
     if (show) {

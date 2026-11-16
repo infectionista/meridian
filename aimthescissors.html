@@ -335,8 +335,7 @@ tr.on .dot { background: var(--mint-deep); }
     Part of the Meridian map:
     <a href="https://meridian-one-jet.vercel.app/goals-map-15-18.html">Science Map 15&ndash;18</a> &middot;
     <a href="https://meridian-one-jet.vercel.app/buildtheprotein.html">Build the Protein</a> &middot;
-    <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror (sequencing)</a> &middot;
-    <a href="https://meridian-one-jet.vercel.app/fliptheswitch.html">Flip the Switch (regulation)</a>
+    <a href="https://meridian-one-jet.vercel.app/readthemirror.html">Read the Mirror (sequencing)</a>
   </footer>
 
 </div>
@@ -607,7 +606,7 @@ function renderStage1() {
     svg.append(h('text', { x: 30, y: 170, class: 'lab' },
       'Any other DNA cut by the same enzyme has the same overhang, so the pieces snap together.'));
     svg.append(h('text', { x: 30, y: 192, class: 'lab' },
-      'That is how a human gene first went into a bacterium — two unrelated genomes, one enzyme.'));
+      'Cut two unrelated genomes with the same enzyme and the pieces join. That is how gene-splicing began.'));
   }
 
   const scene = h('div', { class: 'card scene' }, svg);
@@ -827,7 +826,7 @@ function renderStage3() {
   rx.append(h('hr'));
   rx.append(h('p', { html: 'The snag held the method up for years: 95°C destroys an ordinary enzyme, so you had to add fresh enzyme by hand every single cycle. The fix came from a bacterium living in a <b>Yellowstone hot spring</b>, whose polymerase works happily at those temperatures. That is Taq — and it turned a day of pipetting into a machine you switch on.' }));
   if (st.ok) {
-    rx.append(h('div', { class: 'punch', html: 'Every COVID test that came back positive was this: two primers that only fit the virus, and enough doublings to turn a few molecules into something a machine can see.' }));
+    rx.append(h('div', { class: 'punch', html: 'Every COVID <b>PCR</b> test \u2014 the lab kind, not the fifteen-minute strip \u2014 was this: two primers that only fit the virus, and enough doublings to turn a few molecules into something a machine can see.' }));
   }
   return h('div', { class: 'stagegrid' }, scene, rx);
 }
@@ -938,7 +937,7 @@ function renderStage4() {
     if (c.twist) { rx.append(h('hr')); rx.append(h('p', { html: c.twist })); }
   }
   if (S.done[4]) {
-    rx.append(h('div', { class: 'punch', html: 'Somatic editing is a treatment: it is offered to a patient who can agree to it, and the consequences are theirs. Germline editing is a decision taken on behalf of everyone who comes afterwards, none of whom can be asked. That is why almost every country allows the first and bans the second — and it is a line drawn by <b>which cell</b>, nothing else.' }));
+    rx.append(h('div', { class: 'punch', html: 'Somatic editing is a treatment: it is offered to a patient who can agree to it, and the consequences are theirs. Germline editing is a decision taken on behalf of everyone who comes afterwards, none of whom can be asked. That is why nearly every country that has legislated on it allows the first and bans the second — and it is a line drawn by <b>which cell</b>, nothing else.' }));
   }
   return h('div', { class: 'stagegrid' }, scene, rx);
 }

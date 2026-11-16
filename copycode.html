@@ -940,8 +940,10 @@ function renderStage5() {
         h('span', { class: 'chip con' }, 'molecular clock')),
       h('p', {}, 'Every difference you see survived pairing, proofreading and mismatch repair. Rare per letter — but genomes are long and generations add up.'),
       renderChart5(),
-      h('p', { class: 'sub' }, 'Real numbers: each human baby carries ~70 brand-new mutations. Human and chimpanzee genomes differ by ~1.2% of single letters — run the clock backwards and you land at a split roughly 6–7 million years ago.'),
+      h('p', { class: 'sub' }, 'Real numbers: each human baby carries ~70 brand-new mutations, and human and chimpanzee genomes differ by ~1.2% of single letters. Run the clock back on those two numbers and you get something over ten million years — while the fossils put the split at 6–7. That gap is real, and arguing about it is most of what dating a tree involves.'),
       h('details', { class: 'fine' }, h('summary', {}, 'Fine print'),
+        h('p', {}, 'Do the sum: 70 mutations in 6.4 billion letters is about 1.1 × 10⁻⁸ per letter per generation. Two lineages drift apart at twice that, so 1.2% needs roughly 550,000 generations — 12 to 16 million years, depending on the generation time you assume. To land on 6.5 million you would need a mutation rate about twice the one we now measure directly in families. Older estimates, calibrated against fossils rather than measured, were about that fast; when sequencing gave the direct rate, molecular dates roughly doubled overnight.'),
+        h('p', {}, 'Two more reasons a clock runs early. Genes split before populations do: the common ancestor was already variable, so two sequences can have been diverging for a long time before their carriers stopped interbreeding. And in this case they went on interbreeding for a while after they first separated.'),
         h('p', {}, 'Your curve bends at high counts: with only 24 letters, new mutations start landing on already-changed spots and even flipping letters back. Real analyses correct for this saturation — and real genomes have billions of letters.'),
         h('p', {}, 'The clock is sloppy, not metronomic: different genes tick at different speeds (histones barely move; fibrinopeptides race), and lineages differ too. Biologists calibrate it against fossils before trusting a date.'))
     )
