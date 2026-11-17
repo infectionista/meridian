@@ -99,6 +99,8 @@ PTS = 'https://meridian-one-jet.vercel.app/passthesun.html'
 TRAINER_PTS = L('Pass the Sun — food webs & energy flow trainer', PTS, 'trainer')
 BTW = 'https://meridian-one-jet.vercel.app/breaktheweb.html'
 TRAINER_BTW = L('Break the Web — pollinators, toxins & biodiversity trainer', BTW, 'trainer')
+FJ = 'https://meridian-one-jet.vercel.app/fourjars.html'
+TRAINER_FJ = L('What DNA remembers — ancient DNA, barcodes & building a tree trainer', FJ, 'trainer')
 RTT = 'https://meridian-one-jet.vercel.app/readthetree.html'
 TRAINER_RTT = L('Read the Tree — classifying life, three domains & LUCA trainer', RTT, 'trainer')
 
@@ -110,7 +112,8 @@ NODE_LINKS = {
  'U1.A3': [TRAINER_ES],
  'U5.K1': [TRAINER_ES],
  'U5.K3': [TRAINER_ES],
- 'U2.K1': [L('The Code of Life — DNA slides', MAT + 'dna-slides.pdf', 'slides')],
+ 'U2.K1': [L('The Code of Life — DNA slides', MAT + 'dna-slides.pdf', 'slides'), TRAINER_FJ],
+ 'U2.K2': [TRAINER_FJ],
  'U4.A3': [L('Inner Space: Malaria — lesson slides', MAT + 'malaria-slides.pdf', 'slides')],
  'U3.K1': [L('Inner Space: Malaria — lesson slides', MAT + 'malaria-slides.pdf', 'slides')],
  'U9.K1': [L('Epidemic Forensics: Soho 1854 — lesson slides', MAT + 'soho-1854-slides.pdf', 'slides')],
@@ -149,7 +152,7 @@ edges = [
  E('U1.K2','U1.K4','unit','Specialised cells team up into tissues and organs.'),
  E('U1.K1','U1.C1','unit','The model shows every organelle doing its job.'),
  # U2
- E('U2.K1','U2.K2','unit','A mutation is a change in the DNA you can now describe.'),
+ E('U2.K1','U2.K2','unit','A mutation is a change in the DNA you can now describe.', links=[TRAINER_FJ]),
  E('U2.K2','U2.K3','unit','Harmful or useful depending on environment — that is what selection acts on.'),
  E('U2.K3','U2.A1','unit','Alleles become predictions in a Punnett square.'),
  E('U2.K3','U2.A2','unit','Selection logic applied to a case you were never taught.'),
