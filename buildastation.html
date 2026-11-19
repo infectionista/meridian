@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a Station &middot; Meridian Learning World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+/* Layout: a lab bench. Six stations share one engine: unzip, pair, bond,
+   proofread, clock, quiz. Scene on the left, the chemistry card on the
+   right, a reaction log that fills up along the bottom. Stacks to one
+   column on a phone. Light white-and-lilac theme after the Meridian
+   Learning calendar poster — same family as Build a Tree. */
+:root {
+  color-scheme: light;
+
+  --paper:     #F7F5FC;
+  --panel:     #FFFFFF;
+  --panel-2:   #F3EFFB;
+  --line:      #E7E3F2;
+  --fg:        #161925;
+  --fg-dim:    #767191;
+
+  --violet:      #7733FF;
+  --violet-soft: #F1EAFF;
+  --pink:        #D499B9;
+  --pink-soft:   #FBEFF5;
+  --pink-deep:   #B05684;
+  --mint:        #CBF7ED;
+  --mint-deep:   #0B8A75;
+  --orange:      #FF9C61;
+  --orange-soft: #FFEFE3;
+  --orange-deep: #D95B12;
+  --gray-letter: #C2C6D1;
+
+  --ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(26px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(44px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--violet);
+}
+h1 {
+  font-size: clamp(27px, 5.4vw, 42px); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 0;
+  text-wrap: balance; color: var(--fg);
+}
+h1 .hi { color: var(--violet); }
+.lede { margin: 9px 0 0; color: var(--fg-dim); max-width: 66ch; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+
+.seg { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.seg button {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 0; padding: 10px 14px; cursor: pointer;
+  border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--violet); color: #fff; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--fg); }
+.seg .tick { color: var(--mint-deep); font-weight: 700; }
+.seg button[aria-pressed="true"] .tick { color: #fff; }
+
+.ghost {
+  font: 600 13px/1 var(--ui); color: var(--fg-dim);
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 9px; padding: 10px 14px; cursor: pointer;
+}
+.ghost:hover { color: var(--violet); border-color: var(--violet); }
+
+:is(button, [tabindex], input, summary, a):focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+.stagenote {
+  margin: 16px 0 0; padding: 12px 16px;
+  border-left: 3px solid var(--violet);
+  background: var(--panel); border-radius: 0 10px 10px 0;
+  border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  color: var(--fg-dim); font-size: 14px; max-width: 78ch;
+}
+.stagenote b { color: var(--fg); font-weight: 600; }
+
+/* ---------- panels ---------- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.card > h2 {
+  font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--violet);
+  margin: 0 0 12px;
+}
+.card > h2 .count { color: var(--fg-dim); letter-spacing: .04em; font-weight: 500; }
+
+.stagegrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .stagegrid { grid-template-columns: 1fr; }
+}
+
+.scene svg { width: 100%; height: auto; display: block; }
+
+.scenebtns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+
+.act {
+  font: 600 14px/1.2 var(--ui); color: #fff;
+  background: var(--violet); border: 0; border-radius: 9px;
+  padding: 11px 16px; cursor: pointer;
+}
+.act:hover { background: #6526e8; }
+.act:disabled { background: var(--gray-letter); cursor: default; }
+.act.alt { background: var(--panel); color: var(--violet); border: 1px solid var(--violet); }
+.act.alt:hover { background: var(--violet-soft); }
+
+.meter {
+  font: 500 13px/1.3 var(--ui); color: var(--fg-dim);
+  background: var(--panel-2); border-radius: 8px; padding: 9px 12px;
+}
+.meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.toast { margin-top: 12px; font-size: 13.5px; color: var(--pink-deep); min-height: 1.3em; }
+
+.donebar {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--mint); color: var(--mint-deep);
+  font-size: 14px; font-weight: 500;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+}
+.donebar .act { background: var(--mint-deep); }
+.donebar .act:hover { background: #097a68; }
+
+/* ---------- reaction card ---------- */
+
+.rx h3 {
+  margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.rx .eq {
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  background: var(--panel-2); border-radius: 8px; padding: 10px 12px;
+  margin: 10px 0; overflow-x: auto; white-space: nowrap;
+}
+.rx p { margin: 8px 0; font-size: 14px; }
+.rx .sub { color: var(--fg-dim); font-size: 13.5px; }
+.rx hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.chip.hyd { background: var(--mint); color: var(--mint-deep); }
+.chip.con { background: var(--violet-soft); color: var(--violet); }
+.chip.non { background: var(--pink-soft); color: var(--pink-deep); }
+.chip.en  { background: var(--orange-soft); color: var(--orange-deep); }
+.chip.plain { background: var(--panel-2); color: var(--fg-dim); }
+
+details.fine {
+  margin-top: 12px; font-size: 13.5px; color: var(--fg-dim);
+  border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px;
+}
+details.fine summary { cursor: pointer; font-weight: 600; color: var(--violet); }
+details.fine p { margin: 8px 0 2px; }
+
+/* ---------- reaction log ---------- */
+
+.logtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.logtable td { padding: 8px 10px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.logtable tr:first-child td { border-top: 0; }
+.logtable .nm { font-weight: 600; white-space: nowrap; }
+.logtable .eqc { font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim); }
+.logtable tr.off { opacity: .38; }
+.logtable tr.fresh .nm { color: var(--violet); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-letter); margin-right: 8px; }
+tr.on .dot { background: var(--mint-deep); }
+.logdone { margin: 12px 0 0; font-weight: 600; color: var(--violet); }
+@media (max-width: 820px) {
+  .logtable .eqc { display: none; }
+  .logtable .nm { white-space: normal; }
+  .logtable .chip { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ---------- quiz ---------- */
+
+.q { border-top: 1px solid var(--line); padding: 14px 0; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin: 0 0 8px; }
+.q label { display: flex; gap: 9px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: 14px; }
+.q input[type="radio"] { accent-color: var(--violet); }
+.q .why { font-size: 13.5px; margin: 6px 0 0 24px; }
+.q.right .why { color: var(--mint-deep); }
+.q.wrong .why { color: var(--pink-deep); }
+.scoreband {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--violet-soft); color: var(--violet); font-weight: 700;
+}
+
+/* ---------- error ladder ---------- */
+
+.ladder { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ladder .rung { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.ladder .bar { height: 14px; border-radius: 7px; background: var(--violet); opacity: .85; }
+.ladder .lb b { display: block; font-variant-numeric: tabular-nums; }
+.ladder .lb { color: var(--fg-dim); }
+
+/* ---------- stage 5 ---------- */
+
+.seqrows { font-family: var(--mono); font-size: 13px; line-height: 2; overflow-x: auto; white-space: nowrap; }
+.seqrows .tag { display: inline-block; width: 86px; font-family: var(--ui); font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.seqrows .mut { color: var(--violet); background: var(--violet-soft); border-radius: 3px; }
+.slider-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--violet); }
+.bignum { font-size: 26px; font-weight: 800; color: var(--violet); font-variant-numeric: tabular-nums; }
+
+.punch {
+  margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+  background: var(--violet-soft); border: 1px solid var(--violet);
+  font-size: 14px;
+}
+.punch b { color: var(--violet); }
+.punch a { color: var(--violet); font-weight: 700; }
+
+/* ---------- footer ---------- */
+
+.foot { color: var(--fg-dim); font-size: 12.5px; line-height: 1.7; }
+.foot .cur { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+/* ---------- svg bits ---------- */
+
+.bl { font-family: var(--mono); font-size: 19px; font-weight: 700; fill: var(--fg); }
+.bl.dim { fill: var(--gray-letter); }
+.bl.new { fill: var(--violet); }
+.bl.bad { fill: var(--pink-deep); }
+.rail { stroke: var(--gray-letter); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.rail.new { stroke: var(--violet); }
+.hb { stroke: var(--pink-deep); stroke-width: 2; stroke-dasharray: 2.5 3.5; opacity: .75; }
+.hb.bad { stroke: var(--pink-deep); opacity: .9; }
+.lab { font-family: var(--ui); font-size: 11px; fill: var(--fg-dim); font-weight: 600; }
+.lab.mono { font-family: var(--mono); }
+.heli { fill: var(--violet); opacity: .92; }
+.helieye { fill: #fff; }
+.pickable { cursor: pointer; }
+.pickable:hover .bl { fill: var(--violet); }
+
+.floater {
+  font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--orange-deep);
+  animation: floatup 1s ease-out forwards;
+}
+@keyframes floatup {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-26px); }
+}
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out; }
+.floater { transform-box: fill-box; }
+@keyframes pop {
+  0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ---------- worksheet additions ---------- */
+
+:root { --leaf: #0B8A75; --leaf-soft: #CBF7ED; }
+.chip.vio { background: var(--violet-soft); color: var(--violet); }
+
+.fieldrow { margin-top: 14px; }
+.fldlab { display: block; font-size: 14px; font-weight: 700; color: var(--fg); }
+.fldhint { margin: 3px 0 7px; font-size: 13px; color: var(--fg-dim); max-width: 70ch; }
+
+.fld {
+  width: 100%; display: block;
+  font: 400 15px/1.5 var(--ui); color: var(--fg);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 9px;
+  padding: 9px 11px; resize: vertical;
+}
+.fld:focus { outline: 2px solid var(--violet); outline-offset: 1px; border-color: var(--violet); }
+.fld::placeholder { color: var(--gray-letter); }
+.fld.sel { background: var(--panel-2); cursor: pointer; resize: none; }
+.fld.sheet { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; background: var(--panel-2); }
+
+.picklist { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.pick {
+  text-align: left; cursor: pointer; font: inherit;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 11px 13px; display: flex; flex-direction: column; gap: 4px;
+}
+.pick:hover { border-color: var(--violet); }
+.pick.on { border-color: var(--violet); background: var(--violet-soft); }
+.pickname { font-weight: 700; font-size: 14.5px; color: var(--fg); }
+.pickq { font-size: 12.5px; color: var(--fg-dim); }
+
+.ownrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ownrow .fld { flex: 1 1 240px; width: auto; }
+.act.on { background: var(--violet); color: #fff; border-color: var(--violet); }
+
+.piecerow { display: flex; gap: 9px; align-items: center; margin-top: 9px; }
+.piecerow .fld { flex: 1 1 auto; width: auto; }
+.pnum {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--violet-soft); color: var(--violet);
+  font: 700 12px/24px var(--ui); text-align: center;
+}
+.xbtn {
+  flex: 0 0 auto; border: 1px solid var(--line); background: var(--panel);
+  color: var(--fg-dim); border-radius: 8px; cursor: pointer;
+  font: 400 18px/1 var(--ui); padding: 6px 10px;
+}
+.xbtn:hover { border-color: var(--pink-deep); color: var(--pink-deep); }
+
+.crossrow { border-top: 1px solid var(--line); padding: 13px 0; }
+.crossrow:first-of-type { border-top: 0; }
+.crossrow.on { background: var(--violet-soft); border-radius: 10px; padding: 13px; border-top: 0; margin-top: 8px; }
+.ctext { margin: 0 0 8px; font-weight: 600; font-size: 14.5px; }
+.crosspick { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+.crosspick .fld.sel { flex: 1 1 240px; width: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Meridian Life Sciences &middot; Ecosystems &amp; biodiversity</div>
+    <h1>Build a <span class="hi">Station</span></h1>
+    <p class="lede">People ran ecosystems for thousands of years before anyone had a word for one.
+      Take one of those inventions apart, find the single piece you cannot explain without leaving
+      this unit, and write the instructions for a trainer that teaches it. One station, not a trail.</p>
+    <p class="lede" style="font-size:13.5px;margin-top:6px">Your answers are kept in this browser as you type, so you can close the page and come back.</p>
+    <div class="controls">
+      <div class="seg" id="segStages" role="tablist" aria-label="Stages"></div>
+      <button class="ghost" id="btnReset" type="button">Start over</button>
+    </div>
+    <p class="stagenote" id="stageNote"></p>
+  </header>
+
+  <main id="stageHost"></main>
+
+  <section class="card" id="logCard">
+    <h2>Your sheet <span class="count" id="logCount">0 / 5</span></h2>
+    <table class="logtable" id="logTable"></table>
+    <p class="logdone" id="logDone" hidden>All five done. Copy or download your sheet at the bottom of stage 5 and hand it in.</p>
+  </section>
+
+  <footer class="foot">
+    <div class="cur">
+      <span class="chip vio">U6 &middot; ecosystems &amp; biodiversity</span>
+      <span class="chip plain">assignment</span>
+    </div>
+    Part of the Meridian map:
+    <a href="https://meridian-one-jet.vercel.app/goals-map-11-14.html">Science Map 11&ndash;14</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/passthesun.html">Pass the Sun</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/breaktheweb.html">Break the Web</a> &middot;
+    <a href="https://meridian-one-jet.vercel.app/eatsun.html">Eat the Sun</a>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- helpers ---------------- */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const SVGTAGS = new Set(['svg','g','path','line','circle','rect','text','polyline','polygon','tspan','ellipse','marker','defs']);
+const $ = s => document.querySelector(s);
+
+function h(tag, attrs = {}, ...kids) {
+  const el = SVGTAGS.has(tag) ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat(9)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+function fx(x, y, txt) {
+  const svg = $('#scene');
+  if (!svg) return;
+  const t = h('text', { x, y, class: 'floater' }, txt);
+  svg.append(t);
+  setTimeout(() => t.remove(), 1100);
+}
+
+/* ---------------- state ---------------- */
+
+const STAGE_META = [
+  { n: 1, label: 'Pick' },
+  { n: 2, label: 'Pull apart' },
+  { n: 3, label: 'Cross over' },
+  { n: 4, label: 'The station' },
+  { n: 5, label: 'The trainer' },
+];
+
+const NOTES = {
+  1: '<b>Stage 1 · Pick one thing.</b> One invention, not a whole subject — "beekeeping", not "farming". Then say in one sentence what a person actually gets out of it.',
+  2: '<b>Stage 2 · Pull it apart.</b> A <b>piece</b> is one thing the world provides. It is never one thing a person does: tying a bamboo pole is a step, "there is a hunter living in that tree" is a piece. Answer the four questions, then write your pieces down.',
+  3: '<b>Stage 3 · Find the one that crosses.</b> Say which module of the map explains each piece. Then choose your station — and it has to be a piece you <b>cannot</b> explain from inside Ecosystems.',
+  4: '<b>Stage 4 · Write the station down.</b> About a sentence per box. The last box is the one that tells you what the piece was really doing.',
+  5: '<b>Stage 5 · Write the trainer instruction.</b> This is the part that actually gets built, so it has to be exact. Write the last box first, then work backwards.',
+};
+
+const INVENTIONS = [
+  { id: 'ants',    name: 'Ants in the orange trees',            q: 'The ants were hunting for themselves. So why did the farmer get cleaner fruit?' },
+  { id: 'clover',  name: 'Clover in the crop rotation',          q: 'Nobody put anything into the field. So where did the fertiliser come from?' },
+  { id: 'compost', name: 'The compost heap',                     q: 'A heap of rubbish turns into soil, and it gets hot. Who is doing the work, and why the heat?' },
+  { id: 'paddy',   name: 'Fish and ducks in a rice paddy',       q: 'Adding animals to a field means less work, not more. How?' },
+  { id: 'clams',   name: 'Walls on a beach to grow more shellfish', q: 'They changed the shape of a beach. Why did that make more clams?' },
+  { id: 'keys',    name: 'Identification keys',                  q: 'How do you name a living thing you have never seen before, with no internet?' },
+  { id: 'lichen',  name: 'Lichen on a wall, to measure the air', q: 'Nobody built this instrument. What is it measuring, and how would you read it?' },
+  { id: 'rabbits', name: 'Twenty-four rabbits let loose in Australia', q: 'This is the one that went wrong. Which piece was missing?' },
+];
+
+const MODULES = [
+  'Ecosystems — food webs',
+  'Ecosystems — pollinators & toxins',
+  'Ecosystems — tree of life',
+  'Energy for life',
+  'Cells & microscopy',
+  'Genes & evolution',
+  'Human body & health',
+  'Reproduction',
+  'Matter & particles',
+  'Chemical reactions',
+  'Thinking like a scientist',
+];
+const isEco = m => !!m && m.indexOf('Ecosystems') === 0;
+
+const QUESTIONS = [
+  'Who else is alive in this, apart from people?',
+  'What is that creature getting out of it, for itself?',
+  'What does it do by accident, on the way, that you need?',
+  'What has to be true about the place — weather, water, soil, season?',
+];
+
+const A_FIELDS = [
+  ['name',     'Station name',   'Give it a name somebody would click on.'],
+  ['what',     'What it is',     'The piece itself, plainly.'],
+  ['borrowed', 'Borrowed from',  'Whose business is this really? What is that creature, or that place, getting out of it?'],
+  ['know',     'Did they know?', 'Could the people who did this have known the piece was there? If they could, say how. If they could not, say when anybody finally found out.'],
+  ['away',     'Take it away — what would you still have?', 'The lazy answer is "nothing, it all collapses". That is usually wrong.'],
+];
+
+const B_FIELDS = [
+  ['actions',  'What the learner does there, in order',  'Three to five actions. Every one has to be something a finger can do.'],
+  ['wrong',    'What they should get wrong at least once — and what they see when they do', 'The confident, sensible, wrong guess. Not a silly mistake.'],
+  ['sentence', 'The one sentence they should be able to say afterwards', 'Write this one first. A vague sentence makes a vague trainer.'],
+];
+
+const SAVE_KEY = 'meridian-station-draft';
+
+let S;
+function freshState() {
+  return {
+    stage: 1,
+    pick: { id: null, own: '', purpose: '' },
+    q: ['', '', '', ''],
+    pieces: [ { text: '', mod: '' }, { text: '', mod: '' }, { text: '', mod: '' } ],
+    stationIdx: null,
+    A: { name: '', what: '', borrowed: '', know: '', away: '' },
+    B: { actions: '', wrong: '', sentence: '' },
+    msg: '',
+  };
+}
+function loadState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+    if (raw && raw.pick && raw.A && raw.B && Array.isArray(raw.pieces) && Array.isArray(raw.q)) {
+      const f = freshState();
+      return Object.assign(f, raw, { A: Object.assign(f.A, raw.A), B: Object.assign(f.B, raw.B), msg: '' });
+    }
+  } catch (e) { /* corrupt draft: start clean */ }
+  return null;
+}
+function saveState() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* private mode */ }
+}
+S = loadState() || freshState();
+
+/* ---------------- what counts as finished ---------------- */
+
+const has = v => !!(v && String(v).trim());
+
+function inventionName() {
+  if (S.pick.id === 'own') return S.pick.own.trim();
+  const inv = INVENTIONS.find(i => i.id === S.pick.id);
+  return inv ? inv.name : '';
+}
+function filledPieces() { return S.pieces.filter(p => has(p.text)); }
+function station() {
+  const ps = S.pieces;
+  return (S.stationIdx !== null && ps[S.stationIdx] && has(ps[S.stationIdx].text)) ? ps[S.stationIdx] : null;
+}
+
+const LOG = [
+  { id: 1, name: 'An invention, and what it is for',  note: 'stage 1', test: () => has(inventionName()) && has(S.pick.purpose) },
+  { id: 2, name: 'Four questions and three pieces',   note: 'stage 2', test: () => S.q.every(has) && filledPieces().length >= 3 },
+  { id: 3, name: 'A station that needs two modules',  note: 'stage 3', test: () => !!station() && !isEco(station().mod) },
+  { id: 4, name: 'The station written down',          note: 'stage 4', test: () => A_FIELDS.every(f => has(S.A[f[0]])) },
+  { id: 5, name: 'The trainer instruction',           note: 'stage 5', test: () => B_FIELDS.every(f => has(S.B[f[0]])) },
+];
+function doneCount() { return LOG.filter(r => r.test()).length; }
+function stageDone(n) { const r = LOG.find(x => x.id === n); return r ? r.test() : false; }
+
+/* ---------------- field helpers ---------------- */
+
+/* Typing must not re-render the stage — that would throw away the caret.
+   So inputs write to state, save, and refresh only the chrome. */
+function touch() {
+  saveState();
+  renderSeg();
+  renderLog();
+  refreshHandIn();
+}
+
+/* The hand-in preview sits on the same stage as the boxes that feed it, and
+   that stage is never re-rendered while someone is typing. Update it in place. */
+function refreshHandIn() {
+  const box = $('#sheetBox');
+  if (!box) return;
+  box.value = sheetText();
+  const n = doneCount();
+  const cnt = $('#handCount');
+  if (cnt) cnt.textContent = `${n} / 5 done`;
+  const hint = $('#handHint');
+  if (hint) hint.textContent = handInHint();
+}
+function handInHint() {
+  const missing = LOG.filter(r => !r.test());
+  return missing.length
+    ? 'Still open: ' + missing.map(r => r.name.toLowerCase()).join('; ') + '. You can hand in anyway, but it will have gaps.'
+    : 'Everything is filled in. Copy it or download it and send it to your teacher.';
+}
+
+function area(value, onset, ph, rows) {
+  return h('textarea', {
+    class: 'fld', rows: rows || 3, placeholder: ph || '', spellcheck: 'true',
+    oninput: e => { onset(e.target.value); touch(); },
+  }, value || '');
+}
+function line(value, onset, ph) {
+  return h('input', {
+    class: 'fld', type: 'text', value: value || '', placeholder: ph || '', spellcheck: 'true',
+    oninput: e => { onset(e.target.value); touch(); },
+  });
+}
+function field(label, hint, control) {
+  return h('div', { class: 'fieldrow' },
+    h('label', { class: 'fldlab' }, label),
+    hint ? h('p', { class: 'fldhint' }, hint) : null,
+    control);
+}
+function nextBtn(n, label) {
+  return h('div', { class: 'scenebtns' },
+    h('button', { class: 'act', type: 'button', onclick: () => go(n) }, label));
+}
+
+/* ---------------- stage 1 ---------------- */
+
+function renderStage1() {
+  const box = h('div', { class: 'card' }, h('h2', {}, 'Stage 1 · Pick one thing'));
+
+  box.append(h('div', { class: 'picklist' }, ...INVENTIONS.map(inv =>
+    h('button', {
+      type: 'button',
+      class: 'pick' + (S.pick.id === inv.id ? ' on' : ''),
+      'aria-pressed': String(S.pick.id === inv.id),
+      onclick: () => { S.pick.id = inv.id; S.msg = ''; saveState(); render(); },
+    },
+      h('span', { class: 'pickname' }, inv.name),
+      h('span', { class: 'pickq' }, inv.q))
+  )));
+
+  box.append(h('div', { class: 'fieldrow' },
+    h('label', { class: 'fldlab' }, 'Or bring your own'),
+    h('p', { class: 'fldhint' }, 'Check it with your teacher first, and check that it is one invention and not a whole subject.'),
+    h('div', { class: 'ownrow' },
+      h('button', {
+        type: 'button', class: 'act alt' + (S.pick.id === 'own' ? ' on' : ''),
+        onclick: () => { S.pick.id = 'own'; saveState(); render(); },
+      }, S.pick.id === 'own' ? 'Using my own' : 'Use my own'),
+      line(S.pick.own, v => { S.pick.own = v; }, 'My invention is…'))));
+
+  box.append(field('What is it for?',
+    'One sentence. What does a person actually get out of it?',
+    area(S.pick.purpose, v => { S.pick.purpose = v; }, 'People do this because…', 2)));
+
+  box.append(h('p', { class: 'toast' }, S.msg));
+  box.append(nextBtn(2, 'Next: pull it apart →'));
+  return box;
+}
+
+/* ---------------- stage 2 ---------------- */
+
+function renderStage2() {
+  const box = h('div', {});
+
+  const qc = h('div', { class: 'card' }, h('h2', {}, 'Stage 2 · Four questions'));
+  QUESTIONS.forEach((q, i) => {
+    qc.append(field(`${i + 1}. ${q}`, null, area(S.q[i], v => { S.q[i] = v; }, '', 2)));
+  });
+  box.append(qc);
+
+  const pc = h('div', { class: 'card', style: 'margin-top:16px' },
+    h('h2', {}, 'Now write your pieces ', h('span', { class: 'count' }, `${filledPieces().length} written`)));
+  pc.append(h('p', { class: 'fldhint', style: 'margin-top:-6px' },
+    'Three to six. Each one has to finish this sentence: something in the world does something, and that is why the invention works.'));
+
+  S.pieces.forEach((p, i) => {
+    pc.append(h('div', { class: 'piecerow' },
+      h('span', { class: 'pnum' }, String(i + 1)),
+      line(p.text, v => { S.pieces[i].text = v; }, 'There is / there are…'),
+      S.pieces.length > 3
+        ? h('button', {
+            type: 'button', class: 'xbtn', title: 'Remove this piece', 'aria-label': 'Remove piece ' + (i + 1),
+            onclick: () => {
+              S.pieces.splice(i, 1);
+              if (S.stationIdx === i) S.stationIdx = null;
+              else if (S.stationIdx !== null && S.stationIdx > i) S.stationIdx -= 1;
+              saveState(); render();
+            },
+          }, '×')
+        : null));
+  });
+
+  pc.append(h('div', { class: 'scenebtns' },
+    h('button', {
+      type: 'button', class: 'act alt', disabled: S.pieces.length >= 6,
+      onclick: () => { S.pieces.push({ text: '', mod: '' }); saveState(); render(); },
+    }, '+ one more piece')));
+  box.append(pc);
+
+  box.append(nextBtn(3, 'Next: find the one that crosses →'));
+  return box;
+}
+
+/* ---------------- stage 3 ---------------- */
+
+function renderStage3() {
+  const box = h('div', { class: 'card' }, h('h2', {}, 'Stage 3 · Which module explains it?'));
+  const ps = filledPieces();
+
+  if (!ps.length) {
+    box.append(h('p', { class: 'fldhint' }, 'No pieces yet — go back to stage 2 and write some down.'));
+    box.append(nextBtn(2, '← Back to stage 2'));
+    return box;
+  }
+
+  box.append(h('p', { class: 'fldhint', style: 'margin-top:-6px' },
+    'Pick the module each piece belongs to. Then choose the one that leaves Ecosystems — that one is your station.'));
+
+  S.pieces.forEach((p, i) => {
+    if (!has(p.text)) return;
+    const chosen = S.stationIdx === i;
+    const eco = isEco(p.mod);
+    const row = h('div', { class: 'crossrow' + (chosen ? ' on' : '') });
+    row.append(h('p', { class: 'ctext' }, p.text));
+
+    const sel = h('select', {
+      class: 'fld sel',
+      onchange: e => {
+        S.pieces[i].mod = e.target.value;
+        if (S.stationIdx === i && isEco(e.target.value)) { S.stationIdx = null; S.msg = 'That piece now stays inside Ecosystems, so it cannot be your station any more.'; }
+        saveState(); render();
+      },
+    },
+      h('option', { value: '', selected: !p.mod }, 'Which module explains it?'),
+      ...MODULES.map(m => h('option', { value: m, selected: p.mod === m }, m)));
+
+    row.append(h('div', { class: 'crosspick' },
+      sel,
+      h('button', {
+        type: 'button',
+        class: 'act' + (chosen ? '' : ' alt'),
+        disabled: !p.mod,
+        onclick: () => {
+          if (isEco(p.mod)) {
+            S.msg = 'That piece stays inside Ecosystems. Your station has to be one you cannot explain without a second module — ask "but why does that happen?" until you land somewhere else.';
+            saveState(); render();
+            return;
+          }
+          S.stationIdx = i;
+          S.msg = '';
+          if (!has(S.A.what)) S.A.what = p.text;
+          saveState(); render();
+        },
+      }, chosen ? '★ This is my station' : 'Make this my station'),
+      p.mod ? h('span', { class: 'chip ' + (eco ? 'plain' : 'con') }, eco ? 'stays inside' : 'crosses out') : null));
+    box.append(row);
+  });
+
+  box.append(h('p', { class: 'toast' }, S.msg));
+
+  const st = station();
+  if (st && !isEco(st.mod)) {
+    box.append(h('div', { class: 'donebar' },
+      h('span', {}, 'Your station joins Ecosystems to ' + st.mod + '.'),
+      h('button', { class: 'act', type: 'button', onclick: () => go(4) }, 'Write it down →')));
+  } else {
+    box.append(nextBtn(4, 'Next: write the station down →'));
+  }
+  return box;
+}
+
+/* ---------------- stage 4 ---------------- */
+
+function renderStage4() {
+  const box = h('div', { class: 'card' }, h('h2', {}, 'Stage 4 · Table A — your station'));
+  const st = station();
+
+  if (!st) {
+    box.append(h('p', { class: 'fldhint' }, 'You have not chosen a station yet. Go back to stage 3 and pick the piece that leaves Ecosystems.'));
+    box.append(nextBtn(3, '← Back to stage 3'));
+    return box;
+  }
+
+  box.append(h('div', { class: 'chips' },
+    h('span', { class: 'chip con' }, 'Ecosystems'),
+    h('span', { class: 'chip en' }, st.mod)));
+  box.append(h('p', { class: 'fldhint', style: 'margin-top:0' },
+    'Those are the two modules your station joins. They go in the sheet for you.'));
+
+  A_FIELDS.forEach(([k, label, hint]) => {
+    box.append(field(label, hint, area(S.A[k], v => { S.A[k] = v; }, '', k === 'name' ? 1 : 3)));
+  });
+
+  box.append(nextBtn(5, 'Next: write the trainer →'));
+  return box;
+}
+
+/* ---------------- stage 5 ---------------- */
+
+function sheetText() {
+  const kid = __kid();
+  const st = station();
+  const L = [];
+  L.push('BUILD A STATION — 11–14');
+  L.push('Name: ' + (kid && kid.name ? kid.name : '____________________'));
+  L.push('Date: ' + new Date().toISOString().slice(0, 10));
+  L.push('');
+  L.push('Invention: ' + (inventionName() || '—'));
+  L.push('What it is for: ' + (S.pick.purpose.trim() || '—'));
+  L.push('');
+  L.push('PIECES I FOUND');
+  S.pieces.forEach((p, i) => {
+    if (!has(p.text)) return;
+    L.push(`  ${i + 1}. ${p.text.trim()}  [${p.mod || 'no module'}]${S.stationIdx === i ? '  ← my station' : ''}`);
+  });
+  L.push('');
+  L.push('TABLE A — THE STATION');
+  L.push('  Station name: ' + (S.A.name.trim() || '—'));
+  L.push('  What it is: ' + (S.A.what.trim() || '—'));
+  L.push('  Borrowed from: ' + (S.A.borrowed.trim() || '—'));
+  L.push('  The two modules it joins: Ecosystems · ' + (st ? st.mod : '—'));
+  L.push('  Did they know? ' + (S.A.know.trim() || '—'));
+  L.push('  Take it away: ' + (S.A.away.trim() || '—'));
+  L.push('');
+  L.push('TABLE B — THE TRAINER INSTRUCTION');
+  L.push('  Which station: ' + (S.A.name.trim() || '—'));
+  L.push('  What the learner does, in order: ' + (S.B.actions.trim() || '—'));
+  L.push('  What they should get wrong: ' + (S.B.wrong.trim() || '—'));
+  L.push('  The one sentence afterwards: ' + (S.B.sentence.trim() || '—'));
+  return L.join('\n');
+}
+
+function renderStage5() {
+  const box = h('div', {});
+
+  const bc = h('div', { class: 'card' }, h('h2', {}, 'Stage 5 · Table B — the trainer instruction'));
+  bc.append(h('p', { class: 'fldhint', style: 'margin-top:-6px' },
+    'Which station: ' + (has(S.A.name) ? S.A.name.trim() : 'name it in stage 4 first')));
+  B_FIELDS.forEach(([k, label, hint]) => {
+    bc.append(field(label, hint, area(S.B[k], v => { S.B[k] = v; }, '', k === 'sentence' ? 2 : 4)));
+  });
+  box.append(bc);
+
+  const hc = h('div', { class: 'card', style: 'margin-top:16px' },
+    h('h2', {}, 'Hand it in ', h('span', { class: 'count', id: 'handCount' }, `${doneCount()} / 5 done`)));
+
+  hc.append(h('p', { class: 'fldhint', id: 'handHint', style: 'margin-top:-6px' }, handInHint()));
+  hc.append(h('textarea', { id: 'sheetBox', class: 'fld sheet', rows: 14, readonly: 'readonly' }, sheetText()));
+  hc.append(h('div', { class: 'scenebtns' },
+    h('button', {
+      class: 'act', type: 'button',
+      onclick: () => {
+        const t = sheetText();
+        const done = () => { S.msg = 'Copied. Paste it wherever your teacher asked.'; saveState(); render(); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(done).catch(() => { S.msg = 'Could not copy automatically — select the text above and copy it.'; render(); });
+        } else {
+          S.msg = 'Select the text above and copy it.';
+          render();
+        }
+      },
+    }, 'Copy my sheet'),
+    h('button', {
+      class: 'act alt', type: 'button',
+      onclick: () => {
+        const kid = __kid();
+        const who = (kid && kid.name ? kid.name : 'station').replace(/[^A-Za-z0-9_-]+/g, '-').slice(0, 40) || 'station';
+        const blob = new Blob([sheetText()], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = h('a', { href: url, download: 'build-a-station-' + who + '.txt' });
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      },
+    }, 'Download as a file')));
+  hc.append(h('p', { class: 'toast' }, S.msg));
+  box.append(hc);
+
+  return box;
+}
+
+/* ================= shell ================= */
+
+function go(n) { S.stage = n; render(); window.scrollTo({ top: 0 }); }
+
+function renderSeg() {
+  $('#segStages').replaceChildren(...STAGE_META.map(m =>
+    h('button', { type: 'button', 'aria-pressed': String(S.stage === m.n), onclick: () => go(m.n) },
+      `${m.n} · ${m.label} `, stageDone(m.n) ? h('span', { class: 'tick' }, ' ✓') : null)));
+}
+function renderLog() {
+  $('#logTable').replaceChildren(...LOG.map(r => h('tr', { class: r.test() ? 'on' : 'off' },
+    h('td', { class: 'nm' }, h('span', { class: 'dot' }), r.name),
+    h('td', { style: 'color:var(--fg-dim)' }, r.note))));
+  $('#logCount').textContent = `${doneCount()} / ${LOG.length}`;
+  $('#logDone').hidden = doneCount() < LOG.length;
+}
+
+const STAGE_RENDER = { 1: renderStage1, 2: renderStage2, 3: renderStage3, 4: renderStage4, 5: renderStage5 };
+function render() {
+  saveState();
+  renderSeg();
+  $('#stageNote').innerHTML = NOTES[S.stage];
+  $('#stageHost').replaceChildren(STAGE_RENDER[S.stage]());
+  renderLog();
+}
+$('#btnReset').addEventListener('click', () => {
+  if (!window.confirm('Clear everything you have written and start again?')) return;
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  S = freshState();
+  render();
+});
+
+/* progress hooks: report to the Science Map backend. Primary transport
+   is fetch WITHOUT cookies (dodges Google multi-account redirects);
+   script-tag JSONP is the fallback. */
+const PROGRESS_URL = 'https://script.google.com/macros/s/AKfycbzEGga-Lv5Bc5JPVD6EH6LTHwFjn9fng-BrmLSqsUWnqwaLjxoPAzXnQjt9VzAtv6RecA/exec';
+function __pSend(params) {
+  const q = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&') + '&t=' + Date.now();
+  fetch(PROGRESS_URL + '?' + q, { credentials: 'omit', redirect: 'follow' }).catch(() => {
+    const fn = '__ps' + Math.random().toString(36).slice(2);
+    const s = document.createElement('script');
+    window[fn] = () => { delete window[fn]; s.remove(); };
+    s.onerror = () => { delete window[fn]; s.remove(); };
+    s.src = PROGRESS_URL + '?' + q + '&callback=' + fn;
+    document.head.appendChild(s);
+    setTimeout(() => { if (window[fn]) { delete window[fn]; s.remove(); } }, 15000);
+  });
+}
+function __kid() {
+  try { return JSON.parse(localStorage.getItem('meridian-kid') || 'null'); } catch (e) { return null; }
+}
+function kidSignedIn() { return !!__kid(); }
+let __awardSent = false;
+function awardTrainer() {
+  if (__awardSent) return;
+  const kid = __kid();
+  if (!kid) return;
+  __awardSent = true;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'trainer', id: 'buildastation' });
+}
+function reportQuiz(score, total, wrong) {
+  const kid = __kid();
+  if (!kid) return;
+  __pSend({ name: kid.name, code: kid.code, action: 'mark', type: 'quiz',
+    id: 'buildastation:' + score + '/' + total + ':' + (wrong.length ? wrong.join(',') : 'ok') });
+}
+
+window.__S = () => S;
+render();
+</script>
+</body>
+</html>
