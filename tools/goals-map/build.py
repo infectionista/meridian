@@ -103,8 +103,11 @@ FJ = 'https://meridian-one-jet.vercel.app/fourjars.html'
 TRAINER_FJ = L('What DNA remembers — ancient DNA, barcodes & building a tree trainer', FJ, 'trainer')
 RTT = 'https://meridian-one-jet.vercel.app/readthetree.html'
 TRAINER_RTT = L('Read the Tree — classifying life, three domains & LUCA trainer', RTT, 'trainer')
+BAS = 'https://meridian-one-jet.vercel.app/buildastation.html'
+TRAINER_BAS = L('Build a Station — take an invention apart and spec a trainer for the piece that crosses units', BAS, 'trainer')
 
 NODE_LINKS = {
+ 'U6.A2': [TRAINER_BAS],
  'U6.K2': [L('Build a Tree — phylogenetics trainer', BT, 'trainer'),
            TRAINER_RTT,
            L('Tree of Life — lesson slides', MAT + 'tree-of-life-slides.pdf', 'slides'),
