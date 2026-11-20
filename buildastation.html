@@ -354,6 +354,10 @@ tr.on .dot { background: var(--mint-deep); }
 .ctext { margin: 0 0 8px; font-weight: 600; font-size: 14.5px; }
 .crosspick { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
 .crosspick .fld.sel { flex: 1 1 240px; width: auto; }
+
+.pieceeg { margin-top: 4px; line-height: 1.7; }
+.pieceeg .yes { color: var(--leaf); font-weight: 600; }
+.pieceeg .no { color: var(--pink-deep); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -647,8 +651,17 @@ function renderStage2() {
 
   const pc = h('div', { class: 'card', style: 'margin-top:16px' },
     h('h2', {}, 'Now write your pieces ', h('span', { class: 'count' }, `${filledPieces().length} written`)));
-  pc.append(h('p', { class: 'fldhint', style: 'margin-top:-6px' },
-    'Three to six. Each one has to finish this sentence: something in the world does something, and that is why the invention works.'));
+  pc.append(h('p', {
+    class: 'fldhint', style: 'margin-top:-6px',
+    html: 'Three to six. A piece is something <b>the world does on its own</b>. A step is something <b>a person does</b>. '
+        + 'Start each sentence with whatever is doing it — <i>Ants…</i>, <i>The flower…</i>, <i>The soil…</i> — '
+        + 'and if that turns out to be a person, you have written a step.',
+  }));
+  pc.append(h('p', {
+    class: 'fldhint pieceeg',
+    html: '<span class="yes">Ants hunt the insects that eat the fruit.</span> &rarr; a piece<br>'
+        + '<span class="no">Tie bamboo between the trees.</span> &rarr; a step, because you are the one doing it',
+  }));
 
   S.pieces.forEach((p, i) => {
     pc.append(h('div', { class: 'piecerow' },
@@ -704,7 +717,7 @@ function renderStage3() {
       class: 'fld sel',
       onchange: e => {
         S.pieces[i].mod = e.target.value;
-        if (S.stationIdx === i && isEco(e.target.value)) { S.stationIdx = null; S.msg = 'That piece now stays inside Ecosystems, so it cannot be your station any more.'; }
+        if (S.stationIdx === i && isEco(e.target.value)) { S.stationIdx = null; S.msg = 'That piece now stays in Ecosystems, so it is not your station any more.'; }
         saveState(); render();
       },
     },
@@ -719,7 +732,7 @@ function renderStage3() {
         disabled: !p.mod,
         onclick: () => {
           if (isEco(p.mod)) {
-            S.msg = 'That piece stays inside Ecosystems. Your station has to be one you cannot explain without a second module — ask "but why does that happen?" until you land somewhere else.';
+            S.msg = 'Not this one — it stays in Ecosystems. Keep asking "but why does that happen?" about your pieces until one of them lands in another unit.';
             saveState(); render();
             return;
           }
@@ -729,7 +742,7 @@ function renderStage3() {
           saveState(); render();
         },
       }, chosen ? '★ This is my station' : 'Make this my station'),
-      p.mod ? h('span', { class: 'chip ' + (eco ? 'plain' : 'con') }, eco ? 'stays inside' : 'crosses out') : null));
+      p.mod ? h('span', { class: 'chip ' + (eco ? 'plain' : 'con') }, eco ? 'stays in the unit' : 'reaches a second unit') : null));
     box.append(row);
   });
 
